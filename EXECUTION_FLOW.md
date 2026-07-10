@@ -1,60 +1,81 @@
-# AgentHarness Execution Flow (Phase 1)
+# AgentHarness Execution Flow (Phase 1) - Enhanced
 
-This document maps out the precise, turn-by-turn execution flow of AgentHarness during standard research runs.
-
----
-
-## 1. High-Level Pipeline Initiation
-
-```
-[Runner Entry]
-       |
-       v
-[Scheduler.execute]  ---> Instantiates MiniDAGRunner
-       |
-       v
-[MiniDAGRunner.astream] ---> Navigates Nodes based on Transitions
-       |
-       v
-[main_agent_node]    ---> Triggers main ReAct loop
-       |
-       v
-[run_agent_loop]     ---> Iterates LLM calls and Tool actions
-```
+This document maps out the precise, sequence-by-sequence execution paths of AgentHarness during standard research runs, from initial process creation to terminal results generation.
 
 ---
 
-## 2. Low-Level Turn Execution Sequence (ReAct)
+## 1. High-Level Subprocess Orchestration
 
-Inside `agent_loop.py` (`_run_loop_inner`), the turn-by-turn process executes with fine-grained event hooks:
+```
+[Main OS Process]
+       |
+       | (Fork/Spawns subprocess per task sample)
+       v
+[Subprocess Runner] -> invokes run_subprocess.py
+       |
+       | (loads pipeline configuration)
+       v
+[Scheduler.execute] -> compiles MiniDAGRunner
+       |
+       | (initiates state streams)
+       v
+[MiniDAGRunner.astream] -> traverses DAG nodes sequentially
+       |
+       | (executes main_agent_node)
+       v
+[main_agent_node] -> run_agent_loop
+```
 
-1. **LLM Query Phase**:
-   - Compiles chat history (`messages`).
-   - Requests delta completion from `LLMClient` (calls `call_llm`).
-   - Parses native reasoning (`<think>...</think>`) using `ThinkingParser`.
+---
 
-2. **Parsing Phase**:
-   - Strips leaked private XML blocks.
-   - Evaluates text for structural tool targets via `MultiFormatToolCallParser`.
+## 2. Low-Level ReAct Turn Execution Sequence
 
-3. **Observer Response Interventions**:
-   - Triggers `on_llm_response` event to all observers.
-   - Allows observers to intervene:
-     - **Rollback**: Pop messages and re-issue prompt (e.g. on refusal, duplicate search, or empty search).
-     - **Immediate Stop**: Set `stop_reason` (e.g. on budget exhaustion).
+Within `agent_loop.py` (`_run_loop_inner`), every individual turn goes through a highly structured 10-step lifecycle:
 
-4. **Tool Execution Phase**:
-   - Executes structural tool calls sequentially.
-   - Caps results length via `DefaultToolResultPostProcessor`.
-   - Records tool output messages in context memory.
+```
+     [Start ReAct Turn]
+             |
+             v
+   1. [Compile History] --------> Estimates current token load
+             |
+             v
+   2. [call_llm] --------------> Stream tokens or run synchronous chats
+             |
+             v
+   3. [ThinkingParser] --------> Strips and captures <think> reasoning
+             |
+             v
+   4. [Leaked Tag Filter] -----> Stashes XML and private tag anomalies
+             |
+             v
+   5. [on_llm_response] -------> Observers evaluate prompt response
+             |                   (Can raise Rollbacks or Aborts)
+             |
+             +---- (If Rollback Intervention is triggered)
+             |     - Pop last message from history
+             |     - Inject nudge / fix message
+             |     - Restart turn boundary (turn -= 1, continue)
+             |
+             v
+   6. [ToolCallParser] --------> Extracts target tool names & args
+             |
+             v
+   7. [execute_tools] ---------> Resolves in sandboxed environments
+             |
+             v
+   8. [on_turn_end] -----------> Observers execute turn-completion logic
+             |
+             v
+   9. [Context Guard] ---------> Triggers compaction if limits are close
+             |
+             v
+  10. [on_turn_complete] ------> Persists local state to checkpoint db
+```
 
-5. **Context Overflow Guard**:
-   - Assesses expected token consumption for the next completion.
-   - If limits are reached, truncates older tool outputs using the compactor and raises `stopped_by="context_limit_reached"`.
+---
 
-6. **Compaction Phase**:
-   - Invokes `MessageCompactor` to clean up oversized histories.
+## 3. Concurrency Model Breakdown
 
-7. **Completion Probe Hooks**:
-   - Triggers persistent `on_turn_complete` callbacks.
-   - Validates whether pause signals (`pause_check()`) are requested.
+AgentHarness does not rely on a monolithic async loop inside a single process to execute multiple tasks concurrently.
+- Instead, **Subprocess Isolation** is enforced at the harness layer.
+- This prevents asyncio loop starvation, eliminates thread-safety issues during shared SQLite operations, and allows the OS to cleanly kill hanging or blocked individual sample runs without affecting the wider benchmark session.

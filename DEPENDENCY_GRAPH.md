@@ -1,65 +1,65 @@
-# AgentHarness Dependency Graph (Phase 1)
+# AgentHarness Architectural Dependency Graph (Phase 1) - Enhanced
 
-This document visualizes and outlines the key file and module import relationships within AgentHarness, along with third-party library dependencies.
+This document maps the absolute structural dependencies, package import structures, and external dependency constraints of the AgentHarness orchestration framework.
+
+---
+
+## 1. Class & File Level Topology Graph
 
 ```
-                  +--------------------------------+
-                  |    scheduling/scheduler.py     |
-                  +---------------+----------------+
-                                  |
-                                  v
-                  +--------------------------------+
-                  |  core/runtime/dag/minidag.py   |
-                  +---------------+----------------+
-                                  |
-                                  v
-                  +--------------------------------+
-                  | core/runtime/loop/agent_loop.py|
-                  +---------------+----------------+
-                                  |
-            +---------------------+---------------------+
-            |                     |                     |
-            v                     v                     v
-+-----------------------+ +---------------+ +-----------------------+
-|  core/messages.py     | |  core/tool.py | |  core/llm.py          |
-+-----------------------+ +---------------+ +-----------------------+
+==========================================================================================
+                               [ scheduler.py ]
+                                      |
+                                      | (compiles & runs)
+                                      v
+                             [ graph_builder.py ]
+                                      |
+                                      | (creates runners)
+                                      v
+                               [ minidag.py ]
+                                      |
+                     +----------------+----------------+
+                     | (executes)                      | (manages state)
+                     v                                 v
+             [ main_agent.py ]                  [ sqlite.py ] (EventStore)
+                     |
+                     | (runs ReAct turns)
+                     v
+             [ agent_loop.py ]
+                     |
+         +-----------+-----------+---------------------+
+         |                       |                     |
+         v                       v                     v
+   [ compact.py ]          [ llm_client.py ]    [ tool_exec.py ]
+   - MessageCompactor      - LLM Call Interf.   - execute_tools
+                           - Token Estimator
+==========================================================================================
 ```
 
 ---
 
-## 1. Module-by-Module Import Chains
+## 2. Directory & Namespace Structure Mapping
 
-### `agent_harness/scheduling/`
-- `scheduler.py`
-  - Imports from `agent_harness.core.types` (events and status tracking)
-  - Imports from `agent_harness.state.event_store.sqlite`
-  - Imports from `agent_harness.scheduling.process_manager`
-  - Instantiates or triggers `MiniDAGRunner` from `agent_harness.core.runtime.dag.minidag`
+The repository is structured neatly to isolate infrastructural mechanisms from runtime nodes:
 
-### `agent_harness/core/runtime/dag/`
-- `graph_builder.py`
-  - Imports from `agent_harness.core.protocols` (`PhaseContext`, `PhaseMiddlewareChain`)
-  - Imports from `agent_harness.models.pipeline_spec`
-  - Imports from `agent_harness.core.runtime.dag.minidag`
-- `minidag.py`
-  - Exposes `MiniDAG` and `MiniDAGRunner`
-  - Fully decoupled, zero dependency on scheduling or loops (acts as a pure state engine)
+- `agent_harness/core/`
+  - `runtime/dag/`: Structures `MiniDAG` compilers and transitions (`minidag.py`, `graph_builder.py`).
+  - `runtime/loop/`: The core engine driving sequential step-by-step model predictions and tool evaluations (`agent_loop.py`, `compact.py`, `llm_client.py`, `tool_exec.py`).
+  - `messages.py`: Clean abstract definitions for System, User, Assistant, and Tool message protocols.
+  - `tool.py`: Base wrappers encapsulating custom developer execution schemas.
 
-### `agent_harness/core/runtime/loop/`
-- `agent_loop.py`
-  - Imports from `agent_harness.core.llm` and `agent_harness.core.messages`
-  - Imports from `agent_harness.core.runtime.loop.compact` (compactor mechanisms)
-  - Imports from `agent_harness.core.runtime.loop.llm_client` (token estimators, usage parsers)
-  - Imports from `agent_harness.core.runtime.loop.model_profile` (thinking tags and normalizers)
-  - Imports from `agent_harness.core.runtime.loop.tool_call_parser` (XML tool-argument parsers)
-  - Imports from `agent_harness.core.runtime.loop.tool_exec` (Python sandbox/local tool execution)
-  - Imports from `agent_harness.core.tool`
-  - Imports from `agent_harness.core.loop_types`
+- `agent_harness/scheduling/`
+  - `scheduler.py`: Drives compilation of declarative pipeline profiles into executable subprocess threads.
+  - `process_manager.py`: OS-level task status manager.
+
+- `agent_harness/models/`
+  - `pipeline_spec.py`: Highly pluggable schema configurations using Pydantic.
 
 ---
 
-## 2. Key External Dependencies
-- **Pydantic**: Heavily utilized in `pipeline_spec.py` and `agent_definition.py` for input/configuration structure declaration.
-- **SQLite (sqlite3)**: Core of state persistence in `agent_harness/state/event_store/sqlite.py`.
-- **Jinja2**: Templating engine used to generate prompt chains from declarations in `graph_builder.py`.
-- **OpenAI / SGLang compatible client**: Interfaced in `agent_harness/core/llm.py` to route chat commands.
+## 3. Strict Module Decoupling Boundary Constraints
+
+To preserve standard backward compatibility and benchmark isolation during architectural evolution:
+1. **The DAG Engine (`minidag.py`)** is entirely decoupled from execution context, runtime loops, and local databases. It must *never* reference `agent_loop.py` or `sqlite.py`.
+2. **The ReAct Loop Engine (`agent_loop.py`)** remains a lightweight, domain-agnostic controller. No business logic, benchmark metrics, or task-specific fields (like chem structures, math values, web queries) are allowed within its boundaries. Custom behavior is cleanly injected via observers.
+3. **The Scheduler (`scheduler.py`)** delegates task state tracking to the thread-level database without directly evaluating or manipulating the conversational payload.

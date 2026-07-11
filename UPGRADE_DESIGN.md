@@ -1,167 +1,60 @@
 # AgentHarness Next-Generation Architectural Upgrade Design (Phase 2) - Enhanced
 
-This document provides the complete, professional, production-grade architectural upgrade blueprint for AgentHarness, covering all ten next-generation capabilities.
+This document provides the complete, professional, production-grade architectural upgrade blueprint for AgentHarness, covering all ten foundational capabilities, plus the thirteen advanced cognitive services for the Autonomous Economic Agent Network (AEAN).
 
 ---
 
 ## Upgrade 1: Hierarchical Multi-Agent Orchestration
 
-### Motivation & Current Limitations
-The standard flat ReAct loop (`react_base`) mixes strategic reasoning and low-level search details. This leads to massive context bloating and cognitive dilution.
-
 ### Proposed Architecture
-We will decouple execution context into a three-tier tree structure:
-```
-           +----------------------+
-           |  MasterOrchestrator  |  <-- Allocates high-level tasks
-           +-----------+----------+
-                       |
-                       v
-           +----------------------+
-           |   CoordinatorAgent   |  <-- Summarizes worker state upward
-           +-----------+----------+
-                       |
-             +---------+---------+
-             v                   v
-      +--------------+    +--------------+
-      | SearchWorker |    | SandboxWorker|  <-- Execute atomic actions
-      +--------------+    +--------------+
-```
-
-### Sequence Flow
-1. `MasterOrchestrator` receives a complex research prompt.
-2. It instantiates a `CoordinatorAgent` with specific sub-goals.
-3. The Coordinator spawns a specialized `WorkerAgent` (e.g. `SearchWorker`).
-4. `SearchWorker` executes web actions, receives the raw text, and returns a high-level summary of findings to the `CoordinatorAgent`.
-5. The `CoordinatorAgent` merges the worker findings and passes a clean, aggregated state report to the `MasterOrchestrator`.
-
-### API Changes & New Modules
-- **New Module**: `agent_harness/core/runtime/orchestration/hierarchical.py`
-- **Class**: `class HierarchicalOrchestrator(BaseOrchestrator)`
-- **Class**: `class CoordinatorAgent(BaseAgent)`
-- **Class**: `class WorkerAgent(BaseAgent)`
-
-### Impact & Backward Compatibility
-- **Token Reduction**: Expected $\approx 45\%$ token footprint reduction by isolating raw scraping payloads within short-lived worker threads.
-- **Compatibility**: Perfect. Existing single-solver pipelines bypass this hierarchy entirely.
+We decouple execution context into a three-tier tree structure: MasterOrchestrator -> CoordinatorAgents -> WorkerAgents.
+- **Classes**: `class HierarchicalOrchestrator(BaseOrchestrator)`, `class CoordinatorAgent(BaseAgent)`, `class WorkerAgent(BaseAgent)`.
 
 ---
 
 ## Upgrade 2: Planner / Executor Separation
 
-### Motivation & Current Limitations
-Mixing planner and executor tasks makes strategy highly vulnerable to transient tool-level failures (such as a parsing warning or empty web search page).
-
 ### Proposed Architecture
 Clear demarcation of roles:
-1. **Planner**: Pure strategist. No direct tool access. Receives task requirements and returns a step-by-step Execution Roadmap.
-2. **Executor**: Action-only. Executes tools to fulfill the roadmap segments.
-3. **Verifier**: Cross-checks executor outputs against the planner strategy.
-
-```
-+-----------+                +------------+                +------------+
-|  Planner  | -- roadmap --> |  Executor  | -- outputs --> |  Verifier  |
-+-----------+                +------------+                +------------+
-```
-
-### API Changes & New Modules
-- **New Module**: `agent_harness/core/runtime/orchestration/planner_executor.py`
-- **Interface**: `class StrategicPlanner`, `class TaskExecutor`, `class PlanVerifier`
+- **StrategicPlanner**: Pure strategist. No direct tool access. Returns step-by-step Execution Roadmap.
+- **TaskExecutor**: Action-only. Executes tools to fulfill the roadmap segments.
+- **PlanVerifier**: Cross-checks executor outputs against the planner strategy.
 
 ---
 
 ## Upgrade 3: Persistent Semantic Memory
 
-### Motivation & Current Limitations
-Compaction wipes out historical knowledge, leading to informational amnesia and duplicate search actions.
-
 ### Proposed Architecture
-Implement a structured memory base independent of raw chat records.
-- Stored as high-fidelity structured data in local files or a lightweight memory database.
-
-```
-       [SemanticMemory]
-        /      |       \
-[Beliefs]  [Facts]  [Questions]
-```
-
-### Data Schema
-- **Beliefs**: Evolving hypotheses.
-- **Facts**: Proven statements accompanied by evidence cards.
-- **Evidence Cards**: Content snippets linked to sources.
-- **Unresolved Questions**: Strategic targets.
-
-### Sequence Flow
-```
-Executor -> SemanticMemory.add_fact(Fact(assertion="...", evidence_id="src_1"))
-Planner -> SemanticMemory.retrieve_beliefs() -> returns high-level strategy context
-```
+Implement a structured memory base independent of raw chat records, supported by:
+- **Models**: `Belief`, `Fact`, `EvidenceCard`, `UnresolvedQuestion`.
+- **Repository Pattern**: `MemoryRepository`, `SQLiteMemoryRepository`.
 
 ---
 
 ## Upgrade 4: World Model
 
-### Motivation & Current Limitations
-The agent does not model relationships between entities, causal sequences, or uncertainties dynamically.
-
 ### Proposed Architecture
-A continuous graph model structured as `class WorldModel`:
-- **Knowledge/Entity Graph**: Links actors and entities.
-- **Causal Graph**: Inter-dependencies between steps.
-- **Uncertainty Graph**: Highlights gaps in information.
-
-### API Changes & New Modules
-- **New Module**: `agent_harness/core/memory/world_model.py`
-- **Interface**: `class WorldModel`, `class RelationEdge`, `class CausalNode`
+A continuous graph model structured as `class WorldModel` tracking `CausalNode` and `RelationEdge` without requiring heavyweight external dependencies.
 
 ---
 
 ## Upgrade 5: Parallel Verification
 
-### Motivation & Current Limitations
-Verification is slow, serial, and post-facto.
-
 ### Proposed Architecture
-Concurrent validation:
-- **Domain Verifiers**: Parallel specialized models checking factual accuracy, logic consistency, and code syntax concurrently using `asyncio.gather`.
-- **Meta Verifier**: Evaluates and consolidates domain reports.
-
-```
-                      +-------------------+
-                      |   Worker Output   |
-                      +---------+---------+
-                                |
-             +------------------+------------------+
-             |                                     |
-             v                                     v
-+------------------------+             +------------------------+
-| Domain Verifier (Fact) |             | Domain Verifier (Code) |
-+------------+-----------+             +-----------+------------+
-             |                                     |
-             +------------------+------------------+
-                                v
-                      +-------------------+
-                      |   Meta Verifier   |
-                      +-------------------+
-```
+Concurrent validation utilizing `asyncio.gather`:
+- **Domain Verifiers**: Parallel specialized models checking factual accuracy, logic consistency, and code syntax.
+- **Meta Verifier**: Evaluates and consolidates domain reports into a single consensus.
 
 ---
 
 ## Upgrade 6: Meta-Reasoner
 
-### Motivation & Current Limitations
-The system runs blind; it cannot detect token waste or logical looping traps during execution.
-
 ### Proposed Architecture
-An oversight observer (`class MetaReasonerObserver`) that monitors context growth, token utilization, and loop patterns.
-- **Autocorrection**: Dynamically alters Coordinator's instruction context when loops are identified.
+An oversight observer (`class MetaReasonerObserver`) that monitors context growth, token utilization, and loop patterns to execute active loop-detection/autocorrection.
 
 ---
 
 ## Upgrade 7: Long-Term Learning Memory
-
-### Motivation & Current Limitations
-Learnings are lost after individual task completion.
 
 ### Proposed Architecture
 A persistent strategy registry (`class LongTermLearningMemory`) storing successfully completed roadmaps and failed trajectories to guide future tasks.
@@ -170,36 +63,75 @@ A persistent strategy registry (`class LongTermLearningMemory`) storing successf
 
 ## Upgrade 8: Self-Improvement Flywheel
 
-### Motivation & Current Limitations
-No automated method to generate fine-tuning datasets from successful runs.
-
 ### Proposed Architecture
-A post-execution processor:
-- Analyzes successful trajectories.
-- Validates trace steps.
-- Formats and writes high-quality runs into clean, training-ready JSONL datasets.
+A post-execution processor (`class TrajectoryDatasetCompiler`) that compiles high-quality successful runs into standard SFT JSONL training data.
 
 ---
 
 ## Upgrade 9: Graph-of-Thought Reasoning
 
-### Motivation & Current Limitations
-Linear ReAct restricts exploration of alternative hypotheses.
-
 ### Proposed Architecture
-A non-linear thought tree engine (`class GraphOfThoughtEngine`):
-- Nodes represent thoughts.
-- Edges represent logical relationships.
-- Supports branching, merging, and pruning.
+A non-linear thought tree engine (`class GraphOfThoughtEngine`) supporting branching, merging, and recursive branch pruning.
 
 ---
 
 ## Upgrade 10: Active Learning
 
-### Motivation & Current Limitations
-Passive prompt execution with zero estimation of semantic uncertainty.
-
 ### Proposed Architecture
-An active learning loop:
-- Computes entropy/uncertainty metrics of current beliefs.
-- If uncertainty exceeds a threshold, automatically drafts targeted queries to update the world model until the confidence threshold is satisfied.
+An active learning loop (`class ActiveLearningEngine`) that estimates uncertainty entropy and generates targeted exploration probes.
+
+---
+
+## Cognitive Upgrades for Autonomous Economic Agent Network (AEAN)
+
+### 11. Continuous World Modeling
+- **Class**: `class ContinuousWorldModelService(IWorldModelService)`
+- **Design**: Maintains persistent multi-graph layers (Entity, Knowledge, Causal, Temporal, and Uncertainty graphs) backed by SQLite/Memory.
+
+### 12. Economic Reasoning Engine
+- **Class**: `class EconomicReasoningEngine(IEconomicReasoningEngine)`
+- **Design**: Evaluates strategic candidate roadmaps based on Expected Utility (EU), Opportunity Cost (OC), and resource constraints.
+
+### 13. Market Simulation Engine
+- **Class**: `class MarketSimulationEngine(IMarketSimulator)`
+- **Design**: Asynchronous Monte Carlo simulator executing agent-based pricing, auction bidding, and competitor strategy forecasts.
+
+### 14. Autonomous Experimentation
+- **Class**: `class AutonomousExperimenter(IAutonomousExperimenter)`
+- **Design**: Selects highest-uncertainty hypotheses, designs isolated experimental runs, records outcomes, and refines beliefs.
+
+### 15. Multi-Agent Negotiation
+- **Class**: `class MultiAgentNegotiator(INegotiationProtocol)`
+- **Design**: Protocol wrapper for peer-to-peer contract agreement, proposal bidding, and game-theoretic consensus.
+
+### 16. Causal Inference Engine
+- **Class**: `class CausalInferenceEngine(ICausalInferenceEngine)`
+- **Design**: Distinguishes structural causation from correlation, resolving counterfactual scenarios using path structural equations.
+
+### 17. Bayesian Uncertainty Estimation
+- **Class**: `class BayesianUncertaintyEstimator(IBayesianUncertaintyEstimator)`
+- **Design**: Estimates Epistemic and Aleatoric uncertainties to calculate expected information gain of targeted searches.
+
+### 18. Self-Improving Planning
+- **Class**: `class SelfImprovingPlanner(ISelfImprovingPlanner)`
+- **Design**: Monitors actual vs. planned efficiency metrics, automatically updating planning heuristic weights.
+
+### 19. Memory Consolidation
+- **Class**: `class MemoryConsolidationService(IMemoryConsolidationService)`
+- **Design**: Background service that runs asynchronous distillation sweeps over the SQLite Episodic database, promoting insights to Semantic Memory.
+
+### 20. Tool Invention
+- **Class**: `class SkillCompiler(IToolInventor)`
+- **Design**: Automatically compiles successful python execution blocks or command-line scripts into reusable JSON-described skill schemas.
+
+### 21. Strategy Generation
+- **Class**: `class AlternativeStrategyGenerator(IStrategyGenerator)`
+- **Design**: Branches multiple alternate execution paths, selecting the path with the highest expected value.
+
+### 22. Reflection and Self-Debugging
+- **Class**: `class SelfReflectionService(IReflectionService)`
+- **Design**: Performs post-facto analytical audits, identifying hallucinations, loop traps, and detailing corrective actions.
+
+### 23. Scientific Hypothesis Generation
+- **Class**: `class ScientificHypothesisEngine(ISyntheticResearcher)`
+- **Design**: Maps semantic information gaps and ranks synthetic scientific hypotheses for experimental validation.

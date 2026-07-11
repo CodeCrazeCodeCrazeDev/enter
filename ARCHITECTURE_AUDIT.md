@@ -208,3 +208,23 @@ The DAG Scheduler (`scheduler.py`) compiles `PipelineSpec` schemas into declarat
 ### 10.13 Scientific Hypothesis Generation
 - **Audit Findings**: Passive discovery limits performance on highly complex domains.
 - **Upgrade Path**: Automated hypothesis generation and ranking connected directly to uncertainty metrics.
+
+---
+
+## 11. Superintelligence, Alignment, and Format Compatibility Audits
+
+### 11.1 Self-Scaffolding (Ornith 1.0)
+- **Audit Findings**: Hardcoded orchestrators prevent the agent from adapting to novel environments without human-designed schemas.
+- **Upgrade Path**: Create a dynamic meta-programmer engine that builds sequence steps, custom retries, and execution branches at runtime.
+
+### 11.2 Anti-Reward Hacking
+- **Audit Findings**: Standard RL loops can easily game reward systems by bypassing intermediate verification states or repeating identical quick loops.
+- **Upgrade Path**: Implement a strict three-layered validator consisting of an immutable code boundary, a real-time monitor, and a frozen evaluation judge.
+
+### 11.3 Self-Improving RL Training
+- **Audit Findings**: Value networks optimize purely for final output accuracy, leading to token-waste and excessive trajectory lengths.
+- **Upgrade Path**: Integrate integrated reward optimizations balancing correctness with tool calling success ratios and thinking density.
+
+### 11.4 Multi-Format Parser
+- **Audit Findings**: Built-in parsers are tailored for OpenAI JSON signatures, causing parsing failure on Anthropic, Gemini, or XAI (Grok) format structures.
+- **Upgrade Path**: Create a multi-format adapter translating thinking logs and XML/JSON/function signatures natively across standard providers.

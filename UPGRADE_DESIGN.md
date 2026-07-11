@@ -1,6 +1,6 @@
 # AgentHarness Next-Generation Architectural Upgrade Design (Phase 2) - Enhanced
 
-This document provides the complete, professional, production-grade architectural upgrade blueprint for AgentHarness, covering all ten foundational capabilities, plus the thirteen advanced cognitive services for the Autonomous Economic Agent Network (AEAN).
+This document provides the complete, professional, production-grade architectural upgrade blueprint for AgentHarness, covering all ten foundational capabilities, thirteen advanced cognitive services for the Autonomous Economic Agent Network (AEAN), and four superintelligence capabilities.
 
 ---
 
@@ -135,3 +135,23 @@ An active learning loop (`class ActiveLearningEngine`) that estimates uncertaint
 ### 23. Scientific Hypothesis Generation
 - **Class**: `class ScientificHypothesisEngine(ISyntheticResearcher)`
 - **Design**: Maps semantic information gaps and ranks synthetic scientific hypotheses for experimental validation.
+
+---
+
+## Superintelligence, Alignment, and Format Upgrade Designs
+
+### 24. Self-Scaffolding (Ornith 1.0)
+- **Class**: `class OrnithSelfScaffolder`
+- **Design**: Evaluates task goal inputs, analyzes token complexity, and programmatically designs customized execution steps, retry thresholds, and fallback actions at runtime without relying on static human harnesses.
+
+### 25. Anti-Reward Hacking Safeguards
+- **Class**: `class AntiHackingPipeline` (combining `FixedTrustBoundary`, `DeterministicMonitor`, and `FrozenLLMJudge`)
+- **Design**: Runs exhaustive constraints checks on every turn boundary, auditing directory/system writes, timing parameters, repetitive text outputs, and alignment gaming metrics.
+
+### 26. Self-Improving RL Training
+- **Class**: `class SelfImprovingRLTrainer`
+- **Design**: Optimization training manager that processes episode outcomes to calculate multi-variable losses based on correctness, thinking density, and tool efficiency ratios.
+
+### 27. Multi-Format Reasoning + Tool Calls Parser
+- **Class**: `class ReasoningToolCallParser`
+- **Design**: Formulates structured thinking logs and normalizes custom tool call outputs into perfectly conformant structures compatible with standard providers (OpenAI, Anthropic, XAI, Gemini).

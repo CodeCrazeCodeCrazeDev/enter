@@ -152,3 +152,27 @@ To ensure that no regressions are introduced and that the framework remains prod
 - **Deliverables**: Domain gaps parser and synthetic proposition rankings.
 - **New Files**: `agent_harness/core/reasoning/scientific_hypothesis.py`
 - **Verification**: Validate hypothesis ranking against entropy scores in the knowledge base.
+
+---
+
+## 4. Superintelligence & Format Compatibility Phased Schedule
+
+### PR 24: Self-Scaffolding (Ornith 1.0)
+- **Deliverables**: Real-time workflow programmer and fallback analyzer.
+- **New Files**: `agent_harness/core/runtime/reasoning/self_scaffolder.py`
+- **Verification**: Program and execute dynamic scaffolds on novel tasks.
+
+### PR 25: Anti-Reward Hacking Safeguards
+- **Deliverables**: Fixed boundary checker, execution speed auditor, and static LLM judge evaluator.
+- **New Files**: `agent_harness/core/runtime/verification/anti_hacking.py`
+- **Verification**: Assert correct blocks on file writes, fast loops, and alignment violations.
+
+### PR 26: Self-Improving RL Training
+- **Deliverables**: Replay experience collector and multi-variable integrated loss estimator.
+- **New Files**: `agent_harness/core/runtime/learning/rl_training.py`
+- **Verification**: Perform policy optimizations targeting high tool efficiency and optimal thinking logs.
+
+### PR 27: Multi-Format Reasoning + Tool Calls Parser
+- **Deliverables**: Multi-provider format adapter translating OpenAI, Anthropic, XAI, and Gemini formats.
+- **New Files**: `agent_harness/core/runtime/reasoning/reasoning_parser.py`
+- **Verification**: Validate correct thought capturing and standard tool translations across format configurations.

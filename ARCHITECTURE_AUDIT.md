@@ -62,7 +62,7 @@ The DAG Scheduler (`scheduler.py`) compiles `PipelineSpec` schemas into declarat
 
 ### Current Architecture
 - Relying purely on flat short-term memory (`messages` history).
-- History is pruned using the `KeepLastNToolResultsCompactor` which replaces older tool outputs with short placeholders.
+- History is pruned using the `KeepLastNToolResultsCompactor` which replaces older tool messages with brief placeholders.
 - No semantic, persistent long-term storage exists.
 
 ### Subsystem Analysis
@@ -152,3 +152,59 @@ The DAG Scheduler (`scheduler.py`) compiles `PipelineSpec` schemas into declarat
 - **Recommended Upgrade Path**: Concurrency optimizations in runner orchestration.
 - **Estimated Complexity**: Low-Medium
 - **Risk Assessment**: Low
+
+---
+
+## 10. Autonomous Economic Agent Network (AEAN) Subsystem Audits
+
+### 10.1 Continuous World Modeling
+- **Audit Findings**: Absolute absence of dynamic multi-graph modeling. The system depends entirely on serial text contexts.
+- **Upgrade Path**: Continuous graph representation linking entities, causal relationships, and Bayesian uncertainties. Prevents duplicate searching.
+
+### 10.2 Economic Reasoning Engine
+- **Audit Findings**: The system lack mathematical economic trade-off computations, expected value calculations, and risk-benefit modeling.
+- **Upgrade Path**: Introduce utility-function models, Nash equilibrium solvers, and resource opportunity cost evaluators.
+
+### 10.3 Market Simulation Engine
+- **Audit Findings**: No capabilities exist to test plans against competitors, auctions, or complex synthetic environments.
+- **Upgrade Path**: Sandbox simulator using agent-based models and scenario testing.
+
+### 10.4 Autonomous Experimentation
+- **Audit Findings**: Loop executes static instructions; cannot generate, evaluate, or refine hypotheses automatically.
+- **Upgrade Path**: Active hypothesis-testing lifecycle connected to the Uncertainty Graph.
+
+### 10.5 Multi-Agent Negotiation
+- **Audit Findings**: Only flat single-agent execution is supported; cannot compete, exchange, or coordinate with peer agents.
+- **Upgrade Path**: Standardized consensus protocols, auction biddings, and contract templates.
+
+### 10.6 Causal Inference Engine
+- **Audit Findings**: Trajectory relies on associative or sequential correlation, leaving the planner blind to actual causal variables.
+- **Upgrade Path**: Structural Causal Model (SCM) evaluator with counterfactual path testing.
+
+### 10.7 Bayesian Uncertainty Estimation
+- **Audit Findings**: Confidence values are hardcoded or represented by flat LLM text outputs.
+- **Upgrade Path**: Multi-tier epistemic/aleatoric uncertainty estimations.
+
+### 10.8 Self-Improving Planning
+- **Audit Findings**: No systemic metric tracking exists to evaluate plan failures or optimization.
+- **Upgrade Path**: Run execution metadata collector that auto-optimizes plan heuristics.
+
+### 10.9 Memory Consolidation
+- **Audit Findings**: The compactor performs raw truncation, resulting in irreversible amnesia.
+- **Upgrade Path**: Background consolidation service transferring episodic trajectories to persistent semantic graphs.
+
+### 10.10 Tool Invention
+- **Audit Findings**: Tools must be statically declared inside configuration files.
+- **Upgrade Path**: Skill synthesizer that compiles successfully executed script workflows into new reusable tool schemas.
+
+### 10.11 Strategy Generation
+- **Audit Findings**: Plans are generated as a single linear roadmap.
+- **Upgrade Path**: Non-linear parallel strategy tree generators evaluated against expected utility.
+
+### 10.12 Reflection and Self-Debugging
+- **Audit Findings**: Formatting errors trigger naive line-popping.
+- **Upgrade Path**: Post-task logical auditor identifying hallucinations and bottlenecks.
+
+### 10.13 Scientific Hypothesis Generation
+- **Audit Findings**: Passive discovery limits performance on highly complex domains.
+- **Upgrade Path**: Automated hypothesis generation and ranking connected directly to uncertainty metrics.

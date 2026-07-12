@@ -157,7 +157,7 @@ Every engine within the WMC is designed as a modular service communicating via t
 * **Extension Points:** Custom tax compliance plugins, enterprise resource planning (ERP) bridges.
 
 ### 3.9 Evolution Engine
-* **Purpose:** Automates prompt, heuristic, and hyperparameter optimization over continuous simulation trajectories.
+* **Purpose:** Automates prompt, heuristic, and hyperparameter optimization over continuous simulation trajectories. For complete details on how self-improvement is organized as an internal engineering firm, see the **[Self-Improvement Flywheel Spec](WMC_SELF_IMPROVEMENT_FLYWHEEL.md)**.
 * **Inputs:** Trajectory logs, system feedback metrics, prediction errors.
 * **Outputs:** Updated system prompts, revised heuristic weights, updated model route configurations.
 * **Internal State:** System weights history, optimization trajectories, evaluation metadata.

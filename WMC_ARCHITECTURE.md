@@ -47,6 +47,7 @@ To scale as the platform evolves, the WMC design is organized into an extensible
 6. **[API & Service Specifications](docs/architecture/WMC_API_SPEC.md)** (gRPC/Protobuf definitions, SDK specs, and dependency injection contracts)
 7. **[Security, Governance & Compliance](docs/architecture/WMC_SECURITY.md)** (Trust boundaries, policy engine, sandboxing, and alignment)
 8. **[Research Frontiers](docs/architecture/WMC_RESEARCH_FRONTIERS.md)** (20-year roadmap tracking neuro-symbolic AI, world transformers, and continuous learning)
+9. **[Self-Improvement Flywheel](docs/architecture/WMC_SELF_IMPROVEMENT_FLYWHEEL.md)** (The autonomous engineering organization with 20 self-improving capabilities and 10 specialized cognitive roles)
 
 ---
 

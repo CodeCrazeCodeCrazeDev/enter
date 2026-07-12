@@ -388,3 +388,144 @@ def test_model_router_complexity_routing():
     route_expensive = router.classify_and_route("Allocate corporate seed capital across 10 departments.", {"task_type": "strategic_planning", "complexity": 0.95})
     assert route_expensive["tier"] == "EXPENSIVE"
     assert route_expensive["model"] == "gpt-4o"
+
+
+# =====================================================================
+# 8. Expanded Domain Subsystems Tests
+# =====================================================================
+
+def test_opportunity_scanning():
+    from apodex.arcs.opportunities.scanner import OpportunityScanner
+
+    scanner = OpportunityScanner()
+    raw_market_feed = [
+        {"search_volume": 12000, "friction_sentiment": 0.85, "market_size_est_cents": 25000000, "gap_description": "API-first automated document processing engine"},
+        {"search_volume": 1000, "friction_sentiment": 0.20, "market_size_est_cents": 500000, "gap_description": "Simple text editors"}
+    ]
+
+    discovered = scanner.scan_market(domain="saas", raw_feed=raw_market_feed)
+    assert len(discovered) == 1
+    assert discovered[0].domain == "saas"
+    assert "automated document" in discovered[0].description
+
+
+def test_crm_pipeline_and_lead_scoring():
+    from apodex.arcs.crm.pipeline import CRMPipeline
+
+    pipeline = CRMPipeline()
+    lead = pipeline.register_lead(email="lead@docucorp.com", company="DocuCorp", budget_cents=1200000, needs=["api", "pdf", "sandbox"])
+
+    score = pipeline.score_lead(lead.lead_id)
+    assert score >= 0.50
+    assert lead.stage == "qualified"
+
+    pipeline.transition_stage(lead.lead_id, "proposal")
+    assert lead.stage == "proposal"
+
+
+def test_marketing_campaigns_and_content_generation():
+    from apodex.arcs.marketing.campaign import CampaignEngine
+
+    engine = CampaignEngine()
+    camp = engine.create_campaign(name="Growth Outbound v1", target_icp="SaaS Devs", budget_cents=100000, channels=["email", "linkedin"])
+    assert camp.budget_cents == 100000
+
+    content = engine.generate_seo_geo_landing_page(target_keywords=["pdf indexing", "llm automation"], core_pain_point="manual manual extraction speed")
+    assert "pdf indexing" in content["body"]
+    assert "llm automation" in content["meta_description"]
+    assert content["title"].startswith("Solving")
+
+
+def test_negotiation_and_contracts():
+    from apodex.arcs.sales.negotiation import NegotiationEngine
+
+    engine = NegotiationEngine(base_annual_fee_cents=1000000)
+    negotiated = engine.negotiate_discount(requested_discount_pct=0.20)
+    assert negotiated["agreed_discount_pct"] == 0.20
+    assert negotiated["annual_fee_cents"] == 800000
+
+    # Discount capping gate check
+    capped = engine.negotiate_discount(requested_discount_pct=0.50)
+    assert capped["agreed_discount_pct"] == 0.35  # capped to standard 35% cap
+
+    contract = engine.generate_contract("Client X", negotiated)
+    assert "LIMITATION OF LIABILITY" in contract
+    assert "Client 'Client X'" in contract
+
+
+def test_product_packaging_and_billing():
+    from apodex.arcs.product.manager import ProductPackagingManager
+    from apodex.arcs.finance.billing import MeteredBillingSystem
+
+    product_mgr = ProductPackagingManager()
+    tier = product_mgr.fetch_tier("growth")
+    assert tier.arpu_cents == 4900
+
+    billing = MeteredBillingSystem()
+    cust_id = uuid.uuid4()
+    billing.record_usage(customer_id=cust_id, calls_count=10000)
+
+    invoice = billing.generate_invoice(customer_id=cust_id, base_tier_cents=tier.arpu_cents)
+    assert invoice["base_fee_cents"] == 4900
+    assert invoice["overage_cents"] == 20  # 10000 * 0.002 = 20 cents
+    assert invoice["total_amount_cents"] == 4920
+
+
+def test_investment_yield():
+    from apodex.arcs.investment.manager import InvestmentManager
+
+    invest_mgr = InvestmentManager(reserve_account_cents=1000000)
+    allocs = invest_mgr.allocate_yield_reserves(amount_cents=500000)
+    assert allocs["stablecoin_yield_pool"] == 300000
+    assert invest_mgr.reserve_account_cents == 500000
+
+    invest_mgr.credit_earned_yield("stablecoin_yield_pool", interest_cents=1500)
+    assert invest_mgr.reserve_account_cents == 501500
+
+
+def test_durable_revenue_workflow_and_saga_compensations():
+    from apodex.arcs.workflows.orchestrator import RevenueWorkflowOrchestrator
+
+    orch = RevenueWorkflowOrchestrator()
+
+    # 1. Successful execution
+    saga_ok = orch.execute_customer_acquisition_saga("Corp Ok", budget_cents=200000)
+    assert saga_ok.saga_status == "completed"
+    assert len(saga_ok.steps_completed) == 4
+
+    # 2. Failed step triggers compensation rollback
+    saga_fail = orch.execute_customer_acquisition_saga("Corp Cheap", budget_cents=100)
+    assert saga_fail.saga_status == "compensated"
+    assert len(saga_fail.steps_completed) == 0  # rolled back
+
+
+def test_declarative_policy_engine():
+    from apodex.arcs.policies.policy_engine import DeclarativePolicyEngine, DeclarativePolicy
+
+    engine = DeclarativePolicyEngine()
+
+    context_ok = {"proposed_discount_pct": 0.15, "proposed_risk_score": 0.40, "proposed_budget_cents": 100000}
+    assert engine.evaluate_compliance("default", context_ok) is True
+
+    context_bad_discount = {"proposed_discount_pct": 0.45, "proposed_risk_score": 0.40, "proposed_budget_cents": 100000}
+    assert engine.evaluate_compliance("default", context_bad_discount) is False
+
+    # Custom policies
+    custom_policy = DeclarativePolicy(policy_id="strict", max_discount_pct=0.10)
+    engine.register_policy(custom_policy)
+    assert engine.evaluate_compliance("strict", context_ok) is False # 15% discount fails strict 10%
+
+
+def test_cryptographic_vault_and_key_rotations():
+    from apodex.arcs.integrations.vault import CryptographicVault
+
+    vault = CryptographicVault()
+    t_id = uuid.uuid4()
+
+    vault.store_tenant_credentials(tenant_id=t_id, raw_secret_key="my_secret_key")
+    key = vault.fetch_decrypted_key(tenant_id=t_id)
+    assert key == "my_secret_key"
+
+    version = vault.rotate_tenant_credentials(tenant_id=t_id, new_raw_key="my_new_secret")
+    assert version == 2
+    assert vault.fetch_decrypted_key(tenant_id=t_id) == "my_new_secret"

@@ -693,3 +693,33 @@ ARCS is engineered to evolve through clear architectural horizons, progressing t
 2. **Horizon 2: Active Customer Acquisition (6 Months):** Launch outreach agents, optimize dynamic pricing and SEO landing page generation, integrate Stripe billing.
 3. **Horizon 3: Capital Allocation & Reinvestment (12 Months):** Full activation of the Capital Allocation Engine, dynamic budget shifts, autonomous company creation.
 4. **Horizon 4: Autonomous Economic Operating System (24 Months):** Multi-agent peer-to-peer contract negotiations, automated sub-licensing, self-directed product discovery, and self-liquidation options.
+
+---
+
+## 15. Continuous Self-Improvement & Strict Human Governance Lifecycle (Apodex Vision)
+
+ARCS implements the unified **Apodex Self-Improvement and Governance Vision**, establishing a production-grade cognitive architecture that continuously improves its own business operations and prompt policies under strict, immutable human oversight.
+
+### 15.1 Core Economic Constraints
+* **Resource Cost-Efficiency (Intelligence-Per-Token):** Computing capital is treated as a finite resource. ARCS isolates expensive reasoning processes (e.g., GPT-4o deep-horizon planning, complex simulation iterations) only for strategic pivot points where the expected yield (EV) exceeds the API and token cost. Routine operational activities (such as lead qualification or dunning notifications) are routed through highly optimized, lightweight, cost-neutral models.
+* **Modular Extensibility:** Every new operational capability or plugin (SaaS billing, digital marketing, partner networks) must expose standard interfaces, evaluation metrics, and validation tests. Features that cannot be evaluated or safely isolated are blocked from deployment.
+
+### 15.2 The 10-Step Self-Improvement Cycle
+When a business bottleneck, outreach drop, or pricing discrepancy is detected, ARCS coordinates its organizational agents (led by the Chief Scientist, CEO, and CFO) to run a structured, evidence-based self-improvement pipeline:
+
+1. **Failure & Bottleneck Detection:** The Revenue Intelligence and KPI engines monitor daily customer conversions, processing logs, and financial yield to detect underperforming segments or code/prompt regressions.
+2. **Root-Cause Analysis:** The Reflection and Causal Inference engines perform counterfactual queries to isolate genuine systemic failures rather than treating transient symptoms.
+3. **Academic & Technical Research:** Specialized Research Agents search and retrieve peer-reviewed research papers, open-source repositories, and technical engineering manuals to locate state-of-the-art solutions.
+4. **Candidate Solution Prototyping:** The Product and Engineering agents draft one or more candidate solutions, such as updated pricing algorithms, redesigned landing pages, or optimized prompt templates.
+5. **Cost-Benefit & Risk Estimation:** The CFO Agent and Economic Digital Twin simulate each candidate solution, projecting implementation costs, expected MRR improvements, and technical/operational risks.
+6. **Human Approval Escalation:** The proposed change is packaged with empirical support and escalated as an `EscalateApprovalCommand` to the Human Governance Gateway.
+7. **Approved Code/Prompt Implementation:** Once human approval is cryptographically verified, the CTO and Engineering agents deploy the approved change to a sandboxed canary/shadow container.
+8. **Automated Testing & Regression Validation:** ARCS automatically executes the comprehensive test suite (unit, contract, policy, security, and integration tests) to ensure zero regression.
+9. **Empirical Measurement:** The KPI Engine runs A/B experiments to measure if the deployed change objectively improved conversion, latency, or yield.
+10. **Knowledge Capture & Retention:** Successful optimizations are consolidated and permanently stored within the company's persistent Semantic Memory as reusable operational principles for future tasks.
+
+### 15.3 Strict Human Governance Constraints
+To protect corporate safety, ARCS operates under absolute trust boundaries:
+* **No Automated Code Modification:** Agents can generate plans, propose prompt edits, write scripts, and run test suites; however, deploying changes to production systems or altering the core repository requires cryptographically signed human authorization.
+* **Objective Stability:** ARCS agents are strictly prohibited from modifying safety policies, human governance stages, risk boundaries, or their own high-level organizational objectives (e.g., regulatory compliance limits and capital preservation rules).
+* **Validation Rollbacks:** Any deployed change that triggers a single test failure or a compliance violation is instantly and automatically reverted to its previous stable checkpoint.

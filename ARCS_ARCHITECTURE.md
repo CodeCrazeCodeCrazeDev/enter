@@ -723,3 +723,57 @@ To protect corporate safety, ARCS operates under absolute trust boundaries:
 * **No Automated Code Modification:** Agents can generate plans, propose prompt edits, write scripts, and run test suites; however, deploying changes to production systems or altering the core repository requires cryptographically signed human authorization.
 * **Objective Stability:** ARCS agents are strictly prohibited from modifying safety policies, human governance stages, risk boundaries, or their own high-level organizational objectives (e.g., regulatory compliance limits and capital preservation rules).
 * **Validation Rollbacks:** Any deployed change that triggers a single test failure or a compliance violation is instantly and automatically reverted to its previous stable checkpoint.
+
+---
+
+## 16. Highest-ROI Priorities Matrix (Strategic Execution)
+
+To maximize cognitive yield while minimizing API and computational budgets, ARCS implements the **Highest-ROI Priority Matrix** directly across its modular package structures:
+
+### 16.1 The 10 High-ROI Architectural Pillars
+
+#### 1. Hierarchical & Structured Memory
+* **Specification:** Instead of dumping an entire raw session history into the prompt (which causes context bloating and attention decay), ARCS organizes its knowledge into four distinct memory tiers:
+  * **Working Memory:** Local variables and the transient state of the active run.
+  * **Episodic Memory:** Traces of specific historical attempts and agent trajectories.
+  * **Semantic Memory:** Persistent schemas, factual cards, and world graph snapshots.
+  * **Procedural Memory:** Reusable skills and validated code patterns.
+* **Code Implementation:** Structured under `apodex/arcs/world_graph.py` and `agent_harness/core/memory/semantic_memory.py`.
+
+#### 2. Automatic Memory Compression
+* **Specification:** Background compression layers recursively summarize episodic chunks and truncate redundant logs once raw tokens cross the predefined limits.
+* **Code Implementation:** Integrated into `agent_harness/core/memory/learning_memory.py` and the compaction controllers.
+
+#### 3. Relevance-Based Semantic Retrieval
+* **Specification:** Prevents context-pollution by fetching memory slices dynamically using cosine similarity and entity matching, feeding only relevant context cards into active prompts.
+* **Code Implementation:** Defined under `WorldGraph.get_relations_from()` and `LongTermLearningMemory.query_similar_strategies()`.
+
+#### 4. Forgetting & Summarization
+* **Specification:** Implements a cognitive forgetting curve where low-frequency, low-utility episodic records are archived or condensed into high-level strategic principles, protecting budgets.
+
+#### 5. Hierarchical Planning & Goal Decomposition
+* **Specification:** Replaces flat ReAct loops with structured planning trees comprising long-term goals, milestone decomposition, active tracking, and causal backtracking recovery on tool/agent failures.
+* **Code Implementation:** Implements `StrategicPlanner` and `GraphOfThoughtEngine` under `got.py` and `planner_executor.py`.
+
+#### 6. Tool Reliability & Sandboxing
+* **Specification:** Tools are treated as potentially untrustworthy components. Every tool invocation undergoes automatic syntactic and semantic verification, timeouts, dynamic retries, sandboxed Docker execution, and publishes confidence scores.
+* **Code Implementation:** Managed by `PlanVerifier`, `SecurityAgent`, and `MetaVerifier` under `parallel.py`.
+
+#### 7. Dynamic Model Router
+* **Specification:** Minimizes API expenditures by splitting prompts across three cost tiers:
+  * **Small Model (CHEAP):** For simple tasks like text classification, routing, and intent parsing.
+  * **Medium Model (MEDIUM):** For code compilation, syntax verification, and standard structured parsing.
+  * **Large Model (EXPENSIVE):** Reserved strictly for high-risk strategic decisions, budget allocations, and mathematical consensus validation.
+* **Code Implementation:** Coded in `apodex/cognition/model_router.py`.
+
+#### 8. Local Knowledge & Graph Layer
+* **Specification:** Rather than constantly calling expensive LLMs, ARCS relies on a local vector database, a cached research corpus, and an incremental SQLite knowledge graph to answer environmental queries locally.
+* **Code Implementation:** Backed by `SQLiteMemoryRepository` in `semantic_memory.py` and `WorldGraph` in `world_graph.py`.
+
+#### 9. Incremental & Reusable Learning
+* **Specification:** Avoids the high instability, latency, and cost of continuous online fine-tuning. Instead, ARCS learns iteratively from successful executions, stashing reusable workflow blueprints, successful prompt templates, and optimal tool sequences.
+* **Code Implementation:** Captured via `TrajectoryDatasetCompiler` and `LongTermLearningMemory` in `learning_memory.py`.
+
+#### 10. Multi-Layer Governance & Plugin Architecture
+* **Specification:** Before any tool execution or capital deployment, ARCS executes budget checks, permission gates, safety checks, and human approvals. All functions are wrapped as isolated, hot-swappable plugins.
+* **Code Implementation:** Structured under `HumanGovernanceGateway`, `CapitalAllocationEngine`, and the CQRS command dispatcher.

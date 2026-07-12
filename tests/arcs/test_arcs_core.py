@@ -363,3 +363,28 @@ async def test_simulation_payment_failure_and_outage_graceful_degradation():
         assert fallback_resp["status"] == "success"
         assert fallback_resp["gateway"] == "stablecoin"
         assert fallback_resp["amount_cents"] == invoice_cents
+
+
+# =====================================================================
+# 7. Model Router Tests
+# =====================================================================
+
+def test_model_router_complexity_routing():
+    from apodex.cognition.model_router import ModelRouter
+
+    router = ModelRouter()
+
+    # Classification task should route to cheap tier
+    route_cheap = router.classify_and_route("Classify user intent.", {"task_type": "classification", "complexity": 0.1})
+    assert route_cheap["tier"] == "CHEAP"
+    assert route_cheap["model"] == "gpt-4o-mini"
+
+    # Coding task should route to medium tier
+    route_medium = router.classify_and_route("Write a binary search algorithm.", {"task_type": "code_generation", "complexity": 0.5})
+    assert route_medium["tier"] == "MEDIUM"
+    assert route_medium["model"] == "claude-3-5-haiku"
+
+    # Difficult reasoning / strategic planning should route to expensive tier
+    route_expensive = router.classify_and_route("Allocate corporate seed capital across 10 departments.", {"task_type": "strategic_planning", "complexity": 0.95})
+    assert route_expensive["tier"] == "EXPENSIVE"
+    assert route_expensive["model"] == "gpt-4o"

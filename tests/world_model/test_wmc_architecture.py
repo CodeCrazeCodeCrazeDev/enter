@@ -258,6 +258,114 @@ async def test_orchestration_coordinator():
 
 
 # =====================================================================
+# 9. Self-Improvement Flywheel Tests
+# =====================================================================
+
+from apodex.world_model.domain.self_improvement import (
+    EngineeringFinding,
+    BenchmarkReport,
+    SelfImprovementProposal
+)
+from apodex.world_model.interfaces.self_improvement import (
+    IChiefArchitect,
+    ISecurityEngineer,
+    IPerformanceEngineer,
+    ISoftwareEngineer,
+    IResearchScientist,
+    IQaEngineer,
+    IEvaluator
+)
+from apodex.world_model.orchestration.self_improvement_coordinator import SelfImprovementFlywheelCoordinator
+
+
+@pytest.mark.asyncio
+async def test_self_improvement_flywheel_cycle():
+    """Verify that SelfImprovementFlywheelCoordinator runs a complete multi-agent engineering optimization cycle."""
+    container = DependencyContainer()
+
+    # Register mock specialized agents to handle the self-improvement tasks
+    class MockArchitect(IChiefArchitect):
+        async def evaluate_architecture(self) -> List[EngineeringFinding]:
+            return [
+                EngineeringFinding(
+                    severity="HIGH",
+                    category="CIRCULAR_DEPENDENCY",
+                    file_path="apodex/world_model/domain/timelines.py",
+                    description="Circular dependency detected between timelines and environments",
+                    suggested_fix="Refactor environments to separate file and use interfaces"
+                )
+            ]
+
+    class MockSecurity(ISecurityEngineer):
+        async def audit_security(self) -> List[EngineeringFinding]:
+            # Returns a lower severity issue
+            return [
+                EngineeringFinding(
+                    severity="MEDIUM",
+                    category="SECURITY_VULNERABILITY",
+                    file_path="apodex/world_model/config.py",
+                    description="API Key defaults are stored as strings",
+                    suggested_fix="Load keys from OS environment variable"
+                )
+            ]
+
+    class MockPerformance(IPerformanceEngineer):
+        async def profile_performance(self) -> List[EngineeringFinding]:
+            return []
+
+    class MockSWE(ISoftwareEngineer):
+        async def generate_patch(self, finding: EngineeringFinding) -> SelfImprovementProposal:
+            return SelfImprovementProposal(
+                title="Fix domain circular dependencies",
+                summary=f"Addressed issue: {finding.description}",
+                proposed_diff="--- timeline.py\n+++ timeline.py\n...",
+                risks_analysis="Low risk, backwards compatible",
+                rollback_instructions="Revert git commit",
+                associated_finding_id=finding.finding_id
+            )
+
+    class MockResearch(IResearchScientist):
+        async def research_topic(self, topic: str) -> List[str]:
+            return ["Friston, K. (2010). 'The free-energy principle: a unified brain theory?' Nature Reviews Neuroscience."]
+
+    class MockQA(IQaEngineer):
+        async def generate_tests(self, proposal: SelfImprovementProposal) -> str:
+            return "def test_timeline_isolated_imports():\n    assert True"
+
+    class MockEvaluator(IEvaluator):
+        async def benchmark_proposal(self, proposal: SelfImprovementProposal) -> BenchmarkReport:
+            return BenchmarkReport(
+                latency_delta_ms=-15.4,  # Performance improvement
+                token_cost_delta_usd=-0.002,  # Cost savings
+                is_regression=False
+            )
+
+    # Register singletons in container
+    container.register_singleton(IChiefArchitect, MockArchitect())
+    container.register_singleton(ISecurityEngineer, MockSecurity())
+    container.register_singleton(IPerformanceEngineer, MockPerformance())
+    container.register_singleton(ISoftwareEngineer, MockSWE())
+    container.register_singleton(IResearchScientist, MockResearch())
+    container.register_singleton(IQaEngineer, MockQA())
+    container.register_singleton(IEvaluator, MockEvaluator())
+
+    # Initialize and execute Flywheel Coordinator
+    coordinator = SelfImprovementFlywheelCoordinator(container=container)
+    proposals = await coordinator.execute_optimization_cycle()
+
+    # Validate output
+    assert len(proposals) == 1
+    proposal = proposals[0]
+    assert proposal.title == "Fix domain circular dependencies"
+    assert "Friston, K. (2010)" in proposal.research_citations[0]
+    assert "def test_timeline_isolated_imports" in proposal.summary
+    assert proposal.status == "EVALUATED"
+    assert proposal.benchmark_report is not None
+    assert proposal.benchmark_report.latency_delta_ms == -15.4
+    assert not proposal.benchmark_report.is_regression
+
+
+# =====================================================================
 # 8. Architectural Conformance Tests (Structural Boundary Checks)
 # =====================================================================
 

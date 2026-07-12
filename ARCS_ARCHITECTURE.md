@@ -777,3 +777,56 @@ To maximize cognitive yield while minimizing API and computational budgets, ARCS
 #### 10. Multi-Layer Governance & Plugin Architecture
 * **Specification:** Before any tool execution or capital deployment, ARCS executes budget checks, permission gates, safety checks, and human approvals. All functions are wrapped as isolated, hot-swappable plugins.
 * **Code Implementation:** Structured under `HumanGovernanceGateway`, `CapitalAllocationEngine`, and the CQRS command dispatcher.
+
+---
+
+## 17. Production Architecture Review & Operational Assessment
+
+This section addresses the formal architectural and operational verification milestones required to transition ARCS from **Phase 1: Architecture Foundation** into a robust, operational subsystem.
+
+### 17.1 Core Architectural Review Questions & Resolutions
+
+#### 1. Circular Dependency Elimination
+* **Review Question:** Are there any circular dependencies among services, agents, or subsystems?
+* **Resolution:** No. ARCS avoids circular dependencies by employing three design invariants:
+  * **Unified Service Registry (`ServiceRegistry`):** Services and cognitive components register themselves under abstract base interfaces. Subsystems and agents query this registry at runtime rather than importing other concrete classes.
+  * **Asynchronous Event-Driven Decoupling:** Intra-subsystem communication is mediated entirely via the `EventBus` and `CommandDispatcher`. For example, the `CFOAgent` does not call `MarketingAgent` directly. Instead, it publishes a `BudgetAllocatedEvent`, which the marketing engine consumes asynchronously.
+  * **Layered Dependency Flow:** Dependencies flow strictly downward from the ARCS Application Layer to the AEAN Economic Layer, and finally to the Apodex Cognitive Operating System.
+
+#### 2. Complete Dependency Injection (DI)
+* **Review Question:** Can every service be cleanly replaced through dependency injection?
+* **Resolution:** Yes. All services (such as the `TreasuryGateway`, `EconomicDigitalTwin`, `CapitalAllocationEngine`, and `HumanGovernanceGateway`) are resolved via the `ServiceRegistry` and programmatically injected into agent constructors using abstract base classes (`IPaymentAdapter`, `IWorldModelService`, etc.). This guarantees that any service can be mocked out or replaced with zero modification to agent logic (as demonstrated in our comprehensive test suite).
+
+#### 3. Adapter-Based Boundary Abstractions
+* **Review Question:** Are all external integrations adapter-based?
+* **Resolution:** Yes. Following Hexagonal Architecture, ARCS prohibits direct dependencies on external SaaS APIs, bank rails, LLM endpoints, or databases. Concrete integrations (like `StripeAdapter` or `StablecoinAdapter`) are treated as interchangeable adapters implementing clean, standard ports (`IPaymentAdapter`).
+
+#### 4. State Consistency & Graceful Failure Recovery
+* **Review Question:** Can the system recover from partial failures without getting stuck in an inconsistent state?
+* **Resolution:** Yes. ARCS maintains consistency across distributed and long-horizon tasks through several resilience patterns:
+  * **Saga / Compensation Patterns:** Financial transactions utilize a multi-phase commit model. If a payment charge completes but ledger recordation fails, a compensating "Rollback Charge" is automatically triggered.
+  * **Idempotency Guarantees:** Every command and event contains a unique, cryptographically signed `event_id` or `command_id`. Database and ledger repositories enforce idempotency checks to prevent duplicate processing.
+  * **Graceful Fallbacks:** If a critical payment provider (e.g. Stripe) suffers an outage, the `TreasuryGateway` dynamically reroutes requests to registered secondary rails (e.g. Wise or decentralized Stablecoin transfers) while caching pending actions in durable, persistent queues.
+
+#### 5. Explainable & Traceable Economic Decisions
+* **Review Question:** Is every economic decision traceable and explainable?
+* **Resolution:** Yes. Before committing any capital or launching an acquisition campaign, ARCS generates a comprehensive, auditable execution trace. Every strategic action records:
+  * The triggering `MarketOpportunityDiscoveredEvent`.
+  * The corresponding simulated forecast and ROI projection from the `EconomicDigitalTwin`.
+  * The specific, step-by-step reasoning logs (`log_thought`) from the `CEOAgent` and `CFOAgent` explaining *why* the path was chosen.
+  * The human-approval cryptographic signatures registered via the `HumanGovernanceGateway`.
+
+#### 6. Action Replayability from Event History
+* **Review Question:** Can every autonomous action be replayed from its event history?
+* **Resolution:** Yes. By employing an append-only event-sourcing design, all business operations (tenant provisioning, customer onboarding, invoice issuances, ledger adjustments, compliance overrides) are persisted as immutable `ledger_entries` or JSON event streams. The entire state of any tenant can be cleanly reconstructed from turn zero by sequentially replaying its transaction history.
+
+#### 7. Interface Versioning Strategy
+* **Review Question:** Are all public interfaces and event schemas versioned?
+* **Resolution:** Yes. All public-facing REST/gRPC endpoints and event schemas are strongly typed and versioned (e.g., `api/v1/`, `api/v2/`). Domain Event classes use semantic naming conventions and are decoupled from storage models to ensure backward-compatibility as schemas evolve.
+
+#### 8. Database Schema Migration Strategy
+* **Review Question:** Is there a documented migration strategy for future schema changes?
+* **Resolution:** Yes. ARCS employs `Alembic` (for relational SQLModel/PostgreSQL migration management) and standard incremental graph-attribute updates (for `WorldGraph`). Schema modifications require:
+  * Reversible, forward-only migration scripts.
+  * Integration testing against historical transaction snapshots.
+  * Continuous data-shadowing verification before live cutovers.

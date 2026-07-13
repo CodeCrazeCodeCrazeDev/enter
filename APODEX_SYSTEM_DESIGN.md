@@ -1,12 +1,12 @@
 # Apodex Meta-System Architectural Specification: Self-Improving AI System
 
-This document specifies the architecture, data flows, design patterns, safety guardrails, cost-awareness, and user-control layers for **Apodex**—the self-evolving meta-system that wraps, observes, and continually improves the Autonomous Economic Agent Network (AEAN).
+This document specifies the architecture, data flows, design patterns, safety guardrails, cost-awareness, and the newly integrated **Autonomous Verifier Layer** for **Apodex**—the self-evolving meta-system that wraps, observes, and continually improves the Autonomous Economic Agent Network (AEAN).
 
 ---
 
 ## 1. Unified Architecture & High-Level Goal
 
-Apodex is designed around a **dual-loop self-improvement cognitive architecture** working on top of the AEAN execution framework. The high-level goal of Apodex is to continuously drive both short-term (in-session/cross-session) and long-term (structural and algorithmic) adaptation:
+Apodex is designed around a **dual-loop self-improvement cognitive architecture** working on top of the AEAN execution framework, enhanced by an advanced **Autonomous Verifier Layer**. The high-level goal of Apodex is to continuously drive both short-term (in-session/cross-session) and long-term (structural and algorithmic) adaptation:
 
 ```
                                 +---------------------------+
@@ -31,8 +31,15 @@ Apodex is designed around a **dual-loop self-improvement cognitive architecture*
 |   |                         Experience Database + Cognition Base                      |   |
 |   |  - Trace Logs  - Failure Signatures  - Performance Metrics  - Distilled Lessons   |   |
 |   |  - Research Tickets  - Capability Deltas  - Personal Evolution Profiles (PEPs)    |   |
+|   +-----------------------------------------+-----------------------------------------+   |
+|                                             |                                             |
+|                                             v                                             |
+|   +-----------------------------------------------------------------------------------+   |
+|   |                       AUTONOMOUS VERIFIER & CRITIC LAYER                          |   |
+|   |  - LLM-as-a-Judge   - Introspective Critics  - Reward Models  - Fact-Checkers     |   |
+|   |  - Multi-Agent Runtime V&V  - Temporal Logic & Self-Verifying Code Generaters     |   |
 |   +----------+----------------------------------------------------+-------------------+   |
-|              | (Weakness Indicators)                              | (Performance Gaps)    |
+|              | (Ranked & Filtered Edits)                          | (Dense Rewards)       |
 |              v                                                    v                       |
 |   +------------------------------------+       Triggers       +-----------------------+   |
 |   |      Harness Loop Controller       |  ----------------->  | Research Controller   |   |
@@ -135,7 +142,7 @@ At the initiation of any user session, the PEP is loaded as part of the executio
 
 1. **Query Store**: Retrieve the active PEP record from the persistent SQLite/NoSQL DB.
 2. **Context Assembly**: The `HarnessLoopController` binds the style guidelines and domain vocabulary into the working configuration.
-3. **Prompt Injection**: The loaded vocabulary mapping is appended to the system instructions to ensure proper interpretation of domain-specific terms (e.g., translating "heavy-duty" to invoke specific deep-reasoning agent ensembles).
+3. **Prompt Injection**: The loaded vocabulary mapping is appended to the system instructions to ensure proper interpretation of domain-specific terms.
 
 ### 2.3 PEP Update Lifecycle
 
@@ -146,17 +153,17 @@ The PEP is updated dynamically:
 ### 2.4 PEP Execution Influence
 - **System Prompt Initialization**: Style preferences (e.g., `citation_style`) and pinned behaviors are injected as structural rules into the system prompt.
 - **Tool and Workflow Selection**: Workflows marked as highly effective for the current domain in PEP are automatically given higher routing priorities during planning.
-- **Default Evolution Aggressiveness**: Tells the `HarnessLoopController` how fast to push changes. In "Conservative" domains, prompt modifications are blocked unless they show 100% success on the regression suite. In "Aggressive" domains, candidate changes can be shadow-tested live if they pass a 70% confidence threshold.
+- **Default Evolution Aggressiveness**: In "Conservative" domains, prompt modifications are blocked unless they show 100% success on the regression suite. In "Aggressive" domains, candidate changes can be shadow-tested live if they pass a 70% confidence threshold.
 
 ---
 
 ## 3. Transparent and User-Controllable Evolution
 
-To ensure users remain in absolute control over how Apodex adapts, the platform introduces a comprehensive **Evolution Changelog**, **Control Panel**, and **One-Click Rollback** mechanism.
+To ensure users remain in absolute control over how Apodex adapts, the platform introduces an **Evolution Changelog**, **Control Panel**, and **One-Click Rollback** mechanism.
 
 ### 3.1 Evolution Changelog
 
-All adjustments to prompts, routing, tools, or model weights are recorded in the changelog, which is auditable on demand or surfaced through gentle notification flags.
+All adjustments to prompts, routing, tools, or model weights are recorded in the changelog.
 
 #### Changelog Schema
 
@@ -191,19 +198,13 @@ Surfaced via CLI and GUI, this panel writes to the PEP:
 
 ### 3.3 One-Click Rollback
 
- Hoses can be rollbacked instantly if any performance degradation is observed.
+Harness configurations can be rolled back instantly.
 
 #### API/CLI Examples
 
 - Check the evolution log state:
   ```bash
   /evolution status
-  ```
-  *Output:*
-  ```
-  Active Scaffolding Version: v14.2
-  Last modification: Added strict JSON instruction to Python compiler (Timestamp: 2026-03-30T11:00:00Z)
-  Performance Delta: Success +8%, Latency -1.5s
   ```
 
 - Rollback a specific capability to a previous version:
@@ -213,8 +214,8 @@ Surfaced via CLI and GUI, this panel writes to the PEP:
 
 #### Internal Rollback Mechanics
 1. **Reversion**: The `HarnessLoopController` extracts the historical configuration corresponding to the requested timestamp from the SQLite state ledger and hot-swaps it into active memory.
-2. **Negative Signal Logging**: The rejected change configuration is marked as **blacklisted** in the `FailureSignature` store. The exact reason or trace that led to the rollback is clustered as a "user-rejected mutation".
-3. **Blocking Re-proposals**: The evolution algorithm computes the semantic similarity of future candidate modifications against the blacklisted prompts; any proposed modification with >85% similarity is blocked automatically to prevent re-proposing rejected ideas.
+2. **Negative Signal Logging**: The rejected change configuration is marked as **blacklisted** in the `FailureSignature` store.
+3. **Blocking Re-proposals**: Any proposed modification with >85% similarity is blocked automatically to prevent re-proposing rejected ideas.
 
 ---
 
@@ -245,16 +246,12 @@ def calculate_multi_objective_score(
     satisfaction: float,   # 0.0 to 1.0 (user satisfaction)
     profile_mode: str      # 'max_quality', 'balanced', 'fast_cheap'
 ) -> float:
-    # 1. Define default weights
     weights = {
         "max_quality": {"wq": 0.70, "wt": 0.05, "wl": 0.05, "ws": 0.20},
         "balanced":    {"wq": 0.40, "wt": 0.20, "wl": 0.20, "ws": 0.20},
         "fast_cheap":  {"wq": 0.15, "wt": 0.45, "wl": 0.30, "ws": 0.10}
     }
-
     w = weights.get(profile_mode, weights["balanced"])
-
-    # 2. Compute score components (penalize ratio increases above 1.0)
     token_penalty = max(0.0, token_ratio - 1.0)
     latency_penalty = max(0.0, latency_ratio - 1.0)
 
@@ -269,16 +266,9 @@ def calculate_multi_objective_score(
 
 ### 4.2 Cost Profile Constraints
 
-- **`max_quality`**: Prioritizes logical capability. Acceptable token ratio up to $2.5\times$ (e.g., branching MCTS or large coordinator ensembles).
+- **`max_quality`**: Prioritizes logical capability. Acceptable token ratio up to $2.5\times$ (e.g., branching MCTS).
 - **`balanced`**: Allows up to $1.2\times$ token or latency increases only if they yield at least a corresponding $+10\%$ quality improvement.
 - **`fast_cheap`**: Enforces a strict ceiling on costs. Any proposed harness edit that expands token length by $>5\%$ or adds a tool step is automatically discarded.
-
-### 4.3 Practical Example: Routing Upgrade
-An upgrade is proposed that wraps coding task execution in a triple-pass verifier loop:
-- **Impact**: Quality $Q$ improves from $82\%$ to $90\%$. Latency $L$ increases by $150\%$ (ratio = 2.50). Token volume $T$ increases by $180\%$ (ratio = 2.80).
-- **Evaluation**:
-  - Under `max_quality`: The quality improvement and satisfaction override the penalties. Score remains positive. **Change is accepted**.
-  - Under `fast_cheap`: The heavy token penalty ($0.45 \times 1.80 = 0.81$) and latency penalty ($0.30 \times 1.50 = 0.45$) completely dominate. Score becomes deeply negative. **Change is rejected**.
 
 ---
 
@@ -286,23 +276,9 @@ An upgrade is proposed that wraps coding task execution in a triple-pass verifie
 
 To protect system integrity, Apodex partitions its operating configuration into an **Immutable Safety Core** and enforces a strict **Tiered Approval System**.
 
-```
-  +-------------------------------------------------------------+
-  |                   IMMUTABLE SAFETY CORE                      |
-  |  - Harm & Privacy Prompts   - Access Control & Tenancy      |
-  |  - Critical Audit Logs      - Read-Only Configuration Store |
-  +-------------------------------------------------------------+
-                                 |
-                                 v
-  +-------------------------------------------------------------+
-  |                   TIERED APPROVAL GATEWAY                   |
-  |  [Tier 1: Auto]  ──> [Tier 2: Shadow]  ──> [Tier 3: Git PR] |
-  +-------------------------------------------------------------+
-```
-
 ### 5.1 Immutable Safety Core
 
-Safety and security configurations are marked with `immutable: true` properties and stored in a read-only filesystem partition or protected database tables. These cannot be modified by any automated agent or execution loop.
+Safety and security configurations are marked with `immutable: true` properties.
 - **Harm/Bias Policies**: Prompts governing ethical alignment and system safety.
 - **Data Boundary Rules**: Tenant-isolation and database access controls.
 - **Audit Logging Pipelines**: The components that report token, cost, and trace metrics.
@@ -312,65 +288,106 @@ Safety and security configurations are marked with `immutable: true` properties 
 | Tier | Change Type | Approval Path | Requirement & Benchmarks |
 | :--- | :--- | :--- | :--- |
 | **Tier 1** | Tiny harness tweak (prompt text edit, minor routing value) | **Auto-Approve** | Run fast regression suite (100% success on cached tasks). |
-| **Tier 2** | New tool definition or major workflow routing rewrite | **Shadow Mode** | Deploy in parallel "shadow mode" for 100 runs. Auto-promote if quality score is superior and zero errors occur. |
+| **Tier 2** | New tool definition or major workflow routing rewrite | **Shadow Mode** | Deploy in parallel "shadow mode" for 100 runs. |
 | **Tier 3** | Model architecture, weights, or training setup change | **Git Pull Request** | Run comprehensive benchmark suite (MMLU, HumanEval, MATH). Human engineer merge of PR required. |
-| **Tier 4** | Anything touching safety policies or tenancy rules | **Multi-Party Gate** | Blocked for automation. Requires explicit manual cryptographic keys and multi-party sign-off. |
-
-Every approval decision, including the specific tester agent, validation metrics, approval path, and timestamp, is cryptographically hashed and logged to the permanent auditing ledger.
+| **Tier 4** | Anything touching safety policies or tenancy rules | **Multi-Party Gate** | Blocked for automation. Requires explicit manual cryptographic keys. |
 
 ---
 
-## 6. Tight Harness–Research Feedback Loop
+## 6. The Autonomous Verifier & Critic Layer
 
-The Harness Loop and the Research Loop do not operate in isolation. They communicate explicitly through two structured artifacts: **Research Tickets** and **Capability Deltas**.
+To validate that Apodex's self-evolution represents concrete improvement rather than behavioral drift, we introduce a formal **Verifier Layer** built directly on top of the 60 reference architectures in LLM verification.
 
 ```
-  +──────────────────────+                     +──────────────────────+
-  | Harness Loop (Fast)  | ── Research Ticket ─> Research Loop (Slow) |
-  | - Mines prompt/tool  |                     | - Computes recipes   |
-  |   level bottlenecks  | <─ Capability Delta ─ - Runs sandbox trials  |
-  +──────────────────────+                     +──────────────────────+
+                      +---------------------------------------+
+                      |         Task execution Trace          |
+                      +-------------------+-------------------+
+                                          |
+                                          v
+                      +-------------------+-------------------+
+                      |       LLM-as-a-Judge Evaluation       | (MT-Bench / Chain-of-Thought)
+                      +-------------------+-------------------+
+                                          |
+                     +--------------------+--------------------+
+                     |                                         |
+                     v                                         v
+       +-------------+-------------+             +-------------+-------------+
+       |   Intrinsic Self-Critique |             |    Grounded Fact-Checker  |
+       |  (RISE / CRITIC loops)    |             |    (FIRE / MiniCheck)     |
+       +-------------+-------------+             +-------------+-------------+
+                     |                                         |
+                     +--------------------+--------------------+
+                                          |
+                                          v
+                      +-------------------+-------------------+
+                      |     Dense Reward Model Generation     | (For SPIN, Agent Q, RLHF)
+                      +-------------------+-------------------+
+                                          |
+                                          v
+                      +-------------------+-------------------+
+                      |      Multi-Agent Runtime V&V          | (Temporal logic & Safety)
+                      +---------------------------------------+
 ```
 
-### 6.1 Research Tickets (Harness ──> Research)
+### 6.1 Core LLM-as-a-Judge / Verifier Node (Papers 1–10, 21–28)
+- **Role**: Standardized evaluator rating the correctness and instruction adherence of candidate answers or prompt adjustments.
+- **Design Patterns Borrowed**:
+  - **Internal Reasoning & Chain-of-Thought (CoT)** (NeurIPS #6): Evaluator judges do not just output scores; they must generate an internal `<thinking>` trajectory reasoning step-by-step before producing a quality assessment, substantially reducing rating indeterminacy.
+  - **Pairwise Quality Matching**: Implements MT-Bench/Chatbot Arena-style pairwise evaluation (Paper #1) to rank proposed prompt changes side-by-side, picking the one that best maximizes user preferences.
 
-Generated when the Harness Loop identifies a persistent error pattern that prompt optimizations or workflow rewrites fail to solve (e.g., repeated logic loops or failure of the base model to handle multi-step reasoning).
+### 6.2 Self-Critique & Introspective Critics (Papers 11–20)
+- **Role**: Drives iterative prompt/workflow editing inside the **Harness Loop** and trace cleanup in the **Research Loop**.
+- **Design Patterns Borrowed**:
+  - **CRITIC (Tool-Interactive Critiquing)** (Paper #18): In coding tasks, the verifier invokes an external python compiler tool to verify that generated scripts run without syntax errors before approving them as ground truth.
+  - **RISE (Recursive Introspection)** (Paper #14): The critic continuously identifies gaps between the planned execution path and the actual trace outputs, creating a closed-loop generate-critique-revise cycle until the solution converges.
 
-#### Research Ticket Schema
+### 6.3 Dense Reward Models & Evaluators (Papers 21–30)
+- **Role**: Translates multi-step agent traces and LLM-as-a-judge verdicts into continuous, dense scalar reward signals used for reinforcement learning, SPIN self-play, and Agent Q post-training.
+- **Design Patterns Borrowed**:
+  - **Automatic Trajectory Reward Modeling** (Paper #23): Learns step-level reward densities over multi-step execution paths rather than a single sparse final rating. This guides search algorithms (MCTS) to prune bad execution branches early.
+  - **Task-Specific Classification**: Configures the reward model to act as a task-specific classifier (Paper #28) to prevent reward hacking and ensure stable RLHF policy alignment.
+
+### 6.4 Fact-Checking & Grounded Verification (Papers 31–40)
+- **Role**: Ensures factuality and document grounding during heavy-duty agent operations.
+- **Design Patterns Borrowed**:
+  - **FIRE (Iterative Retrieval and Verification)** (Paper #32): Claims made during execution are isolated, checked via targeted, iterative external searches, and verified step-by-step.
+  - **MiniCheck Grounding** (Paper #31): Verifies facts directly against retrieved baseline documents to strictly catch hallucinated statements.
+
+### 6.5 Multi-Agent Runtime Verification & Logic (Papers 51–60)
+- **Role**: Moniters multi-agent execution at runtime, ensuring compliance with safety boundaries and operational constraints.
+- **Design Patterns Borrowed**:
+  - **Runtime Monitor Protocols** (Paper #58): Dynamically monitors agent token usage, loops, and security constraints during execution.
+  - **Temporal Logic Plans** (Paper #59): Formally verifies that generated workflows conform to safety and sequencing rules.
+  - **Self-Verifying Code Generation** (Paper #60): Compiles generated code segments together with automated unit tests to verify mathematical and procedural correctness.
+
+---
+
+## 7. Tight Harness–Research Feedback Loop
+
+The loops cooperate as engineers using **Research Tickets** and **Capability Deltas**.
+
+### 7.1 Research Tickets (Harness ──> Research)
+
+Generated when the Harness Loop identifies a persistent error pattern that prompt optimizations or workflow rewrites fail to solve.
 
 ```json
 {
   "ticket_id": "RT-2026-0042",
   "created_at": "2026-03-30T12:00:00Z",
   "failure_pattern": "Multi-hop causal reasoning fails on 3+ step chains in physical logic tasks.",
-  "example_traces": [
-    "tr-math-9042",
-    "tr-math-9831"
-  ],
+  "example_traces": ["tr-math-9042", "tr-math-9831"],
   "user_impact": "high",
   "harness_attempts": [
-    {
-      "change": "Added step-by-step decomposition prompt guidelines",
-      "result": "no_improvement"
-    },
-    {
-      "change": "Added validation sub-agent",
-      "result": "marginal_improvement"
-    }
+    { "change": "Added step-by-step decomposition prompt guidelines", "result": "no_improvement" },
+    { "change": "Added validation sub-agent", "result": "marginal_improvement" }
   ],
   "suggested_direction": "weight_level_reasoning_upgrade_via_sft"
 }
 ```
 
-#### Ticket Ingestion & Prioritization
-1. **Creation**: When the `HarnessLoopController` records a failure signature with $>5$ occurrences and $0\%$ recovery after 3 distinct prompt mutation attempts, a ticket is generated.
-2. **Prioritization**: The `ResearchController` ranks tickets by combining `user_impact` with frequency metrics. High-priority tickets trigger the generation of custom fine-tuning SFT recipes.
+### 7.2 Capability Deltas (Research ──> Harness)
 
-### 6.2 Capability Deltas (Research ──> Harness)
-
-When the `ResearchLoopController` successfully completes a sandbox model training trial and promotes the new weights, it publishes a **Capability Delta** to the `HarnessLoopController`.
-
-#### Capability Delta Schema
+Published when the `ResearchLoopController` successfully completes a sandbox model training trial and promotes the new weights.
 
 ```json
 {
@@ -388,43 +405,44 @@ When the `ResearchLoopController` successfully completes a sandbox model trainin
 }
 ```
 
-#### Harness Integration & Regression Handling
-1. **Scaffolding Update**: The `HarnessLoopController` consumes the delta and automatically modifies its routing schemas to point relevant mathematical tasks to the upgraded model endpoint.
-2. **Regression Watchdog**: If a user's PEP metrics for "code synthesis" show a drop of $>5\%$ post-deployment, the watchdog instantly triggers a rollback of the model endpoint for that specific user's PEP, falling back to the previous stable model version.
+---
+
+## 8. Implementation Roadmap (Phased)
+
+The implementation of Apodex's meta-system upgrades is scheduled across four concurrent phases:
+
+### Phase 1: Personalization & Basic Verification Foundation (Aligned with PR 1 - PR 3)
+- **Deliverables**:
+  - Implement `PersonalEvolutionProfile` database structures and session initialization loaders.
+  - Write core `LLMAsAJudgeNode` with chain-of-thought internal reasoning schemas.
+- **Verification**: Confirm automated PEP loading and verify that judge nodes correctly output step-by-step `<thinking>` logs.
+
+### Phase 2: User Control, Cost Profiles & Self-Critique (Aligned with PR 4 - PR 10)
+- **Deliverables**:
+  - Build the Evolution Control Panel, Changelog, and `/evolution rollback` command blacklists.
+  - Implement the `SelfCritiqueCritic` (CRITIC / RISE style) for iterative prompt revisions.
+  - Inject multi-objective cost mode preferences (`max_quality`, `balanced`, `fast_cheap`) into harness decisions.
+- **Verification**: Simulate prompt hot-swapping and rollbacks; assert rejected prompt patterns are blacklisted.
+
+### Phase 3: Cost-Aware Scoring, Fact-Checking & Hardened Safety (Aligned with PR 11 - PR 19)
+- **Deliverables**:
+  - Deploy `GroundedFactChecker` (FIRE/MiniCheck) and the `DenseRewardModel` generator.
+  - Activate `SafetyGuardrailManager` with immutable core check logic.
+  - Implement the multi-objective suitability score and Tiered Approval policy tables (Tier 1 to Tier 3 gates).
+- **Verification**: Verify that safety rules cannot be modified. Confirm token penalties trigger negative score rejections in the `fast_cheap` profile.
+
+### Phase 4: Runtime Multi-Agent V&V & Loop Feedback (Aligned with PR 20 - PR 23)
+- **Deliverables**:
+  - Implement `RuntimeAgentVerifier` with temporal logical validation and self-verifying code compilation.
+  - Establish automated escalation of `ResearchTicket`s and ingestion of `CapabilityDelta` update payloads.
+- **Verification**: Run a full closed-loop run verifying successful ticket generation, model SFT training, delta creation, and automated harness adjustment.
 
 ---
 
-## 7. Implementation Roadmap (Phased)
+## 9. Concrete Worked Examples
 
-The implementation of the five Apodex upgrades is scheduled across four sequential, low-risk, and completely backward-compatible phases:
+### 9.1 User Personal Evolution Profile (PEP) Example
 
-### Phase 1: Personalization Foundation
-- **Deliverables**:
-  - Implement `PersonalEvolutionProfile` schema, SQLite persistence layer, and session initialization hooks.
-  - Implement basic experience tracking storing typical user task frequencies.
-
-### Phase 2: User Control & Cost Profiles
-- **Deliverables**:
-  - Build the Evolution Changelog ledger and command-line `/evolution rollback` utilities.
-  - Integrate multi-objective scoring calculations and hook PEP cost mode preferences (`max_quality`, `balanced`, `fast_cheap`) into active harness decisions.
-
-### Phase 3: Hardened Safety & Immutable Core
-- **Deliverables**:
-  - Deploy the `SafetyGuardrailManager` featuring strict immutable configuration checks.
-  - Establish the Tiered Approval pipeline (Tier 1 to Tier 3 gates) protecting safety-critical systems.
-
-### Phase 4: Full Closed-Loop Feedback Integration
-- **Deliverables**:
-  - Establish the automated generation and ingestion of `ResearchTicket` and `CapabilityDelta` schemas.
-  - Integrate the fast harness adaptation loop and slow research container trials in a unified production-grade feedback loop.
-
----
-
-## 8. Concrete Worked Examples
-
-### 8.1 User Personal Evolution Profile (PEP) Example
-
-#### Profile: High-Value Systems Architect
 ```json
 {
   "$schema": "https://apodex.ai/schemas/pep.v1.json",
@@ -477,7 +495,7 @@ The implementation of the five Apodex upgrades is scheduled across four sequenti
 
 ---
 
-### 8.2 Harness Change Lifecycle Example
+### 9.2 Harness Change Lifecycle Example
 
 #### 1. Proposed Change
 - **Target**: `usr-arch-77` standard coding prompt configuration.
@@ -516,7 +534,7 @@ The implementation of the five Apodex upgrades is scheduled across four sequenti
 
 ---
 
-### 8.3 Ticket & Delta Evolution Round-Trip Example
+### 9.3 Ticket & Delta Evolution Round-Trip Example
 
 #### 1. Research Ticket Generation (Harness ──> Research)
 The coding assistant repeatedly fails to compile complex multi-agent event dispatching routines. Prompt edits have failed to resolve this.
@@ -557,4 +575,4 @@ Upon validation, the model weights are promoted. The following delta is dispatch
 ```
 
 #### 4. Harness Adjustment
-The `HarnessLoopController` parses the recommended changes and instantly updates its routing tables. Any subsequent asynchronous coding requests from `usr-arch-77` are seamlessly dispatched to the new `Apodex-1.1-async-v2` model, successfully resolving the persistent compilation errors.
+The `HarnessLoopController` parses the recommended changes and instantly updates its routing tables. Any subsequent asynchronous coding requests from `usr-arch-77` are seamlessly dispatched to the new `Apodex-1.1-async-v2` model.

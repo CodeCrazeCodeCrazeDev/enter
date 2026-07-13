@@ -24,6 +24,13 @@ from apodex.meta.research_loop import (
     ResearchLoopController,
     TrialConfig,
 )
+from apodex.meta.verifier_layer import (
+    LLMAsAJudgeNode,
+    SelfCritiqueCritic,
+    DenseRewardModel,
+    GroundedFactChecker,
+    RuntimeAgentVerifier,
+)
 
 
 @pytest.mark.asyncio
@@ -236,3 +243,50 @@ async def test_feedback_loop_tickets_and_deltas():
     # 3. Harness loop consumes CapabilityDelta to update workflows
     await harness.apply_capability_delta(delta)
     assert "async-upgrade-v1" in harness.active_scaffolding["routing_logic_override"]
+
+
+@pytest.mark.asyncio
+async def test_verifier_layer_components():
+    # 1. LLM-as-a-Judge Evaluation and Pairwise testing
+    judge = LLMAsAJudgeNode()
+    score = await judge.evaluate_response("What is 2+2?", "4")
+    assert score.rating == 0.95
+    assert "<thinking>" in score.thinking_trajectory
+    assert "JSON" in score.verdict
+
+    winner = await judge.pairwise_rank("Option A", "Option B")
+    assert winner == "B"
+
+    # 2. Introspective Critic (CRITIC / RISE style)
+    critic = SelfCritiqueCritic()
+    report = await critic.generate_tool_critique("some code", "SyntaxError: invalid syntax")
+    assert report.needs_revision is True
+    assert "syntax error" in report.critique_text
+    assert len(report.tool_outcomes) == 1
+
+    report_ok = await critic.generate_tool_critique("some code", "Successfully compiled.")
+    assert report_ok.needs_revision is False
+
+    # 3. Dense Reward Model step-level computation
+    rm = DenseRewardModel()
+    step_rewards = rm.calculate_trajectory_rewards([{"action": "search"}, {"action": "parse"}, {"action": "compile"}])
+    assert len(step_rewards) == 3
+    assert step_rewards[0] == 0.1
+    assert step_rewards[1] == 0.2
+
+    # 4. Grounded Fact-Checking verification
+    checker = GroundedFactChecker()
+    ground_ok = await checker.verify_claims("Claim: system runs on python.", ["Source: python is verified."])
+    assert ground_ok.is_grounded is True
+
+    ground_hallucinated = await checker.verify_claims("Claim: unverified hallucination is true.", ["Source: python runs."])
+    assert ground_hallucinated.is_grounded is False
+    assert len(ground_hallucinated.hallucinated_claims) == 1
+    assert ground_hallucinated.confidence_score == 0.4
+
+    # 5. Runtime Agent Verifier with temporal logic rules
+    verifier = RuntimeAgentVerifier()
+    # Correct sequence: verification occurs before deploy
+    assert verifier.verify_temporal_logic(["Plan: verify then deploy"], ["verify", "deploy"]) is True
+    # Violation sequence: deploy occurs but verify is missing from execution
+    assert verifier.verify_temporal_logic(["Plan: verify then deploy"], ["deploy"]) is False

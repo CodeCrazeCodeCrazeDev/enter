@@ -9,6 +9,9 @@ from apodex.meta.experience_db import (
     FailureSignature,
     DistilledLesson,
     ExperienceDatabase,
+    PersonalEvolutionProfile,
+    ResearchTicket,
+    CapabilityDelta,
 )
 from apodex.meta.safety_manager import (
     DiffProposal,
@@ -21,12 +24,25 @@ from apodex.meta.research_loop import (
     TrialResult,
     ResearchLoopController,
 )
+from apodex.meta.verifier_layer import (
+    JudgeScore,
+    CritiqueReport,
+    GroundedVerificationReport,
+    LLMAsAJudgeNode,
+    SelfCritiqueCritic,
+    DenseRewardModel,
+    GroundedFactChecker,
+    RuntimeAgentVerifier,
+)
 
 __all__ = [
     "ExecutionTrace",
     "FailureSignature",
     "DistilledLesson",
     "ExperienceDatabase",
+    "PersonalEvolutionProfile",
+    "ResearchTicket",
+    "CapabilityDelta",
     "DiffProposal",
     "ValidationReport",
     "SafetyGuardrailManager",
@@ -34,4 +50,12 @@ __all__ = [
     "TrialConfig",
     "TrialResult",
     "ResearchLoopController",
+    "JudgeScore",
+    "CritiqueReport",
+    "GroundedVerificationReport",
+    "LLMAsAJudgeNode",
+    "SelfCritiqueCritic",
+    "DenseRewardModel",
+    "GroundedFactChecker",
+    "RuntimeAgentVerifier",
 ]

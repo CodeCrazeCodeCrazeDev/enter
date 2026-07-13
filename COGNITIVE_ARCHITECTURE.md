@@ -247,7 +247,7 @@ Both loops query and write lessons learned to the unified **Experience Database 
 
 ## 7. Advanced Evolution & Control Governance
 
-The Apodex self-evolution meta-system is hardened and personalized via five core architectural subsystems:
+The Apodex self-evolution meta-system is hardened and personalized via six core architectural subsystems:
 
 ### 7.1 Personal Evolution Layer (PEP)
 Each user owns a persistent, versioned **Personal Evolution Profile (PEP)** database object. The PEP represents style guidelines, typical task frequency distributions, vocabulary mappings, and preferred cost profiles (`max_quality`, `balanced`, or `fast_cheap`). PEP is initialized at session start and dynamically updated post-task to adjust evolution aggressiveness.
@@ -276,3 +276,11 @@ Where $Q$ is task quality, $T$ is token volume, $L$ is latency, and $Sat$ is use
 The loops cooperate as engineers using:
 - **Research Tickets**: Escales persistent failures from the harness loop to the research loop when prompt adjustments are insufficient.
 - **Capability Deltas**: Publishes model capability enhancements and recommended harness changes back to the harness loop upon candidate model promotion.
+
+### 7.6 Autonomous Verifier & Critic Layer
+To systematically prevent behavioral drift during self-evolution, Apodex embeds an expert **Verifier Layer** containing:
+1. **LLM-as-a-Judge**: Employs step-by-step chain-of-thought (CoT) internal reasoning trajectory evaluations and Chatbot Arena-style pairwise quality matches to score and rank candidate outputs.
+2. **Introspective Critics**: Employs generate-critique-revise loops (CRITIC / RISE style) integrating live tool outcomes (such as compiler exceptions).
+3. **Dense Reward Models**: Compiles step-level reward densities over multi-step execution paths to drive reinforcement learning (SPIN/Agent Q) without manual labeling.
+4. **Grounded Fact-Checkers**: Factuality grounding engines (MiniCheck/FIRE style) performing document-based verification of execution claims.
+5. **Runtime Multi-Agent V&V**: Monitors execution plans, ensuring formal correctness, and safety-checking verification logic.

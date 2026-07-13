@@ -231,3 +231,14 @@ If a single subsystem suffers a validation failure:
 - **Phase 1: Cognitive Foundation**: Complete abstract interfaces, database storage layers, and baseline testing.
 - **Phase 2: Market Integration**: Implement peer-to-peer negotiation protocol schemas, simulation engines, and contract resolution mechanisms.
 - **Phase 3: Fully Autonomous Economy (AEAN)**: Agents initiate self-monetized transactions, lease specialized skills (from Tool Invention), and arbitrate market contracts with zero human intervention.
+
+---
+
+## 6. Apodex Meta-System & Dual-Loop Self-Improvement
+
+The entire AEAN architecture described above is supervised, evaluated, and iteratively optimized by the **Apodex Meta-System**. Apodex adds two continuous adaptation layers to the cognitive topology:
+
+1. **Short-Term Harness Loop (Prompts, Scaffolding, Workflows)**: Evaluates trace logs, errors, and user feedback in real-time. It uses TextGrad/EvoPrompt patterns to hot-swap prompt templates, system instructions, and routing parameters.
+2. **Long-Term Research Loop (Weights, Algorithms, Data Curation)**: Aggregates high-quality traces across multiple sessions to compile custom supervised fine-tuning (SFT) datasets, running bounded experiments in isolated sandboxes to train and promote superior model weights.
+
+Both loops query and write lessons learned to the unified **Experience Database & Cognition Base**, which is integrated with the `ContinuousWorldModelService` and `MemoryConsolidationService` to maintain system-wide factual and heuristic memory.

@@ -152,3 +152,25 @@ To ensure that no regressions are introduced and that the framework remains prod
 - **Deliverables**: Domain gaps parser and synthetic proposition rankings.
 - **New Files**: `agent_harness/core/reasoning/scientific_hypothesis.py`
 - **Verification**: Validate hypothesis ranking against entropy scores in the knowledge base.
+
+---
+
+## 4. Apodex Meta-System Integration Schedule
+
+To overlay self-improvement on the AEAN, the following meta-phases are executed concurrently with the core subsystem rollouts:
+
+### Phase 1: Instrumentation & Logging MVP (Aligned with PR 1 - PR 3)
+- **Deliverables**: Complete trace schema recording in `ExperienceDatabase`; hook ReAct loop error handling to save failure logs.
+- **Verification**: Confirm automated writing of execution steps and metrics during standard benchmark runs.
+
+### Phase 2: Full Continual Harness-style Adaptation (Aligned with PR 4 - PR 10)
+- **Deliverables**: Deploy `HarnessLoopController` with prompt mutation and quick regression filtering.
+- **Verification**: Simulating a prompt optimization run over 10-20 mathematical and coding tasks.
+
+### Phase 3: AutoResearch-style Research Loop MVP (Aligned with PR 11 - PR 19)
+- **Deliverables**: Package `ResearchLoopController` SFT/LoRA pipeline and launch isolated, resource-bounded Docker experiments.
+- **Verification**: Measure performance improvement of fine-tuned candidate models against validation baselines.
+
+### Phase 4: Integrated Two-Loop System with Safety & Monitoring (Aligned with PR 20 - PR 23)
+- **Deliverables**: Enable the full closed-loop feedback between both loops; activate the `SafetyGuardrailManager` with immutable zones and automated Git pull request generation.
+- **Verification**: Execute a full continuous self-improvement run, triggering prompt adjustments, fine-tuning escalation, and final PR generation.

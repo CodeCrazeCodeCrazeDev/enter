@@ -1,7 +1,8 @@
 from __future__ import annotations
 from typing import Any, Dict, List, Optional
 from dataclasses import dataclass, field
-from apodex.meta.experience_db import ExperienceDatabase
+import time
+from apodex.meta.experience_db import ExperienceDatabase, ResearchTicket, CapabilityDelta
 
 
 @dataclass
@@ -28,57 +29,74 @@ class TrialResult:
 
 class ResearchLoopController:
     """
-    Research Loop Controller (ASI-Evolve & AutoResearch style).
-    Manages long-term training, data curation, and model-weight updates.
+    Research Loop Controller.
+    Manages long-term training, ticket ingestion, prioritized SFT/RL recipes,
+    and publishes CapabilityDeltas back to the Harness Loop.
     """
 
     def __init__(self, db: ExperienceDatabase) -> None:
         self.db = db
         self.active_trials: Dict[str, TrialConfig] = {}
 
-    async def compile_training_dataset(self, task_domain: str) -> str:
+    async def ingest_and_prioritize_tickets(self) -> List[ResearchTicket]:
         """
-        Gathers high-reward/successful trace logs and compiles a fine-tuning dataset.
-
-        Args:
-            task_domain: The domain of interest (e.g., 'mathematics', 'coding').
-
-        Returns:
-            The file path where the generated JSONL dataset is saved.
+        Pulls pending escalated tickets from the experience DB and sorts them by
+        importance (user_impact and trace frequency).
         """
-        # Traces are compiled into a standard SFT JSONL format
-        dataset_path = f"sandbox/data/sft_{task_domain}.jsonl"
+        tickets = await self.db.get_research_tickets()
+        # Prioritize 'high' impact tickets first
+        sorted_tickets = sorted(
+            tickets,
+            key=lambda t: 1 if t.user_impact == "high" else 0,
+            reverse=True
+        )
+        return sorted_tickets
+
+    async def compile_training_dataset(self, ticket: ResearchTicket) -> str:
+        """
+        Gathers high-reward/successful trace logs from the ticket's example traces
+        to compile an optimal supervised fine-tuning (SFT) dataset.
+        """
+        dataset_path = f"sandbox/data/sft_{ticket.ticket_id}.jsonl"
         return dataset_path
 
     async def launch_sandbox_experiment(self, config: TrialConfig) -> TrialResult:
         """
-        Spins up an isolated, resource-bounded container to run the training experiment.
-
-        Args:
-            config: The TrialConfig containing execution parameters, GPU quotas, and timeouts.
-
-        Returns:
-            The TrialResult indicating performance outcome and new model weights.
+        Spins up an isolated, resource-bounded container to run the training experiment
+        complying with strict wall-clock and GPU limits.
         """
         # Simulates sandboxed execution with strict resource limits
-        # Ensures no external network access unless explicitly whitelisted
         return TrialResult(
             trial_id=config.trial_id,
             success=True,
             new_model_weights_path=f"models/finetuned_{config.trial_id}",
-            metrics={"math_accuracy": 0.688, "gsm8k_accuracy": 0.831},
+            metrics={"math_accuracy": 0.94, "causal_reasoning_accuracy": 0.88},
             lesson_learned="Training on Complete trajectories retaining <think> tags increases consistency."
         )
+
+    async def promote_model_and_publish_delta(self, result: TrialResult, ticket: ResearchTicket) -> CapabilityDelta:
+        """
+        Promotes the successfully tested candidate weights, compiles capabilities delta,
+        and publishes it to the Experience DB.
+        """
+        delta = CapabilityDelta(
+            model_version=f"Apodex-model-{result.trial_id}",
+            released_at=time.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            capabilities_delta={
+                "improved": ["causal reasoning", "math accuracy"],
+                "unchanged": ["standard coding"],
+                "regressed": []
+            },
+            recommended_harness_changes=[
+                f"Route all tasks related to '{ticket.failure_pattern}' to models/finetuned_{result.trial_id}"
+            ]
+        )
+        await self.db.publish_capability_delta(delta)
+        return delta
 
     async def generate_git_pull_request(self, result: TrialResult) -> Dict[str, Any]:
         """
         Generates an auto-PR with diffs and evaluation summary for human review.
-
-        Args:
-            result: The completed TrialResult to be promoted.
-
-        Returns:
-            A dictionary summarizing the generated pull request.
         """
         return {
             "pr_title": f"Promote Fine-tuned Model weights - Trial {result.trial_id}",

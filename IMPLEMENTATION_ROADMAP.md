@@ -159,18 +159,26 @@ To ensure that no regressions are introduced and that the framework remains prod
 
 To overlay self-improvement on the AEAN, the following meta-phases are executed concurrently with the core subsystem rollouts:
 
-### Phase 1: Instrumentation & Logging MVP (Aligned with PR 1 - PR 3)
-- **Deliverables**: Complete trace schema recording in `ExperienceDatabase`; hook ReAct loop error handling to save failure logs.
-- **Verification**: Confirm automated writing of execution steps and metrics during standard benchmark runs.
+### Phase 1: Personalization Foundation (Aligned with PR 1 - PR 3)
+- **Deliverables**:
+  - Implement `PersonalEvolutionProfile` (PEP) storage database schemas and session initialization loader hooks.
+  - Establish basic telemetry and experience database recording user task frequencies.
+- **Verification**: Confirm automated PEP loading and user-frequency updating upon execution of test runs.
 
-### Phase 2: Full Continual Harness-style Adaptation (Aligned with PR 4 - PR 10)
-- **Deliverables**: Deploy `HarnessLoopController` with prompt mutation and quick regression filtering.
-- **Verification**: Simulating a prompt optimization run over 10-20 mathematical and coding tasks.
+### Phase 2: User Control & Cost Profiles (Aligned with PR 4 - PR 10)
+- **Deliverables**:
+  - Build the Evolution Changelog, Control Panel, and automated CLI/GUI `/evolution rollback` utilities.
+  - Wire cost mode preferences (`max_quality`, `balanced`, `fast_cheap`) into active harness decisions.
+- **Verification**: Simulate prompt hot-swapping and rollback executions; assert rejected prompt patterns are blacklisted.
 
-### Phase 3: AutoResearch-style Research Loop MVP (Aligned with PR 11 - PR 19)
-- **Deliverables**: Package `ResearchLoopController` SFT/LoRA pipeline and launch isolated, resource-bounded Docker experiments.
-- **Verification**: Measure performance improvement of fine-tuned candidate models against validation baselines.
+### Phase 3: Hardened Safety & Immutable Core (Aligned with PR 11 - PR 19)
+- **Deliverables**:
+  - Deploy the `SafetyGuardrailManager` with immutable configuration checks.
+  - Implement the Multi-Objective Cost-Aware Scoring formula ($S(M)$) and the Tiered Approval pipeline (Tier 1 to Tier 3 gates).
+- **Verification**: Ensure any attempt to modify security policies is rejected. Measure that token increases trigger negative scoring penalties under the `fast_cheap` profile.
 
-### Phase 4: Integrated Two-Loop System with Safety & Monitoring (Aligned with PR 20 - PR 23)
-- **Deliverables**: Enable the full closed-loop feedback between both loops; activate the `SafetyGuardrailManager` with immutable zones and automated Git pull request generation.
-- **Verification**: Execute a full continuous self-improvement run, triggering prompt adjustments, fine-tuning escalation, and final PR generation.
+### Phase 4: Full Closed-Loop Feedback Integration (Aligned with PR 20 - PR 23)
+- **Deliverables**:
+  - Establish automated escalation of `ResearchTicket`s and consumption of `CapabilityDelta` update payloads.
+  - Connect the fast harness adaptation loop and slow research sandbox trials in a unified feedback loop.
+- **Verification**: Execute a full round-trip trial from failure detection and ticket creation to model SFT training, delta generation, and final workflow adjustments.

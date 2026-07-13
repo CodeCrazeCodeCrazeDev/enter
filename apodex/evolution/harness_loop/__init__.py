@@ -5,3 +5,7 @@ from .optimizers import (
     WorkflowConfig,
     WorkflowEvolutionSearch,
 )
+from .approval import (
+    ChangeProposal,
+    SelfImprovementOrchestrator,
+)

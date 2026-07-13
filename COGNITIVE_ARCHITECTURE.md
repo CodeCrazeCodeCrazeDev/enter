@@ -231,3 +231,56 @@ If a single subsystem suffers a validation failure:
 - **Phase 1: Cognitive Foundation**: Complete abstract interfaces, database storage layers, and baseline testing.
 - **Phase 2: Market Integration**: Implement peer-to-peer negotiation protocol schemas, simulation engines, and contract resolution mechanisms.
 - **Phase 3: Fully Autonomous Economy (AEAN)**: Agents initiate self-monetized transactions, lease specialized skills (from Tool Invention), and arbitrate market contracts with zero human intervention.
+
+---
+
+## 6. Apodex Meta-System & Dual-Loop Self-Improvement
+
+The entire AEAN architecture described above is supervised, evaluated, and iteratively optimized by the **Apodex Meta-System**. Apodex adds two continuous adaptation layers to the cognitive topology:
+
+1. **Short-Term Harness Loop (Prompts, Scaffolding, Workflows)**: Evaluates trace logs, errors, and user feedback in real-time. It uses TextGrad/EvoPrompt patterns to hot-swap prompt templates, system instructions, and routing parameters.
+2. **Long-Term Research Loop (Weights, Algorithms, Data Curation)**: Aggregates high-quality traces across multiple sessions to compile custom supervised fine-tuning (SFT) datasets, running bounded experiments in isolated sandboxes to train and promote superior model weights.
+
+Both loops query and write lessons learned to the unified **Experience Database & Cognition Base**, which is integrated with the `ContinuousWorldModelService` and `MemoryConsolidationService` to maintain system-wide factual and heuristic memory.
+
+---
+
+## 7. Advanced Evolution & Control Governance
+
+The Apodex self-evolution meta-system is hardened and personalized via six core architectural subsystems:
+
+### 7.1 Personal Evolution Layer (PEP)
+Each user owns a persistent, versioned **Personal Evolution Profile (PEP)** database object. The PEP represents style guidelines, typical task frequency distributions, vocabulary mappings, and preferred cost profiles (`max_quality`, `balanced`, or `fast_cheap`). PEP is initialized at session start and dynamically updated post-task to adjust evolution aggressiveness.
+
+### 7.2 Transparent Control & One-Click Rollback
+- **Changelog**: Holds structured entries (e.g., success rate before/after, token count, timestamp) to visualize evolution events.
+- **Control Panel**: Enables users to set caps, pin specific workflows, and modify evolution parameters.
+- **Rollback**: Invoked via CLI or GUI. Restores previous stable config configurations and adds failed prompt variants to a blacklist, preventing them from being re-proposed.
+
+### 7.3 Multi-Objective Cost-Aware Scoring
+Evolutionary updates are filtered by a multi-objective suitability score:
+
+$$S(M) = w_q \cdot Q(M) - w_t \cdot T(M) - w_l \cdot L(M) + w_s \cdot Sat(M)$$
+
+Where $Q$ is task quality, $T$ is token volume, $L$ is latency, and $Sat$ is user satisfaction. The weights dynamically adapt according to the selected PEP profile (e.g., highly penalizing tokens under `fast_cheap`).
+
+### 7.4 Immutable Safety Core & Tiered Approval Table
+- **Safety Core**: Security guidelines, data access filters, and tenancy isolation rules are marked as immutable and protected from automated modifications.
+- **Tiered Approval System**:
+  - **Tier 1**: Small prompt text changes (Auto-Approved).
+  - **Tier 2**: Routing and tool rewrites (Shadow Mode validation required).
+  - **Tier 3**: Model weights and post-training algorithms (Git PR + human sign-off).
+  - **Tier 4**: Tenancy and security policies (Cryptographically signed, multi-party manual governance only).
+
+### 7.5 Structured Loop Feedback Link
+The loops cooperate as engineers using:
+- **Research Tickets**: Escales persistent failures from the harness loop to the research loop when prompt adjustments are insufficient.
+- **Capability Deltas**: Publishes model capability enhancements and recommended harness changes back to the harness loop upon candidate model promotion.
+
+### 7.6 Autonomous Verifier & Critic Layer
+To systematically prevent behavioral drift during self-evolution, Apodex embeds an expert **Verifier Layer** containing:
+1. **LLM-as-a-Judge**: Employs step-by-step chain-of-thought (CoT) internal reasoning trajectory evaluations and Chatbot Arena-style pairwise quality matches to score and rank candidate outputs.
+2. **Introspective Critics**: Employs generate-critique-revise loops (CRITIC / RISE style) integrating live tool outcomes (such as compiler exceptions).
+3. **Dense Reward Models**: Compiles step-level reward densities over multi-step execution paths to drive reinforcement learning (SPIN/Agent Q) without manual labeling.
+4. **Grounded Fact-Checkers**: Factuality grounding engines (MiniCheck/FIRE style) performing document-based verification of execution claims.
+5. **Runtime Multi-Agent V&V**: Monitors execution plans, ensuring formal correctness, and safety-checking verification logic.

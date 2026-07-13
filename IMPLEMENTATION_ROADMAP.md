@@ -152,3 +152,37 @@ To ensure that no regressions are introduced and that the framework remains prod
 - **Deliverables**: Domain gaps parser and synthetic proposition rankings.
 - **New Files**: `agent_harness/core/reasoning/scientific_hypothesis.py`
 - **Verification**: Validate hypothesis ranking against entropy scores in the knowledge base.
+
+---
+
+## 4. Apodex Meta-System Integration Schedule
+
+To overlay self-improvement on the AEAN, the following meta-phases are executed concurrently with the core subsystem rollouts:
+
+### Phase 1: Personalization Foundation & CoT Judges (Aligned with PR 1 - PR 3)
+- **Deliverables**:
+  - Implement `PersonalEvolutionProfile` (PEP) storage database schemas and session initialization loader hooks.
+  - Establish basic telemetry and experience database recording user task frequencies.
+  - Build `LLMAsAJudgeNode` with Chain-of-Thought (CoT) internal reasoning evaluation.
+- **Verification**: Confirm automated PEP loading and verify that judge nodes correctly output step-by-step `<thinking>` logs during test runs.
+
+### Phase 2: User Control, Cost Profiles & Introspective Critics (Aligned with PR 4 - PR 10)
+- **Deliverables**:
+  - Build the Evolution Changelog, Control Panel, and automated CLI/GUI `/evolution rollback` utilities.
+  - Implement the `SelfCritiqueCritic` supporting compiler-interactive code critiques (CRITIC/RISE style).
+  - Wire cost mode preferences (`max_quality`, `balanced`, `fast_cheap`) into active harness decisions.
+- **Verification**: Simulate prompt hot-swapping and rollback executions; assert rejected prompt patterns are blacklisted.
+
+### Phase 3: Cost-Aware Scoring, Fact-Checking & Hardened Safety (Aligned with PR 11 - PR 19)
+- **Deliverables**:
+  - Deploy the `SafetyGuardrailManager` with immutable configuration checks.
+  - Implement the `GroundedFactChecker` (FIRE/MiniCheck grounding check) and `DenseRewardModel` trajectory calculator.
+  - Implement the Multi-Objective Cost-Aware Scoring formula ($S(M)$) and the Tiered Approval pipeline (Tier 1 to Tier 3 gates).
+- **Verification**: Ensure any attempt to modify security policies is rejected. Measure that token increases trigger negative scoring penalties under the `fast_cheap` profile.
+
+### Phase 4: Runtime Multi-Agent V&V & Closed-Loop Integration (Aligned with PR 20 - PR 23)
+- **Deliverables**:
+  - Implement `RuntimeAgentVerifier` featuring temporal logic safety rules and self-verifying code compilation validation.
+  - Establish automated escalation of `ResearchTicket`s and consumption of `CapabilityDelta` update payloads.
+  - Connect the fast harness adaptation loop and slow research sandbox trials in a unified feedback loop.
+- **Verification**: Execute a full round-trip trial from failure detection and ticket creation to model SFT training, delta generation, and final workflow adjustments.

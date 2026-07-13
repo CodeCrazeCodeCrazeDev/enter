@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pytest
+from agent_harness.core.cost_tier import CostTier
 from agent_harness.core.runtime.verification.parallel import (
     FactVerifier,
     MetaVerifier,
@@ -16,7 +17,7 @@ async def test_parallel_verification_consensus():
     # Setup verifiers
     f_verifier = FactVerifier("fact_judge_01")
     s_verifier = SyntaxVerifier("syntax_judge_01")
-    meta = MetaVerifier(verifiers=[f_verifier, s_verifier])
+    meta = MetaVerifier(verifiers=[f_verifier, s_verifier], cost_tier=CostTier.EXPENSIVE)
 
     # 1. Healthy content
     content_valid = "This is a factual and balanced assertion with balanced brackets { [ ] }."

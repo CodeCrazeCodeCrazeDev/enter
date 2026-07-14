@@ -1,5 +1,6 @@
 from __future__ import annotations
 import logging
+import re
 import uuid
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
@@ -228,9 +229,10 @@ class SecurityAgent(CorporateAgent):
         bad_keywords = ["ignore previous instructions", "drop table", "select * from secrets"]
         sanitized = payload
         for kw in bad_keywords:
-            if kw in sanitized.lower():
+            pattern = re.compile(re.escape(kw), re.IGNORECASE)
+            if pattern.search(sanitized):
                 self.log_thought(f"ALERT: Detected injection threat: '{kw}'. Removing threat.")
-                sanitized = sanitized.lower().replace(kw, "[REDACTED_BY_SECURITY]")
+                sanitized = pattern.sub("[REDACTED_BY_SECURITY]", sanitized)
         return sanitized
 
 

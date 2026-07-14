@@ -21,6 +21,7 @@ from ..ekg import EconomicKnowledgeGraph
 from ..governance import ConstitutionalFilter
 from ..models import DemandSignal, EngineName, MicroCell, MicroCellStatus
 from ..validation.critics import ThreeCriticStack
+from ..validation.pretrade import PreTradeValidationEngine
 
 logger = logging.getLogger("aean.paean")
 
@@ -80,10 +81,12 @@ class PAEAN:
         max_scales: int = 3,
         max_active_cells: int = 12,
         critics: Optional[ThreeCriticStack] = None,
+        pretrade: Optional[PreTradeValidationEngine] = None,
     ) -> None:
         self.ekg = ekg
         self.governance = governance
         self.critics = critics
+        self.pretrade = pretrade
         self._rng = rng or random.Random()
         self.bandit = ThompsonBandit(rng=self._rng)
         self.max_cells_per_cycle = max_cells_per_cycle
@@ -94,6 +97,20 @@ class PAEAN:
     # ------------------------------------------------------------------
     def _arm_key(self, signal: DemandSignal) -> str:
         return f"{signal.market}:{signal.segment}"
+
+    def _passes_pretrade(self, signal: DemandSignal) -> bool:
+        """Gate a signal through the Pre-Trade Validation Engine (assess once).
+
+        With no engine attached the gate is open. Assessments are cached in the
+        EKG so a rejected signal is not re-simulated every cycle.
+        """
+        if self.pretrade is None:
+            return True
+        cached = self.ekg.pretrade.get(signal.signal_id)
+        if cached is None:
+            cached = self.pretrade.assess(signal)
+            self.ekg.record_pretrade(cached)
+        return cached.passed
 
     def spawn_cells(self, treasury_cents: int) -> List[MicroCell]:
         """Spawn micro-cells against the most promising open demand signals.
@@ -124,6 +141,11 @@ class PAEAN:
             key=lambda s: self.bandit.sample(self._arm_key(s)) * (0.5 + 0.5 * s.strength),
             reverse=True,
         )
+
+        # Pre-trade viability gate: "should we even try this?" runs before any
+        # capital is committed, so PAEAN backs only signals whose unit economics
+        # survive synthetic testing and counterfactual probing.
+        scored = [s for s in scored if self._passes_pretrade(s)]
 
         spawned: List[MicroCell] = []
         committed = 0

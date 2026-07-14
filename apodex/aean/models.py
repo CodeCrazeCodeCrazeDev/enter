@@ -221,6 +221,107 @@ class SignalValidation(BaseModel):
     notes: List[str] = Field(default_factory=list)
 
 
+# ---------------------------------------------------------------------------
+# Pre-Trade Validation Engine — "should we even try this?" before capital
+# ---------------------------------------------------------------------------
+class EvidencePillar(BaseModel):
+    """One of the four evidence pillars screened before capital deployment."""
+
+    name: str
+    score: float = Field(ge=0.0, le=1.0)
+    passed: bool = False
+    detail: str = ""
+
+
+class PreTradeAssessment(BaseModel):
+    """Verdict of the Simulation & Pre-Trade Validation Engine for a signal.
+
+    A hypothesis is authorised only if (a) all four evidence pillars clear their
+    thresholds (the gate), (b) the Monte-Carlo synthetic test is favourable, and
+    (c) the counterfactual probes do not expose fatal fragility.
+    """
+
+    signal_id: str
+    market: str = ""
+    segment: str = ""
+    gate_passed: bool = False
+    sim_passed: bool = False
+    counterfactual_passed: bool = False
+    passed: bool = False
+    pillars: List[EvidencePillar] = Field(default_factory=list)
+    sim_p05: float = 0.0
+    sim_mean: float = 0.0
+    sim_cv: float = 0.0
+    fragility_index: float = 0.0
+    discriminatory: bool = True
+    notes: List[str] = Field(default_factory=list)
+
+
+# ---------------------------------------------------------------------------
+# Governed Cognitive Evolution System — three-layer governed self-improvement
+# ---------------------------------------------------------------------------
+class EvolutionLayer(str, Enum):
+    """The three layers of the Governed Cognitive Evolution System."""
+
+    CAPABILITY = "capability"      # Layer 1: behavioural (prompts/strategies).
+    ARCHITECTURE = "architecture"  # Layer 2: structural (topology/graph).
+    OBJECTIVE = "objective"        # Layer 3: teleological (never evolves).
+
+
+class StrategyGenome(BaseModel):
+    """A Layer-1 behavioural strategy candidate (the *contents* of cognition).
+
+    These parameters tune behaviour *within* the fixed architecture; they can
+    never alter risk controls or capital limits (those live in Layer 3).
+    """
+
+    allocation_pct: float = Field(default=0.15, ge=0.0, le=1.0)
+    exploration: float = Field(default=0.5, ge=0.0, le=1.0)
+    diversification: float = Field(default=0.5, ge=0.0, le=1.0)
+    patience: float = Field(default=0.5, ge=0.0, le=1.0)
+
+
+class CapabilityEvolutionResult(BaseModel):
+    """Outcome of a Layer-1 variation→measurement→selection round."""
+
+    generations: int = 0
+    incumbent_fitness: float = 0.0
+    champion_fitness: float = 0.0
+    improvement: float = 0.0
+    promoted: bool = False
+    rejected_by_objective: int = 0
+    notes: List[str] = Field(default_factory=list)
+
+
+class PipelineStage(str, Enum):
+    """Sequential stages of the Layer-2 architecture-evolution pipeline."""
+
+    SANDBOX = "sandbox"
+    BENCHMARK = "benchmark"
+    STRESS = "stress"
+    SECURITY = "security"
+    ECONOMIC = "economic"
+    CANARY = "canary"
+    SCALE = "scale"
+
+
+class StageResult(BaseModel):
+    stage: PipelineStage
+    passed: bool
+    detail: str = ""
+
+
+class ArchitectureEvolutionResult(BaseModel):
+    """Outcome of pushing a structural candidate through the seven-stage gate."""
+
+    candidate: str
+    stage_reached: PipelineStage = PipelineStage.SANDBOX
+    promoted: bool = False
+    rejected_by_objective: bool = False
+    stages: List[StageResult] = Field(default_factory=list)
+    notes: List[str] = Field(default_factory=list)
+
+
 class OrganismState(BaseModel):
     """Point-in-time snapshot of the whole organism, used by the dashboard."""
 

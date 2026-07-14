@@ -21,11 +21,14 @@ from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
 from .models import (
+    ArchitectureEvolutionResult,
+    CapabilityEvolutionResult,
     CriticVerdict,
     DemandSignal,
     MicroCell,
     MicroCellStatus,
     Narrative,
+    PreTradeAssessment,
     SignalValidation,
     ValidationRecord,
     VisualAsset,
@@ -75,6 +78,11 @@ class EconomicKnowledgeGraph:
         self.validations: Dict[str, ValidationRecord] = {}       # keyed by asset_id
         self.signal_validations: Dict[str, SignalValidation] = {}  # keyed by signal_id
         self.critic_verdicts: List[CriticVerdict] = []
+
+        # Pre-trade viability + governed-evolution records.
+        self.pretrade: Dict[str, PreTradeAssessment] = {}  # keyed by signal_id
+        self.capability_evolutions: List[CapabilityEvolutionResult] = []
+        self.architecture_evolutions: List[ArchitectureEvolutionResult] = []
 
         # Append-only event log for the Research engine.
         self.events: List[EKGEvent] = []
@@ -178,6 +186,35 @@ class EconomicKnowledgeGraph:
         self.critic_verdicts.append(verdict)
         self._log("critic_verdict", verdict.action, {"approved": verdict.approved})
 
+    def record_pretrade(self, assessment: PreTradeAssessment) -> None:
+        self.pretrade[assessment.signal_id] = assessment
+        if assessment.signal_id in self.nodes:
+            self.nodes[assessment.signal_id].properties.update(
+                pretrade_passed=assessment.passed,
+                pretrade_fragility=assessment.fragility_index,
+            )
+        self._log(
+            "pretrade_assessment",
+            assessment.signal_id,
+            {"passed": assessment.passed, "gate": assessment.gate_passed},
+        )
+
+    def record_capability_evolution(self, result: CapabilityEvolutionResult) -> None:
+        self.capability_evolutions.append(result)
+        self._log(
+            "capability_evolution",
+            f"gen-{len(self.capability_evolutions)}",
+            {"promoted": result.promoted, "improvement": result.improvement},
+        )
+
+    def record_architecture_evolution(self, result: ArchitectureEvolutionResult) -> None:
+        self.architecture_evolutions.append(result)
+        self._log(
+            "architecture_evolution",
+            result.candidate,
+            {"promoted": result.promoted, "stage": result.stage_reached.value},
+        )
+
     def _log(self, kind: str, ref_id: str, payload: Dict[str, Any]) -> None:
         self.events.append(EKGEvent(kind=kind, ref_id=ref_id, payload=payload))
 
@@ -220,5 +257,9 @@ class EconomicKnowledgeGraph:
             "validated_assets": sum(1 for v in self.validations.values() if v.passed),
             "signal_validations": len(self.signal_validations),
             "critic_verdicts": len(self.critic_verdicts),
+            "pretrade_assessments": len(self.pretrade),
+            "pretrade_passed": sum(1 for a in self.pretrade.values() if a.passed),
+            "capability_evolutions": len(self.capability_evolutions),
+            "architecture_evolutions": len(self.architecture_evolutions),
             "events": len(self.events),
         }

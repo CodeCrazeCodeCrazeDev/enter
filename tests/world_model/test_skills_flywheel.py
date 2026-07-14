@@ -12,9 +12,13 @@ from apodex.skills.models import (
     KnowledgeType,
     CostTier,
     SkillExecutionLog,
+    LearnFeedStage,
+    PlaybookUnit,
+    LearnFeedState,
+    DecisionLog,
 )
 from apodex.skills.registry import SkillRegistry
-from apodex.skills.runner import SkillRunner, ProtocolEngine, decay_confidence
+from apodex.skills.runner import SkillRunner, ProtocolEngine, decay_confidence, LearnFeedLoopEngine
 from apodex.skills.implementation import register_all_custom_executors
 
 
@@ -323,3 +327,166 @@ def test_decayed_signals_filtering_in_graph():
     assert decayed_signals[0]["base_weight"] == 0.8
     # 1 half-life -> should be exactly 0.4
     assert pytest.approx(decayed_signals[0]["decayed_weight"]) == 0.4
+
+
+# =====================================================================
+# 6. 9-Stage Learn-Feed Framework Tests
+# =====================================================================
+
+def test_stage_0_to_4_learn_feed_stages():
+    """
+    Verifies Stage 0, Stage 1, Stage 2, Stage 3, and Stage 4 execution.
+    Classifying, structuring, retrieval-cost wiring, backtesting, and compliance checks.
+    """
+    engine = LearnFeedLoopEngine()
+
+    # Sample raw items (Stage 0)
+    raw = [
+        {"content": "Zero to One Strategy", "source_name": "Peter Thiel", "source_type": "book", "pattern_id": "pat_thiel"},
+        {"content": "Ad Campaign CTR spike", "source_name": "Facebook Ad API", "source_type": "ad_velocity", "pattern_id": "pat_fb"}
+    ]
+
+    # Stage 0: Learn class classification
+    tagged = engine.stage_0_learn(raw)
+    assert len(tagged) == 2
+    assert tagged[0]["knowledge_type"] == KnowledgeType.EVERGREEN
+    assert tagged[1]["knowledge_type"] == KnowledgeType.DECAYING
+    assert tagged[1]["half_life_days"] == 7.0
+
+    # Stage 1: Structure with Spot-Checking
+    playbooks = engine.stage_1_structure(tagged)
+    assert len(playbooks) == 2
+    assert "pat_thiel" in engine.playbooks
+
+    # Corrupt item test should be filtered out
+    corrupt_tagged = [{"content": "", "source_name": "corrupt", "knowledge_type": KnowledgeType.EVERGREEN, "half_life_days": 10.0, "pattern_id": "pat_corrupt"}]
+    structured_corrupt = engine.stage_1_structure(corrupt_tagged)
+    assert len(structured_corrupt) == 0  # rejected
+
+    # Stage 2: Wire with compute cost logging
+    matched = engine.stage_2_wire("narrative_synthesis", "demand_discovery_match")
+    assert len(matched) == 2  # both signal maps are demand_discovery_match by default
+
+    # Stage 3: Backtest
+    backtest_res = engine.stage_3_backtest([{"signal_type": "demand_discovery_match"}])
+    assert backtest_res["passed_sanity"] is True
+    assert backtest_res["invoked_playbook_counts"]["pat_thiel"] == 1
+
+    # Stage 4: Experiment with compliance/legal checks
+    experiment_ok = engine.stage_4_experiment("Valid niche product", playbook_on=True, channel="google_ads", proposed_spend_cents=5000)
+    assert experiment_ok["success"] is True
+    assert experiment_ok["lift_percentage"] > 0
+
+    # Compliance rejection
+    experiment_bad = engine.stage_4_experiment("Illegal shadow market", playbook_on=True, channel="unauthorized_blackhat_forum", proposed_spend_cents=1000)
+    assert experiment_bad["success"] is False
+    assert experiment_bad["reason"] == "COMPLIANCE_REJECTED"
+
+
+def test_stage_5_live_loop_and_kill_switches():
+    """
+    Verifies Stage 5 consecutive profitable days counter, reset on loss,
+    and automatic SLA kill-switch trigger on a suppressed channel.
+    """
+    engine = LearnFeedLoopEngine()
+    engine.playbooks["pat_1"] = PlaybookUnit(
+        pattern_id="pat_1", pattern="pat", precondition="pre", signal="sig",
+        failure_mode="fail", source="src", confidence=0.8, knowledge_type=KnowledgeType.EVERGREEN, half_life_days=30.0
+    )
+
+    # 1. Day 1: Profitable run ($50 spend, $150 revenue) -> profit = $100
+    log1 = engine.stage_5_live_loop(channel="facebook_ads", spend_cents=5000, revenue_cents=15000, playbook_ids=["pat_1"])
+    assert log1.profit_cents == 10000
+    assert engine.state.consecutive_profitable_days == 1
+
+    # Day 2: Profitable run -> increments to 2
+    engine.stage_5_live_loop(channel="facebook_ads", spend_cents=5000, revenue_cents=15000, playbook_ids=["pat_1"])
+    assert engine.state.consecutive_profitable_days == 2
+
+    # 2. Reset on Loss or failure
+    # Day 3: Net loss ($100 spend, $40 revenue) -> profit = -$60
+    log3 = engine.stage_5_live_loop(channel="facebook_ads", spend_cents=10000, revenue_cents=4000, playbook_ids=["pat_1"])
+    assert log3.profit_cents == -6000
+    assert engine.state.consecutive_profitable_days == 0  # reset!
+
+    # 3. SLA Auto kill-switch trigger
+    # Huge loss ($800 spend, $100 revenue) -> profit = -$700 -> below -$500 threshold
+    log4 = engine.stage_5_live_loop(channel="facebook_ads", spend_cents=80000, revenue_cents=10000, playbook_ids=["pat_1"])
+    assert log4.profit_cents == -70000
+    assert engine.state.channel_kill_switches["facebook_ads"] is False  # Suppressed!
+
+    # Executing on suppressed channel raises error
+    with pytest.raises(ValueError, match="is suppressed by kill switch"):
+        engine.stage_5_live_loop(channel="facebook_ads", spend_cents=5000, revenue_cents=15000, playbook_ids=["pat_1"])
+
+
+def test_stage_6_7_attribution_and_feedback():
+    """
+    Verifies Stage 6 cost-adjusted attribution and Stage 7 pattern re-weighting with forced decay.
+    """
+    engine = LearnFeedLoopEngine()
+    p1 = PlaybookUnit(
+        pattern_id="pat_1", pattern="pat", precondition="pre", signal="sig",
+        failure_mode="fail", source="src", confidence=0.8, knowledge_type=KnowledgeType.EVERGREEN, half_life_days=30.0
+    )
+    engine.playbooks["pat_1"] = p1
+
+    # Run log
+    log = engine.stage_5_live_loop(channel="google", spend_cents=1000, revenue_cents=4000, playbook_ids=["pat_1"])
+
+    # Stage 6: Attribution
+    attributed = engine.stage_6_attribution(log.decision_id, outcome_win=True)
+    assert len(attributed) == 1
+    assert p1.times_invoked == 1
+    assert p1.win_rate == 1.0
+    assert p1.avg_revenue_lift == 30.0  # profit ($30.00) / times_invoked
+
+    # Stage 7: Feed Back with forced re-validation decay
+    # Backdate playbook last revalidation to 15 days ago
+    p1.last_revalidated = datetime.utcnow() - timedelta(days=15)
+    p1.confidence = 0.8
+
+    engine.stage_7_feed_back()
+    # Conf should decay because of 15 days gap
+    assert p1.confidence < 0.8
+
+
+def test_stage_8_expansion_triggers():
+    """
+    Verifies Stage 8 expansion decision rules based on profitable durations.
+    """
+    engine = LearnFeedLoopEngine()
+
+    # Under-threshold
+    engine.state.consecutive_profitable_days = 5
+    exp_fail = engine.stage_8_expansion("new_vertical", "fintech")
+    assert exp_fail["approved"] is False
+
+    # At-threshold (14 consecutive profitable days)
+    engine.state.consecutive_profitable_days = 14
+    exp_ok = engine.stage_8_expansion("new_vertical", "fintech")
+    assert exp_ok["approved"] is True
+    assert exp_ok["action"] == "INITIALIZE_ISOLATED_STAGE_3_CYCLE"
+    assert exp_ok["target"] == "fintech"
+
+
+def test_stage_9_failure_handling_modes():
+    """
+    Verifies Stage 9 fallbacks for suppressed channels, API failures, and payment locks.
+    """
+    engine = LearnFeedLoopEngine()
+
+    # 1. Channel suppressed
+    res1 = engine.stage_9_failure_handling({"type": "channel_suppressed", "channel": "tiktok"})
+    assert res1["action"] == "TRIGGER_KILL_SWITCH"
+    assert engine.state.channel_kill_switches["tiktok"] is False
+
+    # 2. API failure
+    res2 = engine.stage_9_failure_handling({"type": "api_failure"})
+    assert res2["action"] == "PAUSE_LOOP_AND_WAIT"
+
+    # 3. Payment flagged -> freezes capital gates
+    assert engine.state.frozen is False
+    res3 = engine.stage_9_failure_handling({"type": "payment_flagged"})
+    assert res3["action"] == "FREEZE_ALL_CAPITAL"
+    assert engine.state.frozen is True

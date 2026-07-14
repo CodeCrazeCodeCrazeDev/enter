@@ -34,7 +34,6 @@ class ProtocolStep(BaseModel):
     """A single step in a declarative protocol chain."""
     skill_name: str
     parameter_mappings: Dict[str, str] = Field(default_factory=dict)
-    # E.g., {"product_id": "step_0.product_id"} to wire outputs to subsequent inputs.
 
 
 class BusinessProtocol(BaseModel):
@@ -80,3 +79,62 @@ class ProtocolScorecard(BaseModel):
     success_count: int = 0
     failure_count: int = 0
     average_cost_actual: float = 0.0
+
+
+# =====================================================================
+# 9-Stage Learn-Feed Framework Models
+# =====================================================================
+
+class LearnFeedStage(str, Enum):
+    STAGE_0_LEARN = "STAGE_0_LEARN"
+    STAGE_1_STRUCTURE = "STAGE_1_STRUCTURE"
+    STAGE_2_WIRE = "STAGE_2_WIRE"
+    STAGE_3_BACKTEST = "STAGE_3_BACKTEST"
+    STAGE_4_EXPERIMENT = "STAGE_4_EXPERIMENT"
+    STAGE_5_LIVE_LOOP = "STAGE_5_LIVE_LOOP"
+    STAGE_6_ATTRIBUTION = "STAGE_6_ATTRIBUTION"
+    STAGE_7_FEED_BACK = "STAGE_7_FEED_BACK"
+    STAGE_8_EXPANSION = "STAGE_8_EXPANSION"
+    STAGE_9_FAILURE_HANDLING = "STAGE_9_FAILURE_HANDLING"
+
+
+class PlaybookUnit(BaseModel):
+    """An atomic queryable decision-unit extracted from raw business canon or signals."""
+    pattern_id: str
+    pattern: str
+    precondition: str
+    signal: str
+    failure_mode: str
+    source: str
+    confidence: float
+    knowledge_type: KnowledgeType
+    half_life_days: float
+    times_invoked: int = 0
+    win_rate: float = 0.0
+    avg_revenue_lift: float = 0.0
+    avg_cost_credits: float = 0.0
+    last_revalidated: datetime = Field(default_factory=datetime.utcnow)
+
+
+class LearnFeedState(BaseModel):
+    """Tracks state across the 9-stage Learn-Feed loop."""
+    current_stage: LearnFeedStage = LearnFeedStage.STAGE_0_LEARN
+    active_vertical: str = "default_vertical"
+    consecutive_profitable_days: int = 0
+    channel_kill_switches: Dict[str, bool] = Field(default_factory=dict)  # channel -> is_active
+    frozen: bool = False
+
+
+class DecisionLog(BaseModel):
+    """Logs metrics and attributes decisions to informing PlaybookUnits."""
+    decision_id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    vertical: str
+    stage: LearnFeedStage
+    playbook_invoked_ids: List[str] = Field(default_factory=list)
+    revenue_cents: int = 0
+    cost_cents: int = 0
+    profit_cents: int = 0
+    cleared_by_compliance: bool = True
+    cleared_by_human: bool = True
+    channel: str = "default_channel"
+    timestamp: datetime = Field(default_factory=datetime.utcnow)

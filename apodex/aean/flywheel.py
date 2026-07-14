@@ -24,11 +24,13 @@ from .engines.ade import AutonomousDemandEngine
 from .engines.are import AutonomousRevenueEngine
 from .engines.avie import AutonomousVisualIntelligenceEngine
 from .engines.paean import PAEAN
+from .evolution.three_layer import GovernedCognitiveEvolutionSystem
 from .governance import ConstitutionalFilter
 from .llm import LLMAdapter
 from .models import CycleResult, OrganismState
 from .validation.critics import ThreeCriticStack
 from .validation.epistemic import EpistemicFirewall
+from .validation.pretrade import PreTradeValidationEngine
 from .validation.rgae import RealityGroundedAdaptiveEngine
 
 logger = logging.getLogger("aean.flywheel")
@@ -57,12 +59,20 @@ class Organism:
         self.firewall = EpistemicFirewall(governance=self.governance)
         self.rgae = RealityGroundedAdaptiveEngine(rng=self._val_rng)
         self.critics = ThreeCriticStack(self.governance)
+        self.pretrade = PreTradeValidationEngine(rng=self._val_rng)
+
+        # Governed Cognitive Evolution System (Ch 11 + 15). Uses its own RNG so
+        # the self-improvement loop never perturbs the core engines' order.
+        self._evo_rng = random.Random(None if seed is None else seed + 70707)
+        self.evolution = GovernedCognitiveEvolutionSystem(self.governance, rng=self._evo_rng)
 
         self.ade = AutonomousDemandEngine(
             self.ekg, self.governance, self.llm, rng=self._rng, firewall=self.firewall
         )
         self.avie = AutonomousVisualIntelligenceEngine(self.ekg, self.governance, self.llm, rng=self._rng)
-        self.paean = PAEAN(self.ekg, self.governance, rng=self._rng, critics=self.critics)
+        self.paean = PAEAN(
+            self.ekg, self.governance, rng=self._rng, critics=self.critics, pretrade=self.pretrade
+        )
         self.are = AutonomousRevenueEngine(self.ekg, self.governance, rng=self._rng)
         self.hive_mind = HiveMind(token_budget=token_budget)
         self.research = ResearchEngine(self.ekg)
@@ -84,6 +94,7 @@ class Organism:
             TaskBid("allocate_capital", priority=0.9, expected_value=0.7, token_cost=20),
             TaskBid("run_revenue", priority=0.95, expected_value=0.5 + 0.05 * active, token_cost=20),
             TaskBid("rebalance", priority=0.85, expected_value=0.6, token_cost=10),
+            TaskBid("evolve", priority=0.5, expected_value=0.55, token_cost=10),
         ]
 
     def step(self) -> CycleResult:
@@ -92,6 +103,22 @@ class Organism:
         grants = self.hive_mind.granted_tasks(self.hive_mind.arbitrate(self._bids()))
         result = CycleResult(cycle=self.cycle)
         blocks_before = self.governance.blocks
+
+        # Stage 0: governed cognitive evolution. Layer 1 evolves the behavioural
+        # allocation strategy within the fixed architecture; when it promotes a
+        # champion, the improved (governance-bounded) strategy is redeployed. On
+        # a slower cadence a structural proposal is routed through the Layer-2
+        # seven-stage pipeline. Objective stability (Layer 3) guards both.
+        if grants.get("evolve") and self.cycle % 5 == 0:
+            cap = self.evolution.evolve_capability()
+            self.ekg.record_capability_evolution(cap)
+            if cap.promoted:
+                self.paean.base_allocation_pct = max(
+                    0.08, min(0.22, self.evolution.incumbent.allocation_pct)
+                )
+            if self.cycle % 15 == 0:
+                arch = self.evolution.evaluate_architecture(self._architecture_candidate())
+                self.ekg.record_architecture_evolution(arch)
 
         # Stage 1: demand detection.
         if grants.get("sense_demand"):
@@ -203,6 +230,41 @@ class Organism:
             history=self.history,
         )
 
+    def _architecture_candidate(self) -> dict:
+        """The Ch 15.3.4 worked example: Research→Critic→Simulation→Execution.
+
+        A well-formed structural proposal that respects the Layer-3 invariants
+        and carries production-grade promotion evidence (>=10k canary samples).
+        """
+        return {
+            "name": "research-critic-simulation-execution",
+            "boots": True,
+            "benchmark_delta": 0.28,  # 28% revision-rate reduction (better, not merely different).
+            "stress_ok": True,
+            "security_ok": True,
+            "cost_quality_ok": True,
+            "canary_divergence_ok": True,
+            "samples": 12_000,
+            "scale_ok": True,
+        }
+
+    def _evolution_stats(self) -> dict:
+        """Aggregate governed-evolution metrics for the dashboard/CLI."""
+        return self.evolution.stats()
+
+    def _pretrade_stats(self) -> dict:
+        stats = self.pretrade.stats()
+        stats["avg_fragility"] = (
+            round(
+                sum(a.fragility_index for a in self.ekg.pretrade.values() if a.passed)
+                / max(1, stats["approved"]),
+                4,
+            )
+            if stats["approved"]
+            else 0.0
+        )
+        return stats
+
     def _validation_stats(self) -> dict:
         """Aggregate reality/validation-layer metrics for the dashboard."""
         vals = list(self.ekg.validations.values())
@@ -225,6 +287,7 @@ class Organism:
                 "calibration_updates": self.rgae.calibration.updates,
             },
             "three_critic_stack": self.critics.stats(),
+            "pretrade": self._pretrade_stats(),
         }
 
     def snapshot(self) -> dict:
@@ -247,6 +310,7 @@ class Organism:
             "llm_live": self.llm.is_live,
             "ekg": self.ekg.stats(),
             "validation": self._validation_stats(),
+            "evolution": self._evolution_stats(),
             "autonomy": {
                 engine.value: {
                     "decisions": rec.decisions,

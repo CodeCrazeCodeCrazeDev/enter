@@ -51,10 +51,23 @@ def main() -> None:
     fw = val["epistemic_firewall"]
     rg = val["rgae"]
     cs = val["three_critic_stack"]
+    pt = val["pretrade"]
     print("Reality & validation layer:")
     print(f"  Epistemic firewall : {fw['signals_checked']} checked, {fw['signals_rejected']} rejected, avg cred {fw['avg_credibility']}")
     print(f"  RGAE pipeline      : {rg['assets_passed']}/{rg['assets_screened']} assets passed, {rg['calibration_updates']} calibrations")
     print(f"  Three-Critic Stack : {cs['approved']}/{cs['reviews']} approved, {cs['blocked']} blocked, {cs['avg_latency_ms']}ms avg")
+    print(f"  Pre-trade gate     : {pt['approved']}/{pt['assessed']} approved, "
+          f"{pt['gate_rejections']} gated / {pt['sim_rejections']} sim / {pt['counterfactual_rejections']} cf rejected")
+    print("-" * 64)
+    ev = snap["evolution"]
+    inc = ev["incumbent"]
+    print("Governed cognitive evolution (3-layer):")
+    print(f"  Layer 1 capability : {ev['capability_promotions']}/{ev['capability_rounds']} promotions, "
+          f"champion fitness {ev['champion_fitness']}")
+    print(f"  Layer 2 architecture: {ev['architecture_promotions']}/{ev['architecture_rounds']} promoted through 7-stage pipeline")
+    print(f"  Layer 3 objective  : {ev['objective_rejections']} candidates rejected (invariants held)")
+    print(f"  Incumbent strategy : alloc {inc['allocation_pct']:.3f}, explore {inc['exploration']:.3f}, "
+          f"diversify {inc['diversification']:.3f}, patience {inc['patience']:.3f}")
     print("-" * 64)
     print("Top micro-cells by ROI:")
     for c in snap["cells"][:8]:

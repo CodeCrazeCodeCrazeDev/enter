@@ -16,12 +16,16 @@ grounded in reality:
 * :class:`~apodex.aean.validation.epistemic.EpistemicFirewall` — reality
   validation of inbound demand signals via oracle verification, cross-source
   consensus and adversarial red-teaming.
+* :class:`~apodex.aean.validation.pretrade.PreTradeValidationEngine` — the
+  "should we even try this?" gate (four evidence pillars → Monte-Carlo synthetic
+  test → counterfactual probes) run before any capital is committed.
 """
 from __future__ import annotations
 
 from .critics import ThreeCriticStack
 from .epistemic import EpistemicFirewall
 from .perception import CalibrationLayer, PerceptionPredictor
+from .pretrade import PreTradeValidationEngine
 from .rgae import RealityGroundedAdaptiveEngine
 
 __all__ = [
@@ -30,4 +34,5 @@ __all__ = [
     "RealityGroundedAdaptiveEngine",
     "ThreeCriticStack",
     "EpistemicFirewall",
+    "PreTradeValidationEngine",
 ]

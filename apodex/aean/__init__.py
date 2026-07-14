@@ -22,12 +22,19 @@ from .engines.ade import AutonomousDemandEngine
 from .engines.are import AutonomousRevenueEngine
 from .engines.avie import AutonomousVisualIntelligenceEngine
 from .engines.paean import PAEAN, ThompsonBandit
+from .evolution.three_layer import (
+    ArchitectureEvolution,
+    CapabilityEvolution,
+    GovernedCognitiveEvolutionSystem,
+    ObjectiveStability,
+)
 from .flywheel import Organism
 from .governance import ConstitutionalFilter, ConstitutionalRules
 from .llm import LLMAdapter
 from .validation.critics import ThreeCriticStack
 from .validation.epistemic import EpistemicFirewall
 from .validation.perception import CalibrationLayer, PerceptionPredictor
+from .validation.pretrade import PreTradeValidationEngine
 from .validation.rgae import RealityGroundedAdaptiveEngine
 
 __all__ = [
@@ -48,4 +55,9 @@ __all__ = [
     "CalibrationLayer",
     "ThreeCriticStack",
     "EpistemicFirewall",
+    "PreTradeValidationEngine",
+    "GovernedCognitiveEvolutionSystem",
+    "ObjectiveStability",
+    "CapabilityEvolution",
+    "ArchitectureEvolution",
 ]

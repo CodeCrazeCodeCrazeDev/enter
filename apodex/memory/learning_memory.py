@@ -1,8 +1,11 @@
 from __future__ import annotations
 import json
+import logging
 import os
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
+
+logger = logging.getLogger("apodex.memory.learning")
 
 
 class TrajectoryRecord(BaseModel):
@@ -30,8 +33,13 @@ class LongTermLearningMemory:
                 data = json.load(f)
                 for task_type, records in data.items():
                     self.registry[task_type] = [TrajectoryRecord(**rec) for rec in records]
-        except Exception:
-            pass
+        except (OSError, ValueError) as exc:
+            logger.warning(
+                "Failed to load learning memory from '%s': %s. Starting with empty registry.",
+                self.storage_path,
+                exc,
+                exc_info=True,
+            )
 
     def _save(self) -> None:
         try:
@@ -41,8 +49,9 @@ class LongTermLearningMemory:
                     for task_type, records in self.registry.items()
                 }
                 json.dump(serialized, f, indent=2)
-        except Exception:
-            pass
+        except OSError:
+            logger.exception("Failed to persist learning memory to '%s'.", self.storage_path)
+            raise
 
     def record_trajectory(self, record: TrajectoryRecord) -> None:
         """Add a trajectory record and persist it to long-term memory."""

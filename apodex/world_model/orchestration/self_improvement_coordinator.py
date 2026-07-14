@@ -1,6 +1,7 @@
 from __future__ import annotations
 from datetime import datetime
 import hashlib
+import logging
 import re
 from typing import List, Dict, Any, Optional
 from uuid import UUID
@@ -21,6 +22,8 @@ from apodex.world_model.interfaces.self_improvement import (
     IQaEngineer,
     IEvaluator
 )
+
+logger = logging.getLogger("apodex.world_model.self_improvement")
 
 # Production-grade cost weight configuration (not hard-coded magic numbers)
 COST_WEIGHTS = {
@@ -49,6 +52,11 @@ class SelfImprovementFlywheelCoordinator:
             self.current_tier = tier_from_config
         except Exception:
             # Fallback to EXPENSIVE for backward compatibility in legacy tests
+            logger.warning(
+                "Failed to resolve WorldModelCreatorConfig from container; "
+                "falling back to default config and EXPENSIVE tier.",
+                exc_info=True,
+            )
             self.config = WorldModelCreatorConfig(tenant_id="default_tenant")
             self.config.reality_engine.execution_tier = "EXPENSIVE"
             self.current_tier = "EXPENSIVE"
@@ -147,8 +155,8 @@ class SelfImprovementFlywheelCoordinator:
                             description=msg,
                             suggested_fix="Load configuration dynamically and avoid static/unsafe executions."
                         ))
-            except Exception:
-                pass
+            except OSError:
+                logger.warning("Fast security scan could not read '%s'; skipping.", path, exc_info=True)
         return findings
 
     async def execute_optimization_cycle(self) -> List[SelfImprovementProposal]:
@@ -172,7 +180,7 @@ class SelfImprovementFlywheelCoordinator:
                 if self._charge_operation("expensive_agent_call", "IChiefArchitect evaluate_architecture"):
                     findings.extend(await architect.evaluate_architecture())
             except Exception:
-                pass
+                logger.exception("IChiefArchitect.evaluate_architecture failed; skipping architecture findings.")
 
         # SECURITY: Replaced with ultra-fast regex scanning in CHEAP tier (not fully skipped)
         if self.current_tier == "CHEAP":
@@ -184,7 +192,7 @@ class SelfImprovementFlywheelCoordinator:
                 if self._charge_operation("expensive_agent_call", "ISecurityEngineer audit_security"):
                     findings.extend(await security_eng.audit_security())
             except Exception:
-                pass
+                logger.exception("ISecurityEngineer.audit_security failed; skipping security findings.")
 
         # PERFORMANCE: Profile performance under all tiers
         try:
@@ -193,7 +201,7 @@ class SelfImprovementFlywheelCoordinator:
             if self._charge_operation(cost_type, "IPerformanceEngineer profile_performance"):
                 findings.extend(await performance_eng.profile_performance())
         except Exception:
-            pass
+            logger.exception("IPerformanceEngineer.profile_performance failed; skipping performance findings.")
 
         if not findings:
             return proposals
@@ -223,6 +231,7 @@ class SelfImprovementFlywheelCoordinator:
                 return proposals
             proposal = await swe.generate_patch(target_finding)
         except Exception:
+            logger.exception("ISoftwareEngineer.generate_patch failed; aborting optimization cycle.")
             return proposals
 
         # 5. Gather research-driven citations (Skipped in CHEAP tier)
@@ -233,7 +242,7 @@ class SelfImprovementFlywheelCoordinator:
                     citations = await researcher.research_topic(f"optimization of {target_finding.category}")
                     proposal.research_citations.extend(citations)
             except Exception:
-                pass
+                logger.exception("IResearchScientist.research_topic failed; proceeding without research citations.")
         else:
             self._charge_operation("skipped_or_cached", "Skipped research scientist in CHEAP tier")
 
@@ -245,7 +254,7 @@ class SelfImprovementFlywheelCoordinator:
                     test_code = await qa.generate_tests(proposal)
                     proposal.summary += f"\n[QA Test Generated]\n{test_code}"
             except Exception:
-                pass
+                logger.exception("IQaEngineer.generate_tests failed; proceeding without generated tests.")
         else:
             self._charge_operation("skipped_or_cached", "Skipped QA test generation in CHEAP tier")
 
@@ -265,6 +274,7 @@ class SelfImprovementFlywheelCoordinator:
             else:
                 proposal.status = "REJECTED"
         except Exception:
+            logger.exception("IEvaluator.benchmark_proposal failed; marking proposal as REJECTED.")
             proposal.status = "REJECTED"
 
         proposals.append(proposal)

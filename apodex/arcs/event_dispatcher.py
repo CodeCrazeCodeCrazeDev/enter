@@ -164,9 +164,21 @@ class EventBus:
             return
 
         logger.debug(f"Publishing {event_type.__name__} (ID: {event.event_id}) to {len(handlers)} handlers.")
-        # Schedule all handler coroutines in parallel
+        # Schedule all handler coroutines in parallel. Isolate handler failures so a
+        # single faulty subscriber does not prevent others from running, but surface
+        # each error instead of silently swallowing it.
         tasks = [asyncio.create_task(handler(event)) for handler in handlers]
-        await asyncio.gather(*tasks, return_exceptions=True)
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        for handler, result in zip(handlers, results):
+            if isinstance(result, Exception):
+                logger.error(
+                    "Handler '%s' failed while processing %s (ID: %s): %s",
+                    getattr(handler, "__name__", repr(handler)),
+                    event_type.__name__,
+                    event.event_id,
+                    result,
+                    exc_info=result,
+                )
 
 
 class CommandDispatcher:

@@ -8,7 +8,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 from enum import Enum
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -111,6 +111,7 @@ class CycleResult(BaseModel):
     signals_detected: int = 0
     narratives_created: int = 0
     assets_produced: int = 0
+    assets_validated: int = 0
     active_cells: int = 0
     capital_deployed_cents: int = 0
     revenue_cents: int = 0
@@ -119,6 +120,104 @@ class CycleResult(BaseModel):
     cells_killed: int = 0
     cells_scaled: int = 0
     governance_blocks: int = 0
+    notes: List[str] = Field(default_factory=list)
+
+
+# ---------------------------------------------------------------------------
+# Reality-Grounded Adaptive Engine (RGAE) — perception + three-layer validation
+# ---------------------------------------------------------------------------
+class ValidationStage(str, Enum):
+    """Screening stage reached by a creative asset in the RGAE pipeline."""
+
+    SIMULATION = "simulation"        # Layer 1: TRIBE neural-response simulation.
+    REALITY_TEST = "reality_test"    # Layer 2: controlled micro-budget live test.
+    REVENUE_GATE = "revenue_gate"    # Layer 3: profitability / unit-economics gate.
+    PASSED = "passed"                # Cleared all three layers.
+    REJECTED = "rejected"            # Terminated at some layer.
+
+
+class PerceptionScore(BaseModel):
+    """TRIBEv2 four-dimensional perception prediction for a creative asset.
+
+    Each dimension is normalised to ``[0, 1]``. The engine deliberately keeps
+    ``attention`` and ``engagement`` distinct from the downstream economic
+    signal so the calibration layer can discount attention-only "decoys".
+    """
+
+    attention: float = Field(ge=0.0, le=1.0)          # Will they look?
+    valence: float = Field(ge=0.0, le=1.0)            # Emotional positivity.
+    arousal: float = Field(ge=0.0, le=1.0)            # Emotional intensity.
+    cognitive_load: float = Field(ge=0.0, le=1.0)     # Will they understand?
+    engagement_likelihood: float = Field(ge=0.0, le=1.0)  # Will they act?
+
+
+class ValidationRecord(BaseModel):
+    """Outcome of running a creative asset through the RGAE pipeline."""
+
+    asset_id: str
+    narrative_id: str
+    segment: str = ""
+    stage_reached: ValidationStage = ValidationStage.SIMULATION
+    passed: bool = False
+    perception: Optional[PerceptionScore] = None
+    calibrated_value: float = 0.0
+    predicted_ctr: float = 0.0
+    observed_ctr: float = 0.0
+    ltv_cpa_ratio: float = 0.0
+    notes: List[str] = Field(default_factory=list)
+    created_at: datetime = Field(default_factory=_now)
+
+
+# ---------------------------------------------------------------------------
+# Three-Critic Stack — Truth / Policy / Strategy review of every action
+# ---------------------------------------------------------------------------
+class CriticName(str, Enum):
+    TRUTH = "truth"        # Factual correctness / grounded projections.
+    POLICY = "policy"      # Constraint & constitutional alignment.
+    STRATEGY = "strategy"  # Objective optimality of the action.
+
+
+class CriticReview(BaseModel):
+    critic: CriticName
+    passed: bool
+    score: float = Field(ge=0.0, le=1.0)
+    rationale: str = ""
+
+
+class CriticVerdict(BaseModel):
+    """Aggregated verdict of the Three-Critic Stack for a single action."""
+
+    action: str
+    approved: bool
+    reviews: List[CriticReview] = Field(default_factory=list)
+    latency_ms: float = 0.0
+
+    @property
+    def score(self) -> float:
+        if not self.reviews:
+            return 0.0
+        return sum(r.score for r in self.reviews) / len(self.reviews)
+
+
+# ---------------------------------------------------------------------------
+# Epistemic firewall — reality validation of inbound demand signals
+# ---------------------------------------------------------------------------
+class SignalValidation(BaseModel):
+    """Three-layer reality-validation verdict for a demand signal.
+
+    Oracle verification checks the signal against known priors, cross-source
+    consensus requires corroboration across independent sources, and the
+    adversarial red-team probes for manipulation. ``credibility`` combines all
+    three with a temporal-decay factor.
+    """
+
+    signal_id: str
+    passed: bool = False
+    credibility: float = Field(default=0.0, ge=0.0, le=1.0)
+    oracle_ok: bool = False
+    consensus_ok: bool = False
+    red_team_ok: bool = False
+    corroborating_sources: int = 0
     notes: List[str] = Field(default_factory=list)
 
 

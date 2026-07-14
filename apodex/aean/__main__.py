@@ -47,6 +47,15 @@ def main() -> None:
     print(f"Governance blocks   : {snap['governance_blocks']}")
     print(f"EKG                 : {snap['ekg']}")
     print("-" * 64)
+    val = snap["validation"]
+    fw = val["epistemic_firewall"]
+    rg = val["rgae"]
+    cs = val["three_critic_stack"]
+    print("Reality & validation layer:")
+    print(f"  Epistemic firewall : {fw['signals_checked']} checked, {fw['signals_rejected']} rejected, avg cred {fw['avg_credibility']}")
+    print(f"  RGAE pipeline      : {rg['assets_passed']}/{rg['assets_screened']} assets passed, {rg['calibration_updates']} calibrations")
+    print(f"  Three-Critic Stack : {cs['approved']}/{cs['reviews']} approved, {cs['blocked']} blocked, {cs['avg_latency_ms']}ms avg")
+    print("-" * 64)
     print("Top micro-cells by ROI:")
     for c in snap["cells"][:8]:
         print(f"  {c['status']:<7} {c['market']:<16} {c['segment']:<10} ROI={c['roi'] * 100:6.1f}%  rev={_fmt_money(c['revenue_cents'])}")

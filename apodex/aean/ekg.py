@@ -20,7 +20,16 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
-from .models import DemandSignal, MicroCell, MicroCellStatus, Narrative, VisualAsset
+from .models import (
+    CriticVerdict,
+    DemandSignal,
+    MicroCell,
+    MicroCellStatus,
+    Narrative,
+    SignalValidation,
+    ValidationRecord,
+    VisualAsset,
+)
 
 logger = logging.getLogger("aean.ekg")
 
@@ -61,6 +70,11 @@ class EconomicKnowledgeGraph:
         self.narratives: Dict[str, Narrative] = {}
         self.assets: Dict[str, VisualAsset] = {}
         self.cells: Dict[str, MicroCell] = {}
+
+        # Reality & validation systems (Part II of the architecture).
+        self.validations: Dict[str, ValidationRecord] = {}       # keyed by asset_id
+        self.signal_validations: Dict[str, SignalValidation] = {}  # keyed by signal_id
+        self.critic_verdicts: List[CriticVerdict] = []
 
         # Append-only event log for the Research engine.
         self.events: List[EKGEvent] = []
@@ -138,6 +152,32 @@ class EconomicKnowledgeGraph:
         self.add_edge(cell.cell_id, cell.signal_id, "EXPLOITS", weight=1.0)
         self._log("micro_cell", cell.cell_id, {"status": cell.status.value, "roi": cell.roi})
 
+    def record_validation(self, record: ValidationRecord) -> None:
+        self.validations[record.asset_id] = record
+        if record.asset_id in self.nodes:
+            self.nodes[record.asset_id].properties.update(
+                validation_stage=record.stage_reached.value,
+                validated=record.passed,
+                calibrated_value=record.calibrated_value,
+            )
+        self._log(
+            "asset_validation",
+            record.asset_id,
+            {"stage": record.stage_reached.value, "passed": record.passed},
+        )
+
+    def record_signal_validation(self, validation: SignalValidation) -> None:
+        self.signal_validations[validation.signal_id] = validation
+        self._log(
+            "signal_validation",
+            validation.signal_id,
+            {"passed": validation.passed, "credibility": validation.credibility},
+        )
+
+    def record_critic_verdict(self, verdict: CriticVerdict) -> None:
+        self.critic_verdicts.append(verdict)
+        self._log("critic_verdict", verdict.action, {"approved": verdict.approved})
+
     def _log(self, kind: str, ref_id: str, payload: Dict[str, Any]) -> None:
         self.events.append(EKGEvent(kind=kind, ref_id=ref_id, payload=payload))
 
@@ -158,6 +198,16 @@ class EconomicKnowledgeGraph:
     def assets_for(self, narrative_id: str) -> List[VisualAsset]:
         return [a for a in self.assets.values() if a.narrative_id == narrative_id]
 
+    def validated_assets_for(self, narrative_id: str) -> List[VisualAsset]:
+        """Assets for a narrative that cleared the RGAE validation pipeline."""
+        return [
+            a
+            for a in self.assets.values()
+            if a.narrative_id == narrative_id
+            and (v := self.validations.get(a.asset_id)) is not None
+            and v.passed
+        ]
+
     def stats(self) -> Dict[str, int]:
         return {
             "nodes": len(self.nodes),
@@ -166,5 +216,9 @@ class EconomicKnowledgeGraph:
             "narratives": len(self.narratives),
             "assets": len(self.assets),
             "cells": len(self.cells),
+            "validations": len(self.validations),
+            "validated_assets": sum(1 for v in self.validations.values() if v.passed),
+            "signal_validations": len(self.signal_validations),
+            "critic_verdicts": len(self.critic_verdicts),
             "events": len(self.events),
         }

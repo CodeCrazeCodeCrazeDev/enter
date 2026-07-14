@@ -21,6 +21,7 @@ from ..ekg import EconomicKnowledgeGraph
 from ..governance import ConstitutionalFilter
 from ..llm import LLMAdapter
 from ..models import DemandSignal, EngineName, Narrative
+from ..validation.epistemic import EpistemicFirewall
 
 logger = logging.getLogger("aean.ade")
 
@@ -46,16 +47,23 @@ class AutonomousDemandEngine:
         *,
         rng: Optional[random.Random] = None,
         markets=None,
+        firewall: Optional[EpistemicFirewall] = None,
     ) -> None:
         self.ekg = ekg
         self.governance = governance
         self.llm = llm or LLMAdapter()
         self._rng = rng or random.Random()
         self.markets = markets or DEFAULT_MARKETS
+        self.firewall = firewall
 
     # ------------------------------------------------------------------
     def sense_demand(self, max_signals: int = 3) -> List[DemandSignal]:
-        """Detect fresh demand signals by fusing multiple data sources."""
+        """Detect fresh demand signals by fusing multiple data sources.
+
+        Candidate signals must clear the :class:`EpistemicFirewall` (when one is
+        attached) before they are recorded in the EKG — belief contamination is
+        filtered at the perimeter, not after it has propagated.
+        """
         signals: List[DemandSignal] = []
         for _ in range(max_signals):
             market, segments = self._rng.choice(self.markets)
@@ -74,6 +82,13 @@ class AutonomousDemandEngine:
                 elasticity=round(self._rng.uniform(-2.2, -0.8), 3),
                 keywords=self._rng.sample(DATA_SOURCES, k=2),
             )
+            if self.firewall is not None:
+                validation = self.firewall.validate(signal, readings)
+                self.ekg.record_signal_validation(validation)
+                if not validation.passed:
+                    self.governance.note_decision(EngineName.ADE, success=False)
+                    logger.info("Signal rejected by epistemic firewall: %s", validation.notes)
+                    continue
             self.ekg.record_signal(signal)
             signals.append(signal)
         return signals

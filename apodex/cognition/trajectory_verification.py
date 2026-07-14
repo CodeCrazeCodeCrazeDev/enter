@@ -1,6 +1,8 @@
 from __future__ import annotations
 from typing import Dict, Any, List
 
+from apodex.common.text import is_balanced_brackets
+
 
 class TwoLevelCreditAssignment:
     """Computes credit assignment scores globally across trajectories and locally across execution steps."""
@@ -36,26 +38,10 @@ class MultiDimensionalTrajectoryVerifier:
 
     def verify_trajectory(self, messages: List[Dict[str, Any]]) -> Dict[str, Any]:
         # Check mismatched brackets/parentheses across all assistant messages
-        stack = []
-        mapping = {")": "(", "}": "{", "]": "["}
-        syntax_valid = True
-
-        assistant_contents = []
-        for msg in messages:
-            if msg.get("role") == "assistant":
-                content = msg.get("content", "")
-                assistant_contents.append(content)
-                for char in content:
-                    if char in mapping.values():
-                        stack.append(char)
-                    elif char in mapping.keys():
-                        if not stack or stack[-1] != mapping[char]:
-                            syntax_valid = False
-                            break
-                        stack.pop()
-
-        if stack:
-            syntax_valid = False
+        assistant_contents = [
+            msg.get("content", "") for msg in messages if msg.get("role") == "assistant"
+        ]
+        syntax_valid = is_balanced_brackets("".join(assistant_contents))
 
         syntax_score = 1.0 if syntax_valid else 0.4
 

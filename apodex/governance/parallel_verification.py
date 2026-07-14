@@ -1,6 +1,8 @@
 from __future__ import annotations
 from typing import List, Dict, Any, Optional
 
+from apodex.common.text import is_balanced_brackets
+
 
 class VerificationReport:
     """Consolidated outcome of the parallel verifiers."""
@@ -28,23 +30,7 @@ class SyntaxVerifier:
 
     async def verify(self, content: str) -> Dict[str, Any]:
         """Verify syntax validity (e.g. matched brackets/parentheses)."""
-        stack = []
-        mapping = {")": "(", "}": "{", "]": "["}
-        is_valid = True
-
-        for char in content:
-            if char in mapping.values():
-                stack.append(char)
-            elif char in mapping.keys():
-                if not stack or stack[-1] != mapping[char]:
-                    is_valid = False
-                    break
-                stack.pop()
-
-        if stack:
-            is_valid = False
-
-        return {"valid": is_valid, "confidence": 1.0}
+        return {"valid": is_balanced_brackets(content), "confidence": 1.0}
 
 
 class MetaVerifier:

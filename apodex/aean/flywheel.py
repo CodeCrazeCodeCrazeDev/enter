@@ -27,6 +27,9 @@ from .engines.paean import PAEAN
 from .governance import ConstitutionalFilter
 from .llm import LLMAdapter
 from .models import CycleResult, OrganismState
+from .validation.critics import ThreeCriticStack
+from .validation.epistemic import EpistemicFirewall
+from .validation.rgae import RealityGroundedAdaptiveEngine
 
 logger = logging.getLogger("aean.flywheel")
 
@@ -43,13 +46,23 @@ class Organism:
         token_budget: int = 120,
     ) -> None:
         self._rng = random.Random(seed)
+        # Validation subsystems get an independent RNG so the reality layer's
+        # stochastic draws never perturb the core engines' deterministic order.
+        self._val_rng = random.Random(None if seed is None else seed + 90210)
         self.ekg = EconomicKnowledgeGraph()
         self.governance = ConstitutionalFilter()
         self.llm = llm or LLMAdapter()
 
-        self.ade = AutonomousDemandEngine(self.ekg, self.governance, self.llm, rng=self._rng)
+        # Reality & validation systems (Part II of the architecture).
+        self.firewall = EpistemicFirewall(governance=self.governance)
+        self.rgae = RealityGroundedAdaptiveEngine(rng=self._val_rng)
+        self.critics = ThreeCriticStack(self.governance)
+
+        self.ade = AutonomousDemandEngine(
+            self.ekg, self.governance, self.llm, rng=self._rng, firewall=self.firewall
+        )
         self.avie = AutonomousVisualIntelligenceEngine(self.ekg, self.governance, self.llm, rng=self._rng)
-        self.paean = PAEAN(self.ekg, self.governance, rng=self._rng)
+        self.paean = PAEAN(self.ekg, self.governance, rng=self._rng, critics=self.critics)
         self.are = AutonomousRevenueEngine(self.ekg, self.governance, rng=self._rng)
         self.hive_mind = HiveMind(token_budget=token_budget)
         self.research = ResearchEngine(self.ekg)
@@ -92,11 +105,20 @@ class Organism:
                     if self.ade.engineer_narrative(signal):
                         result.narratives_created += 1
 
-        # Stage 3: visual production.
+        # Stage 3: visual production + RGAE reality validation. Newly produced
+        # assets are screened through the three-layer pipeline; only creatives
+        # that clear the revenue gate become eligible for media spend.
         if grants.get("produce_visuals"):
-            for narrative in self.ekg.narratives.values():
+            for narrative in list(self.ekg.narratives.values()):
                 if not self.ekg.assets_for(narrative.narrative_id):
-                    result.assets_produced += len(self.avie.produce_assets(narrative))
+                    assets = self.avie.produce_assets(narrative)
+                    result.assets_produced += len(assets)
+                    signal = self.ekg.signals.get(narrative.signal_id)
+                    if signal is not None and assets:
+                        for record in self.rgae.screen(narrative, assets, signal):
+                            self.ekg.record_validation(record)
+                            if record.passed:
+                                result.assets_validated += 1
 
         # Stage 4: capital allocation. Committed capital is carved out of the
         # live treasury; ARE spends from within each cell's committed budget.
@@ -181,6 +203,30 @@ class Organism:
             history=self.history,
         )
 
+    def _validation_stats(self) -> dict:
+        """Aggregate reality/validation-layer metrics for the dashboard."""
+        vals = list(self.ekg.validations.values())
+        sig_vals = list(self.ekg.signal_validations.values())
+        stage_counts: dict = {}
+        for v in vals:
+            stage_counts[v.stage_reached.value] = stage_counts.get(v.stage_reached.value, 0) + 1
+        return {
+            "epistemic_firewall": {
+                "signals_checked": len(sig_vals),
+                "signals_rejected": self.firewall.rejected,
+                "avg_credibility": round(
+                    sum(s.credibility for s in sig_vals) / len(sig_vals), 4
+                ) if sig_vals else 0.0,
+            },
+            "rgae": {
+                "assets_screened": len(vals),
+                "assets_passed": sum(1 for v in vals if v.passed),
+                "stage_reached": stage_counts,
+                "calibration_updates": self.rgae.calibration.updates,
+            },
+            "three_critic_stack": self.critics.stats(),
+        }
+
     def snapshot(self) -> dict:
         """JSON-serialisable view for the dashboard/API."""
         st = self.state()
@@ -200,6 +246,7 @@ class Organism:
             "llm_provider": self.llm.provider,
             "llm_live": self.llm.is_live,
             "ekg": self.ekg.stats(),
+            "validation": self._validation_stats(),
             "autonomy": {
                 engine.value: {
                     "decisions": rec.decisions,
@@ -225,6 +272,7 @@ class Organism:
                     "signals_detected": h.signals_detected,
                     "narratives_created": h.narratives_created,
                     "assets_produced": h.assets_produced,
+                    "assets_validated": h.assets_validated,
                     "governance_blocks": h.governance_blocks,
                 }
                 for h in st.history

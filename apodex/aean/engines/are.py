@@ -73,12 +73,21 @@ class AutonomousRevenueEngine:
         if signal is None:
             return 0
 
-        # Pick the highest-CTR asset attached to this signal's narratives.
+        # Pick the highest-CTR asset attached to this signal's narratives. When
+        # the RGAE has screened a narrative's assets, only creatives that
+        # cleared the revenue gate are eligible for spend; otherwise fall back
+        # to all assets (RGAE not attached).
         best_ctr = 0.0
         best_resonance = 0.5
         for narrative in self.ekg.narratives_for(cell.signal_id):
             best_resonance = max(best_resonance, narrative.predicted_resonance)
-            for asset in self.ekg.assets_for(narrative.narrative_id):
+            validated = self.ekg.validated_assets_for(narrative.narrative_id)
+            screened = any(
+                a.asset_id in self.ekg.validations
+                for a in self.ekg.assets_for(narrative.narrative_id)
+            )
+            eligible = validated if screened else self.ekg.assets_for(narrative.narrative_id)
+            for asset in eligible:
                 best_ctr = max(best_ctr, asset.predicted_ctr)
         if best_ctr <= 0:
             return 0

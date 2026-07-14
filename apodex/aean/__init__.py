@@ -25,6 +25,10 @@ from .engines.paean import PAEAN, ThompsonBandit
 from .flywheel import Organism
 from .governance import ConstitutionalFilter, ConstitutionalRules
 from .llm import LLMAdapter
+from .validation.critics import ThreeCriticStack
+from .validation.epistemic import EpistemicFirewall
+from .validation.perception import CalibrationLayer, PerceptionPredictor
+from .validation.rgae import RealityGroundedAdaptiveEngine
 
 __all__ = [
     "Organism",
@@ -39,4 +43,9 @@ __all__ = [
     "ConstitutionalFilter",
     "ConstitutionalRules",
     "LLMAdapter",
+    "RealityGroundedAdaptiveEngine",
+    "PerceptionPredictor",
+    "CalibrationLayer",
+    "ThreeCriticStack",
+    "EpistemicFirewall",
 ]

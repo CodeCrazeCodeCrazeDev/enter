@@ -20,6 +20,7 @@ from typing import Dict, List, Optional
 from ..ekg import EconomicKnowledgeGraph
 from ..governance import ConstitutionalFilter
 from ..models import DemandSignal, EngineName, MicroCell, MicroCellStatus
+from ..validation.critics import ThreeCriticStack
 
 logger = logging.getLogger("aean.paean")
 
@@ -78,9 +79,11 @@ class PAEAN:
         base_allocation_pct: float = 0.15,
         max_scales: int = 3,
         max_active_cells: int = 12,
+        critics: Optional[ThreeCriticStack] = None,
     ) -> None:
         self.ekg = ekg
         self.governance = governance
+        self.critics = critics
         self._rng = rng or random.Random()
         self.bandit = ThompsonBandit(rng=self._rng)
         self.max_cells_per_cycle = max_cells_per_cycle
@@ -129,10 +132,6 @@ class PAEAN:
             # Allocation scales with posterior EV and signal strength.
             amount = int(treasury_cents * self.base_allocation_pct * (0.5 + ev) * (0.5 + 0.5 * sig.strength))
             amount = max(amount, 0)
-            verdict = self.governance.review_allocation(amount, treasury_cents, committed)
-            if not verdict.approved:
-                logger.info("PAEAN allocation blocked for %s: %s", sig.market, verdict.reasons)
-                continue
             cell = MicroCell(
                 signal_id=sig.signal_id,
                 market=sig.market,
@@ -140,6 +139,26 @@ class PAEAN:
                 status=MicroCellStatus.ACTIVE,
                 allocated_cents=amount,
             )
+            # Every allocation passes through the Three-Critic Stack when it is
+            # attached (Truth/Policy/Strategy); otherwise the raw constitution.
+            if self.critics is not None:
+                verdict = self.critics.review_allocation(
+                    cell,
+                    treasury_cents=treasury_cents,
+                    deployed_cents=committed,
+                    expected_value=ev,
+                    signal=sig,
+                )
+                self.ekg.record_critic_verdict(verdict)
+                approved = verdict.approved
+                reasons = [r.rationale for r in verdict.reviews if not r.passed]
+            else:
+                pol = self.governance.review_allocation(amount, treasury_cents, committed)
+                approved = pol.approved
+                reasons = pol.reasons
+            if not approved:
+                logger.info("PAEAN allocation blocked for %s: %s", sig.market, reasons)
+                continue
             self.ekg.record_cell(cell)
             committed += amount
             spawned.append(cell)

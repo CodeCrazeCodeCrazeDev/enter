@@ -243,3 +243,101 @@ async def test_aean_os_subsystems_flow():
     # Verify that learning has updated Unified Memory
     mem_records = os.memory.retrieve_memory(MemoryType.EPISODIC)
     assert len(mem_records) > 0
+
+
+# =====================================================================
+# 7. EIOS Version 2: Active Inference, Compiler, & Scientific Discovery Tests
+# =====================================================================
+
+def test_active_inference_hierarchy():
+    from apodex.arcs.causal.active_inference import ActiveInferenceEngine
+    from apodex.arcs.kernel import HierarchicalActiveInference
+
+    # Single Active Inference loop (reducing Free Energy)
+    engine = ActiveInferenceEngine()
+    prior = engine.beliefs["customer_demand_is_high"]
+
+    # Observation shows high demand (1.0), reducing Free Energy on next loop
+    fe = engine.observe("customer_demand_is_high", 1.0)
+    assert fe > 0
+    assert engine.beliefs["customer_demand_is_high"] > prior
+
+    # Select uncertainty-minimizing action based on expected free energy
+    options = {
+        "conjoint_test": {"expected_roi": 1.5, "epistemic_value": 0.9},
+        "straight_scale": {"expected_roi": 2.0, "epistemic_value": 0.1}
+    }
+    best_key, selected = engine.select_action_to_minimize_uncertainty(options)
+    # conjoint_test is selected because its high uncertainty-reduction (epistemic value) yields lower Expected Free Energy
+    assert best_key == "conjoint_test"
+
+    # Hierarchical active inference (multiple cascading layers)
+    hierarchy = HierarchicalActiveInference()
+    fe_layer = hierarchy.calculate_layer_free_energy("team", actual_outcome=0.9, expected_outcome=0.5)
+    assert fe_layer > 0
+
+
+@pytest.mark.asyncio
+async def test_eios_kernel_and_compiler():
+    from apodex.arcs.kernel import EIOSKernel, EntrepreneurialCompiler, RecursivePlanner, TimeHorizon
+
+    # 1. Compiler translates high-level goal to execution DAG
+    compiler = EntrepreneurialCompiler()
+    dag = compiler.compile_goal_to_dag("Achieve LTV:CAC >= 3:1 in target segment", target_budget_usd=10000)
+    assert len(dag.nodes) == 4
+
+    # 2. Kernel schedules and executes the DAG with failure recovery
+    kernel = EIOSKernel()
+    success = await kernel.execute_dag(dag)
+    assert success is True
+
+    # 3. Recursive Planner cascadesvision down across horizons
+    planner = RecursivePlanner()
+    planner.cascade_vision_down("Build a fully autonomous, self-sustaining software group.")
+    assert len(planner.plan_registry[TimeHorizon.VISION_10Y]) == 1
+    assert len(planner.plan_registry[TimeHorizon.WEEK]) == 2
+
+
+def test_scientific_discovery_and_evolution():
+    from apodex.arcs.evolution import ScientificDiscoveryEngine, AgentEvolutionEngine
+
+    # 1. Scientific hypothesis generation & RCT conjoint design
+    wg = WorldGraph()
+    science = ScientificDiscoveryEngine(world_graph=wg)
+    hyp = science.generate_hypothesis("pricing_model_type", "customer_retention", expected_effect=0.35)
+    assert hyp.independent_variable == "pricing_model_type"
+
+    rct = science.design_rct_experiment(hyp.id)
+    assert rct["experimental_design"] == "Randomized Controlled Trial (RCT)"
+
+    # Synthesize to scientific theory based on empirical proof (p-value < 0.05)
+    theory = science.synthesize_to_theory(hyp.id, sample_size=1500, actual_effect=0.42, p_value=0.01)
+    assert theory is not None
+    assert theory.p_value == 0.01
+
+    # 2. Agent evolution tournaments
+    evolution = AgentEvolutionEngine(role_name="Software Engineer")
+    champion = evolution.run_tournament()
+    assert champion.role_name == "Software Engineer"
+
+
+# =====================================================================
+# 8. EIOS Version 2: Society of Agents, Debate & Venture Studio Portfolio
+# =====================================================================
+
+def test_collective_intelligence_and_venture_studio():
+    # Instantiate the Version 2 Operating System
+    os = AutonomousEntrepreneurialActorOS(initial_cash_cents=100_000_00)
+
+    # 1. Run AlphaAlgo Verdict-style Adversarial Debate & Consensus
+    debate_res = os.run_collective_intelligence_debate("Should we transition pricing model to usage-based?")
+    assert "winning_strategy" in debate_res
+    assert debate_res["consensus_confidence"] > 0.5
+
+    # 2. Run Autonomous Venture Studio portfolio management
+    os.add_portfolio_venture("venture_01", "Apodex PDF Parser", allocated_capital=30_000_00)
+    os.add_portfolio_venture("venture_02", "Apodex Ads Optimizer", allocated_capital=15_000_00)
+
+    # Reallocate capital from high-surplus venture to under-funded high yield venture
+    reallocation = os.reallocate_portfolio_capital()
+    assert len(reallocation) > 0

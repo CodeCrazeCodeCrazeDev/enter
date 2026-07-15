@@ -17,11 +17,19 @@ class MemoryType(str, Enum):
     EPISODIC = "episodic"
     PROCEDURAL = "procedural"
     STRATEGIC = "strategic"
+    COMPETITIVE = "competitive"
+    NEGOTIATION = "negotiation"
+    BRAND = "brand"
     FINANCIAL = "financial"
-    CUSTOMER = "customer"
-    COMPETITOR = "competitor"
-    RESEARCH = "research"
-    FAILURES = "failures"
+    INVESTOR = "investor"
+    HIRING = "hiring"
+    OPERATIONAL = "operational"
+    MARKET = "market"
+    SIMULATION = "simulation"
+    FAILURE = "failure"
+    TACIT = "tacit"
+    SCIENTIFIC = "scientific"
+    POLICY = "policy"
 
 
 class MemoryEntry(BaseModel):
@@ -31,7 +39,11 @@ class MemoryEntry(BaseModel):
     context: Dict[str, Any] = Field(default_factory=dict)
     payload: Dict[str, Any] = Field(default_factory=dict)
     timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    belief: float = Field(default=0.5, ge=0.0, le=1.0)
     confidence: float = Field(default=1.0, ge=0.0, le=1.0)
+    causal_links: List[str] = Field(default_factory=list)
+    counterfactuals: Dict[str, Any] = Field(default_factory=dict)
+    historical_outcomes: List[Dict[str, Any]] = Field(default_factory=list)
 
 
 class UnifiedMemoryAPI:
@@ -51,7 +63,11 @@ class UnifiedMemoryAPI:
             properties = {
                 "tenant_id": entry.tenant_id,
                 "timestamp": entry.timestamp.isoformat(),
+                "belief": entry.belief,
                 "confidence": entry.confidence,
+                "causal_links": entry.causal_links,
+                "counterfactuals": entry.counterfactuals,
+                "historical_outcomes": entry.historical_outcomes,
                 "context": entry.context,
                 "payload": entry.payload,
             }
@@ -108,7 +124,11 @@ class UnifiedMemoryAPI:
                             context=props.get("context", {}),
                             payload=props.get("payload", {}),
                             timestamp=timestamp,
-                            confidence=props.get("confidence", 1.0)
+                            belief=props.get("belief", 0.5),
+                            confidence=props.get("confidence", 1.0),
+                            causal_links=props.get("causal_links", []),
+                            counterfactuals=props.get("counterfactuals", {}),
+                            historical_outcomes=props.get("historical_outcomes", [])
                         )
                     )
 

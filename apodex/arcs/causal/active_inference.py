@@ -1,7 +1,7 @@
 from __future__ import annotations
 import math
 import logging
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger("arcs.causal.active_inference")
 

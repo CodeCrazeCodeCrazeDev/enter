@@ -35,14 +35,14 @@ def test_unified_memory_and_world_graph():
     )
     memory.store_memory(entry)
 
-    # Store policy memory
-    policy_entry = MemoryEntry(
-        type=MemoryType.POLICY,
+    # Store strategic memory
+    strategic_entry = MemoryEntry(
+        type=MemoryType.STRATEGIC,
         tenant_id="tenant_123",
         context={"limit_type": "ad_spend"},
         payload={"weekly_cap_usd": 5000}
     )
-    memory.store_memory(policy_entry)
+    memory.store_memory(strategic_entry)
 
     # Retrieve memory by type
     retrieved = memory.retrieve_memory(MemoryType.EPISODIC, tenant_id="tenant_123")
@@ -51,23 +51,23 @@ def test_unified_memory_and_world_graph():
     assert retrieved[0].payload["ctr_achieved"] == 0.045
 
     # Retrieve memory by context
-    retrieved_policy = memory.retrieve_memory(
-        MemoryType.POLICY,
+    retrieved_strategic = memory.retrieve_memory(
+        MemoryType.STRATEGIC,
         tenant_id="tenant_123",
         query_context={"limit_type": "ad_spend"}
     )
-    assert len(retrieved_policy) == 1
-    assert retrieved_policy[0].payload["weekly_cap_usd"] == 5000
+    assert len(retrieved_strategic) == 1
+    assert retrieved_strategic[0].payload["weekly_cap_usd"] == 5000
 
     # Link memories semantically
-    memory.link_memories(entry.id, policy_entry.id, "GOVERNED_BY", weight=0.95)
+    memory.link_memories(entry.id, strategic_entry.id, "GOVERNED_BY", weight=0.95)
     relations = wg.get_relations_from(entry.id)
     assert len(relations) == 1
-    assert relations[0].target_id == policy_entry.id
+    assert relations[0].target_id == strategic_entry.id
     assert relations[0].relation_type == "GOVERNED_BY"
 
     # Assert belief over relation
-    memory.add_memory_belief("belief_tx_01", f"{entry.id}:{policy_entry.id}", probability=0.88, evidence=["sha_hash_1"])
+    memory.add_memory_belief("belief_tx_01", f"{entry.id}:{strategic_entry.id}", probability=0.88, evidence=["sha_hash_1"])
     assert wg.beliefs["belief_tx_01"].probability == 0.88
 
 

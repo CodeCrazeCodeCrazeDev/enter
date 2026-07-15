@@ -17,13 +17,11 @@ class MemoryType(str, Enum):
     EPISODIC = "episodic"
     PROCEDURAL = "procedural"
     STRATEGIC = "strategic"
-    RESEARCH = "research"
-    EXPERIMENT = "experiment"
     FINANCIAL = "financial"
     CUSTOMER = "customer"
     COMPETITOR = "competitor"
-    POLICY = "policy"
-    GOVERNANCE = "governance"
+    RESEARCH = "research"
+    FAILURES = "failures"
 
 
 class MemoryEntry(BaseModel):

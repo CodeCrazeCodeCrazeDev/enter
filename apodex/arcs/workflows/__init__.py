@@ -1,4 +1,4 @@
-"""Workflows and Subsystem Coordinators for ARCS / AEAN OS."""
+"""Workflows and Subsystem Coordinators for ARCS / AEAN OS / EREOS."""
 
 from __future__ import annotations
 
@@ -12,17 +12,19 @@ from .orchestrator import (
     DecisionTrace
 )
 from .subsystems import (
+    EntrepreneurialResearchExecutionOS,
     AutonomousEntrepreneurialActorOS,
     OpportunityDiscoverySubsystem,
-    BusinessModelSubsystem,
-    BrandSubsystem,
+    MarketResearchSubsystem,
+    BusinessGenerationSubsystem,
     ProductSubsystem,
-    GrowthSubsystem,
-    CustomerSuccessSubsystem,
+    BrandSubsystem,
+    MarketingSubsystem,
+    SalesSubsystem,
     FinanceSubsystem,
-    ComplianceSubsystem,
-    ExpansionSubsystem,
-    MetaLearningSubsystem
+    OperationsSubsystem,
+    LegalSubsystem,
+    StrategicPlanningSubsystem
 )
 
 __all__ = [
@@ -33,15 +35,17 @@ __all__ = [
     "ResearchCoordinator",
     "SubsystemCoordinator",
     "DecisionTrace",
+    "EntrepreneurialResearchExecutionOS",
     "AutonomousEntrepreneurialActorOS",
     "OpportunityDiscoverySubsystem",
-    "BusinessModelSubsystem",
-    "BrandSubsystem",
+    "MarketResearchSubsystem",
+    "BusinessGenerationSubsystem",
     "ProductSubsystem",
-    "GrowthSubsystem",
-    "CustomerSuccessSubsystem",
+    "BrandSubsystem",
+    "MarketingSubsystem",
+    "SalesSubsystem",
     "FinanceSubsystem",
-    "ComplianceSubsystem",
-    "ExpansionSubsystem",
-    "MetaLearningSubsystem"
+    "OperationsSubsystem",
+    "LegalSubsystem",
+    "StrategicPlanningSubsystem"
 ]

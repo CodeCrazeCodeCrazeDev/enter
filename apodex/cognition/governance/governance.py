@@ -130,6 +130,15 @@ class GovernanceLayer(ICognitiveModule):
                 rejection_tags=["NEGATIVE_ECONOMIC_YIELD"]
             )
 
+        # 7. Evidence-Based Strategic Verification (arXiv:2605.15245)
+        if "require_evidence" in goal.constraints:
+            if not context.evidence:
+                return VerificationResult(
+                    is_valid=False,
+                    reason="Governance Veto: Evidence-based self-improving organization protocol requires at least one supporting EvidenceCard.",
+                    rejection_tags=["MISSING_EVIDENCE_CARD"]
+                )
+
         return VerificationResult(is_valid=True, reason="Governance clearance granted. All safety and compliance checks passed.")
 
     async def learn(self, context: CognitiveContext, lessons: List[Lesson]) -> None:

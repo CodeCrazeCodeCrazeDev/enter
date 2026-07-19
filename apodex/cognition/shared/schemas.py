@@ -89,7 +89,9 @@ class DecisionProvenance(BaseModel):
     uncertainty: float
     alternatives_considered: List[str] = Field(default_factory=list)
     final_decision: str  # e.g. "APPROVED", "REJECTED_GOVERNANCE", "HALTED_FEASIBILITY"
+    predicted_expectations: Dict[str, Any] = Field(default_factory=dict, description="Simulated expectations prior to execution")
     execution_outcome: Optional[ExecutionOutcome] = None
+    discrepancy_analysis: Dict[str, Any] = Field(default_factory=dict, description="Outcome actuals compared against predicted expectations")
     lessons_learned: List[Lesson] = Field(default_factory=list)
 
 

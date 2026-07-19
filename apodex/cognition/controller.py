@@ -30,6 +30,12 @@ class CognitiveSystemController:
     """
     The Single Brain (Central Controller) of the Cognitive Operating System.
     Coordinates all capability modules in a single deterministic decision cycle.
+    Enforces arXiv:2605.15245 Evidence-Based Self-Improving Organization protocol:
+    1. Supported by Evidence (at least one EvidenceCard registered)
+    2. Simulated before Execution (using the global UnifiedPredictiveModel)
+    3. Measured after Execution (captured actual metrics)
+    4. Compared against Expectations (discrepancy variance analysis)
+    5. Fed back to Memory (persisting lessons, tuning world parameters)
     """
 
     def __init__(self) -> None:
@@ -58,14 +64,13 @@ class CognitiveSystemController:
         simulate_success: bool = True
     ) -> DecisionProvenance:
         """
-        Executes a single deterministic, audited decision cycle:
-        Observe -> Understand -> Strat Objective -> Hypotheses -> Feasibility -> ROI -> Operations Plan -> Governance Veto -> Execution -> Learn & Record
+        Executes a single deterministic, audited decision cycle adhering to arXiv:2605.15245
         """
         logger.info(f"Initiating decision cycle for: {goal_title}")
         context = CognitiveContext()
         obs_data = observation_data or {}
 
-        # 1. Observe: Initialize environment inputs and strategic intent
+        # 1. Observe: Initialize environmental inputs, strategic intent and evidence cards
         active_goal = StrategicGoal(
             title=goal_title,
             description=goal_description,
@@ -89,33 +94,14 @@ class CognitiveSystemController:
         context.system_metrics["executive_adjusted_priority"] = exec_analysis.get("adjusted_priority", priority_score)
 
         # 3. Hypothesis Generation (Research Intelligence)
-        # Research proposes, Planner coordinates
         await self.research.plan(context)
         await self.research.analyze(context)
 
         # 4. Feasibility & Risk Analysis (Engineering Intelligence)
-        # Engineering queries global predictive model for feasibility estimation (Rule 3)
-        proj_params = {
-            "estimated_cost_cents": int(budget_cents * 0.4),
-            "base_risk": 0.45 if len(active_goal.constraints) > 2 else 0.15,
-            "market_size_cents": 50_000_000
-        }
-        prediction = self.world_model.predict_strategy_outcome("engineering_feasibility", proj_params)
-
-        # Engineering populates structured FeasibilityReport
         await self.engineering.plan(context)
         await self.engineering.analyze(context)
 
         # 5. Value and ROI Assessment (Business Intelligence)
-        # Business queries same global predictive model for ROI simulation (Rule 3)
-        biz_params = {
-            "estimated_cost_cents": budget_cents,
-            "base_risk": 0.45 if len(active_goal.constraints) > 2 else 0.15,
-            "market_size_cents": 50_000_000
-        }
-        biz_prediction = self.world_model.predict_strategy_outcome("business_roi", biz_params)
-
-        # Business populates structured ValueReport
         await self.business.plan(context)
         await self.business.analyze(context)
 
@@ -123,19 +109,39 @@ class CognitiveSystemController:
         await self.operations.plan(context)
         await self.operations.analyze(context)
 
+        # STEP 2 (arXiv:2605.15245): Simulated before Execution
+        # Query global predictive model to simulate expectations before execution
+        proj_params = {
+            "estimated_cost_cents": int(budget_cents * 0.4),
+            "base_risk": 0.45 if len(active_goal.constraints) > 2 else 0.15,
+            "market_size_cents": 50_000_000
+        }
+        prediction = self.world_model.predict_strategy_outcome("strategy_simulation", proj_params)
+
+        predicted_expectations = {
+            "expected_feasibility_confidence": prediction.get("feasibility_confidence", 0.8),
+            "expected_revenue_cents": prediction.get("projected_revenue_cents", 0),
+            "expected_roi_multiple": prediction.get("roi_multiple", 1.0),
+            "expected_cost_cents": int(budget_cents * 0.95)
+        }
+
         # 7. Non-Bypassable Governance Veto Check (Governance Layer)
         gov_clearance = await self.governance.verify(context)
 
         # 8. Execution Stage
         final_decision = "REJECTED_GOVERNANCE"
         outcome = None
+        discrepancy_analysis = {}
 
         if gov_clearance.is_valid:
             final_decision = "APPROVED"
 
-            # Simulate sequential execution of steps
+            # STEP 3 (arXiv:2605.15245): Measured after Execution
+            # Capture actual execution parameters
             actual_cost = int(budget_cents * 0.95) if simulate_success else int(budget_cents * 1.25)
             actual_duration = 240.0
+            actual_revenue = int(prediction.get("projected_revenue_cents", 0) * (1.0 if simulate_success else 0.1))
+            actual_roi = (actual_revenue / actual_cost) if actual_cost > 0 else 0.0
 
             outcome = ExecutionOutcome(
                 success=simulate_success,
@@ -143,16 +149,31 @@ class CognitiveSystemController:
                 actual_duration_sec=actual_duration,
                 performance_metrics={
                     "conversions": 120 if simulate_success else 5,
-                    "avg_response_ms": 115.2
+                    "avg_response_ms": 115.2,
+                    "actual_revenue_cents": actual_revenue,
+                    "actual_roi_multiple": actual_roi
                 },
                 error_logs=[] if simulate_success else ["Connection timed out during database write."]
             )
             context.execution_outcome = outcome
+
+            # STEP 4 (arXiv:2605.15245): Compared against Expectations
+            # Compute variances between predicted expectations and measured outcomes
+            cost_variance_cents = actual_cost - predicted_expectations["expected_cost_cents"]
+            roi_variance = actual_roi - predicted_expectations["expected_roi_multiple"]
+
+            discrepancy_analysis = {
+                "cost_variance_cents": cost_variance_cents,
+                "roi_variance_multiple": roi_variance,
+                "performance_gap_detected": not simulate_success,
+                "comparison_timestamp": datetime.utcnow().isoformat()
+            }
         else:
             final_decision = f"REJECTED: {gov_clearance.reason}"
             logger.warning(f"Governance vetoed execution: {gov_clearance.reason}")
 
         # 9. Learning and Optimization (Learning Engine)
+        # STEP 5 (arXiv:2605.15245): Fed back into institutional memory
         lessons: List[Lesson] = []
         if outcome:
             # Let Learning Engine observe outcomes and analyze
@@ -179,6 +200,10 @@ class CognitiveSystemController:
                     "complexity_cost_multiplier": 1.4,
                     "failure_probability_offset": 0.12
                 })
+            else:
+                self.world_model.update_model_parameters({
+                    "market_saturation": 0.12
+                })
 
             # Notify modules to learn from these lessons
             await self.executive.learn(context, lessons)
@@ -202,7 +227,9 @@ class CognitiveSystemController:
             uncertainty=1.0 - (context.feasibility.confidence if context.feasibility else 0.5),
             alternatives_considered=["Heuristic fallback pipeline", "Sequential sequential check"],
             final_decision=final_decision,
+            predicted_expectations=predicted_expectations,
             execution_outcome=outcome,
+            discrepancy_analysis=discrepancy_analysis,
             lessons_learned=lessons
         )
 

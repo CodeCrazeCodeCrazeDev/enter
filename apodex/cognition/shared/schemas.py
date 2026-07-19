@@ -23,6 +23,15 @@ class Hypothesis(BaseModel):
     confidence: float = Field(0.5, description="Bayesian confidence score between 0.0 and 1.0")
     evidence_ids: List[uuid.UUID] = Field(default_factory=list)
 
+    # Research Opportunity Metrics (arXiv:2605.15245 Portfolio Management)
+    expected_scientific_value: float = Field(0.5, description="Scale of 0.0 to 1.0")
+    expected_engineering_impact: float = Field(0.5, description="Scale of 0.0 to 1.0")
+    expected_business_value: float = Field(0.5, description="Scale of 0.0 to 1.0")
+    cost_of_investigation_cents: int = Field(50_000, description="Cost in cents")
+    probability_of_success: float = Field(0.5, description="Bayesian estimate 0.0 to 1.0")
+    information_gain: float = Field(0.5, description="Entropy reduction / expected info gain 0.0 to 1.0")
+    priority_score: float = Field(0.5, description="Computed portfolio priority rank")
+
 
 class EvidenceCard(BaseModel):
     id: uuid.UUID = Field(default_factory=uuid.uuid4)
@@ -75,6 +84,24 @@ class ExecutionPlan(BaseModel):
     total_cost_projection_cents: int
 
 
+class ExecutionOutcome(BaseModel):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    success: bool
+    actual_cost_cents: int
+    actual_duration_sec: float
+    performance_metrics: Dict[str, Any] = Field(default_factory=dict)
+    error_logs: List[str] = Field(default_factory=list)
+
+
+class Lesson(BaseModel):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    category: str  # "workflow", "planner", "research_source", "engineering_pattern", "execution_strategy"
+    summary: str
+    context: str
+    impact_delta: float = Field(0.0, description="Change in performance metric if applied")
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
 class DecisionProvenance(BaseModel):
     id: uuid.UUID = Field(default_factory=uuid.uuid4)
     timestamp: datetime = Field(default_factory=datetime.utcnow)
@@ -93,24 +120,6 @@ class DecisionProvenance(BaseModel):
     execution_outcome: Optional[ExecutionOutcome] = None
     discrepancy_analysis: Dict[str, Any] = Field(default_factory=dict, description="Outcome actuals compared against predicted expectations")
     lessons_learned: List[Lesson] = Field(default_factory=list)
-
-
-class ExecutionOutcome(BaseModel):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4)
-    success: bool
-    actual_cost_cents: int
-    actual_duration_sec: float
-    performance_metrics: Dict[str, Any] = Field(default_factory=dict)
-    error_logs: List[str] = Field(default_factory=list)
-
-
-class Lesson(BaseModel):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4)
-    category: str  # "workflow", "planner", "research_source", "engineering_pattern", "execution_strategy"
-    summary: str
-    context: str
-    impact_delta: float = Field(0.0, description="Change in performance metric if applied")
-    created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
 class Recommendation(BaseModel):

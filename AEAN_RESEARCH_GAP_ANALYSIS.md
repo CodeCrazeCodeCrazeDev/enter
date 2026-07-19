@@ -380,6 +380,27 @@ class ResearchHypothesis(SQLModel, table=True):
 
 ---
 
+## 7. Universal vs. Domain-Specific Research Practices (Gap Justification)
+
+To keep AEAN’s Research Operating System highly optimized, performant, and lightweight, a key architectural distinction is made between **Universal Research Practices** (which are broadly applicable to software engineering and autonomous agents) and **Domain-Specific Research Practices** (which belong to non-adjacent fields and are explicitly excluded).
+
+### 7.1 Universal Research Practices (Fully Supported in AEAN)
+These practices are fundamental to the integrity of any computational, AI, or decision-making system. They are fully coded and enforced in AEAN:
+- **Reproducibility & Seeding:** Guaranteeing that any sandbox simulation, parameter estimation, or model execution can be exactly re-run and verified across environments.
+- **Experiment Tracking:** Explicitly registering hypotheses, evidence, parameters, expectations, and outcomes.
+- **Peer Review & Veto Gates:** Ensuring dual-perspective verification (e.g., Security, QA, and Governance validation) is executed prior to code execution or asset allocation.
+- **Statistical Validation:** Running bootstrapped iterations or multi-objective variance comparisons instead of reacting to singular noise points.
+
+### 7.2 Domain-Specific Research Practices (Explicitly Excluded)
+These practices exist in other world-class research bodies but are rejected for AEAN to avoid unnecessary process complexity and architectural bloating:
+- **Pharmaceutical R&D Clinical Trials:** Human phase-1 to phase-3 multi-year trial methodologies, double-blinding with human placebos, and FDA regional filings are not relevant to cognitive software agents.
+- **Particle Physics Data Pipelines (CERN):** Highly specific, petabyte-scale subatomic detector collision sorting, grid computing distributions, and hadron-beam hardware calibrations are irrelevant to our unified EKG and agent workflows.
+- **Aerospace Systems Thermal/Vibration Testing (NASA JPL):** Hardware environmental chamber simulations, structural vacuum stress tests, and orbital decay telemetry do not map to cognitive SaaS execution layers.
+
+Focusing strictly on **Universal Computational Research Practices** ensures AEAN’s self-improvement cycle remains highly focused and provides maximum measurable value to the platform.
+
+---
+
 ## Conclusion & Action Plan
 
 By establishing a unified `CognitiveSystemController` and implementing the **arXiv:2605.15245 Evidence-Based Self-Improving Organization** protocol, we have elevated AEAN’s maturity to **Level 4 (Quantitative)**.

@@ -61,11 +61,14 @@ class GovernanceLayer(ICognitiveModule):
         logger.info("Governance Layer generating compliance recommendations.")
         recs = []
         if context.active_goal and context.active_goal.budget_cents > (self.max_budget_limit_cents * 0.8):
+            evidence_ids = [ev.id for ev in context.evidence]
             recs.append(Recommendation(
                 title="Enforce Split-Payment Milestones",
                 action_type="SPLIT_BUDGET",
                 payload={"milestones_count": 3},
-                confidence_score=0.99
+                confidence_score=0.99,
+                supporting_evidence_ids=evidence_ids,
+                assumptions=["Budget allocations exceeding 80% threshold present elevated systemic insolvency risks"]
             ))
         return recs
 

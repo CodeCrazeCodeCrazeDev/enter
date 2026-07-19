@@ -128,6 +128,8 @@ class Recommendation(BaseModel):
     action_type: str
     payload: Dict[str, Any] = Field(default_factory=dict)
     confidence_score: float
+    supporting_evidence_ids: List[uuid.UUID] = Field(default_factory=list, description="Explicit links to evidence cards")
+    assumptions: List[str] = Field(default_factory=list, description="Cited key assumptions relied upon for this recommendation")
 
 
 class VerificationResult(BaseModel):

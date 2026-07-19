@@ -95,11 +95,14 @@ class OperationsIntelligence(ICognitiveModule):
         logger.info("Operations Intelligence providing routing recommendations.")
         recs = []
         if context.execution_plan and len(context.execution_plan.steps) > 5:
+            evidence_ids = [ev.id for ev in context.evidence]
             recs.append(Recommendation(
                 title="Parallelize Execution Sequence",
                 action_type="PARALLELIZE_STEPS",
                 payload={"target_sequences": [2, 3]},
-                confidence_score=0.88
+                confidence_score=0.88,
+                supporting_evidence_ids=evidence_ids,
+                assumptions=["Individual workflow step task transitions do not share mutable database variables"]
             ))
         return recs
 

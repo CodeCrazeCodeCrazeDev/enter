@@ -71,11 +71,14 @@ class ExecutiveIntelligence(ICognitiveModule):
         logger.info("Executive Intelligence generating recommendations.")
         recs = []
         if context.active_goal and context.active_goal.budget_cents > 1_000_000:
+            evidence_ids = [ev.id for ev in context.evidence]
             recs.append(Recommendation(
                 title="Optimize Seed Budget",
                 action_type="REALLOCATE_BUDGET",
                 payload={"target_cents": int(context.active_goal.budget_cents * 0.8)},
-                confidence_score=0.85
+                confidence_score=0.85,
+                supporting_evidence_ids=evidence_ids,
+                assumptions=["Historical budget execution shows 20% average baseline buffer efficiency"]
             ))
         return recs
 

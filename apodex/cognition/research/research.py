@@ -197,7 +197,9 @@ class ResearchIntelligence(ICognitiveModule):
                         "statement": best_hyp.statement,
                         "priority_score": best_hyp.priority_score
                     },
-                    confidence_score=best_hyp.confidence
+                    confidence_score=best_hyp.confidence,
+                    supporting_evidence_ids=best_hyp.evidence_ids,
+                    assumptions=["Scientific baseline literature findings generalize to the active tenant domain"]
                 ))
         return recs
 

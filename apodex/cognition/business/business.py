@@ -75,11 +75,14 @@ class BusinessIntelligence(ICognitiveModule):
         logger.info("Business Intelligence generating pricing recommendations.")
         recs = []
         if context.value and context.value.roi_multiple < 2.0:
+            evidence_ids = [ev.id for ev in context.evidence]
             recs.append(Recommendation(
                 title="Shift Focus to High-Margin Segments",
                 action_type="INCREASE_PRICING",
                 payload={"premium_tier_markup_pct": 0.15},
-                confidence_score=0.90
+                confidence_score=0.90,
+                supporting_evidence_ids=evidence_ids,
+                assumptions=["Dynamic price elasticity curves follow baseline competitor trends"]
             ))
         return recs
 

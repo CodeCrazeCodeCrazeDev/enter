@@ -104,11 +104,14 @@ class LearningEngine(ICognitiveModule):
         logger.info("Learning Engine generating optimization recommendations.")
         recs = []
         if context.execution_outcome and not context.execution_outcome.success:
+            evidence_ids = [ev.id for ev in context.evidence]
             recs.append(Recommendation(
                 title="Tune Predictive Model Parameters",
                 action_type="TUNE_PARAMETERS",
                 payload={"complexity_cost_multiplier": 1.5, "failure_probability_offset": 0.15},
-                confidence_score=0.95
+                confidence_score=0.95,
+                supporting_evidence_ids=evidence_ids,
+                assumptions=["Cost and complexity overruns correlate log-linearly with model parameter scale restrictions"]
             ))
         return recs
 

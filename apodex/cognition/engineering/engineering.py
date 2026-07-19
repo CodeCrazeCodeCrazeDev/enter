@@ -86,11 +86,14 @@ class EngineeringIntelligence(ICognitiveModule):
         logger.info("Engineering Intelligence providing development recommendations.")
         recs = []
         if context.feasibility and context.feasibility.architecture_score < 0.80:
+            evidence_ids = [ev.id for ev in context.evidence]
             recs.append(Recommendation(
                 title="Refactor Circular Dependencies",
                 action_type="REFACTOR_CODEBASE",
                 payload={"target_modules": "circular_ref"},
-                confidence_score=0.95
+                confidence_score=0.95,
+                supporting_evidence_ids=evidence_ids,
+                assumptions=["Static AST analysis correctly identifies structural circular dependency paths"]
             ))
         return recs
 

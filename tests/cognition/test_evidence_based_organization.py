@@ -48,7 +48,7 @@ async def test_evidence_based_organization_protocol_success():
     provenance = await controller.execute_decision_cycle(
         goal_title="Corroborated Strategic Strategy",
         goal_description="Launch high-frequency dynamic pricing variant.",
-        budget_cents=200_000,
+        budget_cents=2_000_000,
         constraints=["require_evidence"],
         observation_data=obs_data,
         simulate_success=True
@@ -66,7 +66,7 @@ async def test_evidence_based_organization_protocol_success():
     # 3. Measured after Execution
     assert provenance.execution_outcome is not None
     assert provenance.execution_outcome.success is True
-    assert provenance.execution_outcome.actual_cost_cents == int(200_000 * 0.95)
+    assert provenance.execution_outcome.actual_cost_cents == int(2_000_000 * 0.95)
 
     # 4. Compared against Expectations (discrepancy analysis)
     assert "cost_variance_cents" in provenance.discrepancy_analysis
@@ -76,6 +76,14 @@ async def test_evidence_based_organization_protocol_success():
     # 5. Fed back to Memory
     assert len(provenance.lessons_learned) > 0
     assert len(controller.memory.get_all_lessons()) > 0
+
+    # 6. Evidence-based Decisions & Assumptions checks on recommendations
+    test_context = CognitiveContext(active_goal=provenance.objective, evidence=provenance.evidence)
+    recs = await controller.executive.recommend(test_context)
+    assert len(recs) == 1
+    assert recs[0].supporting_evidence_ids == [provenance.evidence[0].id]
+    assert len(recs[0].assumptions) == 1
+    assert "Historical budget" in recs[0].assumptions[0]
 
     # Verify that the world model has adapted under positive reinforcement feedback (market_saturation updated)
     assert controller.world_model.base_parameters["market_saturation"] == 0.12

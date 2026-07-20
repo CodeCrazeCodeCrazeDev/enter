@@ -1,0 +1,132 @@
+"""Domain models, types, and schemas for the AI-EOS Operating System.
+
+This module houses the core aggregate roots and entities representing the state
+of the system, ensuring strict boundaries and adhering to Domain-Driven Design.
+"""
+
+from __future__ import annotations
+from datetime import datetime
+from enum import Enum
+from typing import Any, Dict, List, Optional
+from uuid import UUID, uuid4
+from pydantic import BaseModel, Field
+
+
+class SubsystemMaturity(str, Enum):
+    EXPERIMENTAL = "experimental"
+    VALIDATED = "validated"
+    PRODUCTION = "production"
+    DEPRECATED = "deprecated"
+
+
+class ExecutionStatus(str, Enum):
+    QUEUED = "queued"
+    RUNNING = "running"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+
+class AuditProvenance(BaseModel):
+    """Immutable audit tracking metadata for tracing decision origins."""
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_by: str = Field(..., description="Entity or agent responsible for the action.")
+    signature_sha256: str = Field(..., description="Cryptographic fingerprint of the inputs/state.")
+    parent_provenance_id: Optional[UUID] = None
+
+
+class DecisionProvenance(BaseModel):
+    """An immutable record detailing the scientific backing behind a strategic decision."""
+    decision_id: UUID = Field(default_factory=uuid4)
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    evidence: List[str] = Field(default_factory=list, description="Validated factual observations.")
+    assumptions: List[str] = Field(default_factory=list, description="Strategic assumptions made.")
+    models_consulted: List[str] = Field(default_factory=list, description="Model variants utilized.")
+    experiments_consulted: List[UUID] = Field(default_factory=list, description="Experiment IDs backing this choice.")
+    confidence: float = Field(0.0, ge=0.0, le=1.0)
+    uncertainty: float = Field(0.0, ge=0.0, le=1.0)
+    approval_chain: List[str] = Field(default_factory=list, description="Actors signing off on the action.")
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+class VentureCell(BaseModel):
+    """A bounded venture cell representing an isolated business unit with independent financials."""
+    cell_id: UUID = Field(default_factory=uuid4)
+    name: str = Field(..., min_length=2, max_length=128)
+    namespace: str = Field(..., description="Isolated storage and memory partition.")
+    sub_agent_ids: List[str] = Field(default_factory=list, description="Active agent composition.")
+
+    # Financial state (P&L)
+    allocated_capital_cents: int = Field(0, ge=0)
+    spent_capital_cents: int = Field(0, ge=0)
+    earned_revenue_cents: int = Field(0, ge=0)
+
+    # Active Inference and Belief state tracking
+    belief_state: Dict[str, Any] = Field(default_factory=dict, description="Probability distribution over market dimensions.")
+    uncertainty: float = Field(0.5, ge=0.0, le=1.0, description="Entropy score of current belief state.")
+    expected_free_energy: float = Field(0.0, description="Objective function score of the current policy.")
+    information_gain: float = Field(0.0, description="Predicted reduction in belief entropy.")
+    prediction_error: float = Field(0.0, description="Difference between model forecast and measurement.")
+    confidence: float = Field(0.5, ge=0.0, le=1.0, description="Confidence score on current policy trajectory.")
+    risk: float = Field(0.0, ge=0.0, description="Computed quantitative risk factor.")
+    capital_allocation_score: float = Field(0.0, description="Priority score for capital reallocation.")
+
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+    @property
+    def net_profit_cents(self) -> int:
+        return self.earned_revenue_cents - self.spent_capital_cents
+
+
+class Hypothesis(BaseModel):
+    """A registered scientific business hypothesis under statistical evaluation."""
+    hypothesis_id: UUID = Field(default_factory=uuid4)
+    title: str = Field(..., min_length=5, max_length=256)
+    description: str = Field(..., description="Detailed hypothesis declaration (H1).")
+    null_hypothesis: str = Field(..., description="Null hypothesis declaration (H0).")
+    parameters: Dict[str, Any] = Field(default_factory=dict)
+    target_metric: str = Field(..., description="The quantitative metric under evaluation.")
+    significance_level_alpha: float = Field(0.05, ge=0.001, le=0.2)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    status: str = Field("registered", description="Status (e.g. registered, testing, validated, refuted).")
+
+
+class Experiment(BaseModel):
+    """An execution instance of a scientific experiment in an isolated Sandbox."""
+    experiment_id: UUID = Field(default_factory=uuid4)
+    hypothesis_id: UUID
+    dataset_id: Optional[UUID] = None
+    seed: int = Field(default=42)
+    reproducibility_hash: str = Field(default="", description="Hash representation of sandbox state and seed.")
+    status: ExecutionStatus = Field(default=ExecutionStatus.QUEUED)
+    started_at: Optional[datetime] = None
+    ended_at: Optional[datetime] = None
+
+    # Statistical validation outputs
+    p_value: Optional[float] = None
+    effect_size: Optional[float] = None
+    deflated_sharpe_ratio: Optional[float] = None
+    is_statistically_significant: bool = Field(default=False)
+
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+class Capability(BaseModel):
+    """A version-controlled, verified, and audited operational behavior or system tool."""
+    capability_id: str = Field(..., description="UUID or structured string identifier.")
+    name: str = Field(..., min_length=2, max_length=128)
+    description: str = Field(..., description="Functional behavior description.")
+    source: str = Field(..., description="Source code file path or model endpoint.")
+    origin: str = Field(..., description="Origin of the capability, e.g. 'internal', 'arXiv:2502.20422', 'GitHub:some-repo'.")
+    evidence: List[str] = Field(default_factory=list, description="Pointers to validated Sandbox experiments or papers.")
+    benchmark_results: Dict[str, Any] = Field(default_factory=dict, description="Performance metrics scored on evaluation.")
+    risk_score: float = Field(0.0, ge=0.0, le=1.0)
+    dependencies: List[str] = Field(default_factory=list, description="IDs of other required capabilities.")
+    owner: str = Field(..., description="Subsystem or division owning this capability.")
+    maturity: SubsystemMaturity = Field(default=SubsystemMaturity.EXPERIMENTAL)
+    deployment_status: str = Field(default="staged", description="Status, e.g. staged, shadow, production, retired.")
+    rollback_trigger: str = Field(..., description="Metric threshold or exception pattern triggering auto-rollback.")
+    retirement_policy: str = Field(..., description="Condition for automatic deprecation.")
+
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)

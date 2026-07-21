@@ -7,6 +7,9 @@ from .models import (
     DecisionProvenance,
     VentureCell,
     Hypothesis,
+    Evidence,
+    Theory,
+    Contradiction,
     Experiment,
     Capability,
 )

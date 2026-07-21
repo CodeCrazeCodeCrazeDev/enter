@@ -1,18 +1,18 @@
-"""Execution Subsystem Orchestration Adapters for AI-EOS.
+"""Execution Subsystem Orchestration Adapters and Venture Execution System (VES) for SERO v2.
 
 Wires the existing AEAN Organism and ARCS systems behind stable decoupled interfaces,
-treating them as replaceable execution backends.
+and manages hierarchical multi-timescale planning.
 """
 
 from __future__ import annotations
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 from uuid import UUID
 
 from ..interfaces.services import IExecutionBackend
 from ...aean.flywheel import Organism
 
-logger = logging.getLogger("ai_eos.orchestration")
+logger = logging.getLogger("sero.ves")
 
 
 class ExecutionBackendAdapter(IExecutionBackend):
@@ -46,3 +46,33 @@ class ExecutionBackendAdapter(IExecutionBackend):
 
         logger.info(f"AEAN Organism step completed: Deploy = ${cycle_result.capital_deployed_cents/100:.2f}, Rev = ${cycle_result.revenue_cents/100:.2f}")
         return translated_metrics
+
+
+class VentureExecutionSystem:
+    """Consumes KOS theories and manages hierarchical multi-timescale venture planning."""
+
+    def __init__(self) -> None:
+        pass
+
+    def plan_multi_timescale(self, horizon_days: int) -> str:
+        """Resolve planning task types according to explicit timescale hierarchies."""
+        logger.info(f"VES generating hierarchical plans for horizon: {horizon_days} days")
+
+        if horizon_days <= 2:
+            logger.info("Timescale: Hours-Days -> Active experimental execution and ad-bid adjustment.")
+            return "EXECUTE_EXPERIMENTS"
+
+        if horizon_days <= 14:
+            logger.info("Timescale: Weeks -> Sprint-level product iterations and GTM optimizations.")
+            return "GT_SPRINTS"
+
+        if horizon_days <= 90:
+            logger.info("Timescale: Months -> Venture cell go/no-go progression and capital adjustments.")
+            return "GO_NO_GO_PROGRESSION"
+
+        if horizon_days <= 365:
+            logger.info("Timescale: Years -> Portfolio rebalancing and macro-geography sequencing.")
+            return "PORTFOLIO_REBALANCE"
+
+        logger.info("Timescale: Multi-year -> Organizational capability and research discipline updates.")
+        return "STRATEGIC_DISCIPLINE"

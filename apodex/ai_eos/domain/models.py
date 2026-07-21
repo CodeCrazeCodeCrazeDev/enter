@@ -1,4 +1,4 @@
-"""Domain models, types, and schemas for the AI-EOS Operating System.
+"""Domain models, types, and schemas for the SERO v2 Operating System.
 
 This module houses the core aggregate roots and entities representing the state
 of the system, ensuring strict boundaries and adhering to Domain-Driven Design.
@@ -81,14 +81,67 @@ class VentureCell(BaseModel):
 class Hypothesis(BaseModel):
     """A registered scientific business hypothesis under statistical evaluation."""
     hypothesis_id: UUID = Field(default_factory=uuid4)
-    title: str = Field(..., min_length=5, max_length=256)
-    description: str = Field(..., description="Detailed hypothesis declaration (H1).")
-    null_hypothesis: str = Field(..., description="Null hypothesis declaration (H0).")
-    parameters: Dict[str, Any] = Field(default_factory=dict)
-    target_metric: str = Field(..., description="The quantitative metric under evaluation.")
+
+    # New SERO v2 fields (with defaults for backward-compatibility)
+    statement: str = Field(default="", description="The target hypothesis statement.")
+    domain: str = Field(default="general", description="Scientific or business domain classification.")
+    prior_confidence: float = Field(0.50, ge=0.0, le=1.0)
+    posterior_confidence: float = Field(0.50, ge=0.0, le=1.0)
+    supporting_evidence: List[str] = Field(default_factory=list, description="List of supporting Evidence IDs.")
+    contradicting_evidence: List[str] = Field(default_factory=list, description="List of contradicting Evidence IDs.")
+    dependent_hypotheses: List[str] = Field(default_factory=list, description="Hypotheses assumed true.")
+    downstream_decisions: List[str] = Field(default_factory=list, description="Decisions relying on this claim.")
+    status: str = Field("active", description="Status (e.g. active, falsified, superseded, theory-promoted).")
+
+    # Old Phase 2 fields (retained for backward compatibility)
+    title: Optional[str] = None
+    description: Optional[str] = None
+    null_hypothesis: Optional[str] = None
+    target_metric: Optional[str] = None
     significance_level_alpha: float = Field(0.05, ge=0.001, le=0.2)
+
     created_at: datetime = Field(default_factory=datetime.utcnow)
-    status: str = Field("registered", description="Status (e.g. registered, testing, validated, refuted).")
+
+    def model_post_init(self, __context: Any) -> None:
+        """Autofill new fields from old ones if needed."""
+        if not self.statement and self.description:
+            self.statement = self.description
+        if not self.title and self.statement:
+            self.title = self.statement[:50]
+
+
+class Evidence(BaseModel):
+    """A factual measurement node in KOS graph."""
+    evidence_id: str = Field(..., description="Unique Evidence ID identifier.")
+    source: str = Field(..., description="Origin of measurement, e.g. paid pilot, simulation.")
+    method: str = Field(..., description="Method: experiment, observation, literature, simulation.")
+    strength: Dict[str, Any] = Field(default_factory=dict, description="Contains effect_size, sample_size, p_value.")
+    causal_or_correlational: str = Field("correlational", description="causal or correlational classification.")
+    linked_hypotheses: List[str] = Field(default_factory=list, description="Linked Hypothesis IDs.")
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    decay_rate: float = Field(0.02, ge=0.0)
+
+
+class Theory(BaseModel):
+    """A promoted general explanatory model built from validated hypotheses."""
+    theory_id: str = Field(..., description="Unique Theory ID identifier.")
+    statement: str = Field(..., description="General explanatory model statement.")
+    constituent_hypotheses: List[str] = Field(default_factory=list, description="Validated Hypothesis IDs backing this theory.")
+    predictive_scope: List[str] = Field(default_factory=list, description="Untested predictions queued for validation.")
+    confidence: float = Field(0.50, ge=0.0, le=1.0)
+    contradictions: List[str] = Field(default_factory=list, description="List of raised Contradiction IDs.")
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class Contradiction(BaseModel):
+    """An identified inconsistency between hypothesis beliefs."""
+    contradiction_id: str = Field(..., description="Unique Contradiction ID identifier.")
+    node_a: str = Field(..., description="First inconsistent Hypothesis ID.")
+    node_b: str = Field(..., description="Second inconsistent Hypothesis ID.")
+    detected_by: str = Field(..., description="Agent or module that identified the mismatch.")
+    resolution_status: str = Field(default="pending", description="Status of resolution: pending, resolved.")
+    resolution_action: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
 class Experiment(BaseModel):

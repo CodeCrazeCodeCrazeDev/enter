@@ -1,4 +1,4 @@
-"""Domain models, types, and schemas for the SERO v2 Operating System.
+"""Domain models, types, and schemas for the SERO v2.1 Operating System.
 
 This module houses the core aggregate roots and entities representing the state
 of the system, ensuring strict boundaries and adhering to Domain-Driven Design.
@@ -24,6 +24,25 @@ class ExecutionStatus(str, Enum):
     RUNNING = "running"
     COMPLETED = "completed"
     FAILED = "failed"
+
+
+class CognitiveStage(str, Enum):
+    """The 7 Cognitive Stages of the SERO v2.1 architecture."""
+    IMAGINE = "imagine"
+    PLAN = "plan"
+    EXPERIMENT = "experiment"
+    LEARN = "learn"
+    GENERALIZE = "generalize"
+    TEACH = "teach"
+    GOVERN = "govern"
+
+
+class KnowledgeROI(BaseModel):
+    """Structural metrics representing scientific research accountability."""
+    cost_per_validated_theory: float = Field(0.0, ge=0.0)
+    cost_per_uncertainty_reduction: float = Field(0.0, ge=0.0)
+    cost_per_reusable_insight: float = Field(0.0, ge=0.0)
+    cost_per_future_venture_unlocked: float = Field(0.0, ge=0.0)
 
 
 class AuditProvenance(BaseModel):
@@ -69,6 +88,9 @@ class VentureCell(BaseModel):
     confidence: float = Field(0.5, ge=0.0, le=1.0, description="Confidence score on current policy trajectory.")
     risk: float = Field(0.0, ge=0.0, description="Computed quantitative risk factor.")
     capital_allocation_score: float = Field(0.0, description="Priority score for capital reallocation.")
+
+    # Cognitive Tracking
+    current_cognitive_stage: CognitiveStage = Field(default=CognitiveStage.IMAGINE)
 
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)

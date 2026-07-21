@@ -3,6 +3,8 @@
 from .models import (
     SubsystemMaturity,
     ExecutionStatus,
+    CognitiveStage,
+    KnowledgeROI,
     AuditProvenance,
     DecisionProvenance,
     VentureCell,

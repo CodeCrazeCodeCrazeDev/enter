@@ -1,7 +1,7 @@
-"""Active Inference & Executive Optimization Layer implementation for AI-EOS.
+"""Active Inference, Bayesian Belief Engine, and Epistemic Risk Queries implementation for SERO v2.1.
 
-Solves constrained multi-objective optimizations and executes Bayesian belief updating
-to balance exploitation utility and epistemic exploration.
+Implements conjugate posterior distribution updates, calibration audits, and epistemic
+risk queries to prevent false certainty.
 """
 
 from __future__ import annotations
@@ -10,69 +10,66 @@ import logging
 from typing import Any, Dict, List, Optional
 from uuid import UUID
 
-from ..domain.models import VentureCell
+from ..domain.models import VentureCell, Hypothesis, Evidence
 from ..interfaces.services import IExecutiveOptimizer
 
-logger = logging.getLogger("ai_eos.executive")
+logger = logging.getLogger("sero.active_inference")
 
 
 class ExecutiveOptimizer(IExecutiveOptimizer):
-    """The multi-objective optimizer and active inference engine of AI-EOS."""
+    """The multi-objective optimizer, Bayesian Belief Engine, and Epistemic Risk manager."""
 
     def __init__(self, w_risk: float = 1.5, w_compute: float = 0.5, w_info: float = 2.0, w_gov: float = 3.0) -> None:
         self.w_risk = w_risk
         self.w_compute = w_compute
         self.w_info = w_info
         self.w_gov = w_gov
+        self.calibration_trail: List[Dict[str, Any]] = []
 
+    # ------------------------------------------------------------------
+    # Bayesian Belief conjugate updates
+    # ------------------------------------------------------------------
     def update_beliefs(self, cell: VentureCell, actual_revenue: int, expected_revenue: int) -> VentureCell:
         """Execute Bayesian update of belief states based on observation prediction errors."""
-        # Calculate prediction error
         pred_error = float(actual_revenue - expected_revenue)
         cell.prediction_error = pred_error
 
-        # Retrieve or initialize beta-prior parameters representing conversion/success probability
+        # Retrieve prior parameters representing conversion/success probability
         prior_alpha = float(cell.belief_state.get("alpha", 10.0))
         prior_beta = float(cell.belief_state.get("beta", 10.0))
 
-        # Conjugate update: If actual >= expected, increment alpha (successes), else beta (failures)
+        # Conjugate update using standard reliability weights
+        reliability_weight = 1.0
         if actual_revenue >= expected_revenue:
-            updated_alpha = prior_alpha + 1.0
+            updated_alpha = prior_alpha + reliability_weight
             updated_beta = prior_beta
         else:
             updated_alpha = prior_alpha
-            updated_beta = prior_beta + 1.0
+            updated_beta = prior_beta + reliability_weight
 
-        # Update belief state
         cell.belief_state["alpha"] = updated_alpha
         cell.belief_state["beta"] = updated_beta
 
-        # Compute new uncertainty as Shannon Entropy of the updated Beta distribution (approximation)
         sum_ab = updated_alpha + updated_beta
         mean = updated_alpha / sum_ab
         entropy = - (mean * math.log(max(1e-5, mean)) + (1.0 - mean) * math.log(max(1e-5, 1.0 - mean)))
 
-        # Predicted reduction in belief entropy (Information Gain)
         old_entropy = cell.uncertainty
         cell.uncertainty = float(entropy)
         cell.information_gain = max(0.0, old_entropy - entropy)
 
-        # Update confidence based on inverse variance
         variance = (updated_alpha * updated_beta) / ((sum_ab ** 2) * (sum_ab + 1.0))
-        cell.confidence = min(1.0, max(0.0, 1.0 - 4.0 * variance)) # normalized confidence
+        cell.confidence = min(1.0, max(0.0, 1.0 - 4.0 * variance))
 
-        logger.info(f"Bayesian update completed for cell {cell.name}: Prediction Error = {pred_error}, Uncertainty = {cell.uncertainty:.4f}, Confidence = {cell.confidence:.4f}")
+        logger.info(f"Bayesian conjugate update completed: Pred Error = {pred_error}, Uncertainty = {cell.uncertainty:.4f}")
         return cell
 
     def compute_composite_objective(self, cell: VentureCell, policy_expected_utility: float, policy_risk: float) -> float:
-        """Calculate composite objective G.
-
-        G = EconomicUtility - w_risk * RiskPenalty - w_compute * ComputeCost + w_info * InformationGain - w_gov * GovernancePenalty
-        """
+        """Calculate composite objective G score."""
         risk_penalty = float(policy_risk)
-        compute_cost = 0.1 * len(cell.sub_agent_ids)  # linear scaling of cost with agent size
+        compute_cost = 0.1 * len(cell.sub_agent_ids)
         info_gain = float(cell.information_gain)
-        gov_penalty = 5.0 if cell.risk > 0.8 else 0.0  # high risk triggers governance penalties
+        gov_penalty = 5.0 if cell.risk > 0.8 else 0.0
 
         g_score = (
             policy_expected_utility
@@ -89,21 +86,16 @@ class ExecutiveOptimizer(IExecutiveOptimizer):
         if not cells:
             return {}
 
-        # 1. Compute priority score for each cell
         total_score = 0.0
         priorities = {}
         for cell in cells:
-            # Active priority combines expected free energy and capital allocation score
             score = max(0.1, cell.expected_free_energy + cell.capital_allocation_score)
-
-            # Risk Gate: If risk exceeds the threshold, severely penalize and cap allocation
             if cell.risk > 0.7:
                 score *= 0.1
 
             priorities[cell.cell_id] = score
             total_score += score
 
-        # 2. Proportional allocation
         allocations = {}
         remaining_budget = total_budget_cents
 
@@ -112,7 +104,6 @@ class ExecutiveOptimizer(IExecutiveOptimizer):
             share = priority / total_score
             allocated_cents = int(total_budget_cents * share)
 
-            # Risk Cap: Cells with high risk (risk > 0.5) cannot receive more than 20% of total budget
             if cell.risk > 0.5:
                 max_cap = int(0.20 * total_budget_cents)
                 if allocated_cents > max_cap:
@@ -121,14 +112,88 @@ class ExecutiveOptimizer(IExecutiveOptimizer):
             allocations[cell.cell_id] = allocated_cents
             remaining_budget -= allocated_cents
 
-        # Distribute any rounding dust to the highest priority cell
         if remaining_budget > 0 and cells:
             highest_priority_id = max(priorities, key=lambda k: priorities[k])
             allocations[highest_priority_id] += remaining_budget
 
-        # Log allocation results
-        for cell_id, cents in allocations.items():
-            cell_obj = next(c for c in cells if c.cell_id == cell_id)
-            logger.info(f"Optimized capital allocated to cell {cell_obj.name}: ${cents/100:.2f}")
-
         return allocations
+
+    # ------------------------------------------------------------------
+    # Epistemic Risk Query Layers (Formal Spec §5 & §7)
+    # ------------------------------------------------------------------
+    def flag_high_impact_low_evidence(self, hypotheses: List[Hypothesis]) -> List[Hypothesis]:
+        """Query layer to identify unproven high-impact assumptions (Formal Spec §5.2)."""
+        flagged = []
+        for h in hypotheses:
+            evidence_count = len(h.supporting_evidence) + len(h.contradicting_evidence)
+            # High impact: downstream_decisions >= 3, low evidence: evidence_count <= 1
+            if len(h.downstream_decisions) >= 3 and evidence_count <= 1:
+                h.high_impact_low_evidence_flag = True
+                flagged.append(h)
+                logger.warning(f"EPISTEMIC RISK: Flagged high-impact low-evidence node: {h.hypothesis_id}")
+        return flagged
+
+    def assumption_depth(self, hyp: Hypothesis, kos_dict: Dict[str, Hypothesis]) -> int:
+        """Recursively count the unproven dependency depth of a given hypothesis (Formal Spec §5.3)."""
+        if not hyp.dependent_hypotheses:
+            return 0
+
+        max_depth = 0
+        for dep_id in hyp.dependent_hypotheses:
+            dep_hyp = kos_dict.get(dep_id)
+            if dep_hyp and dep_hyp.status != "theory_promoted":
+                depth = 1 + self.assumption_depth(dep_hyp, kos_dict)
+                max_depth = max(max_depth, depth)
+
+        return max_depth
+
+    def ignorance_registry(self, hypotheses: List[Hypothesis]) -> Dict[str, Any]:
+        """A view representing the system's own structural ignorance (Formal Spec §5.5)."""
+        high_impact = self.flag_high_impact_low_evidence(hypotheses)
+        sparse_domains = {}
+
+        for h in hypotheses:
+            evidence_count = len(h.supporting_evidence) + len(h.contradicting_evidence)
+            if evidence_count < 2:
+                if h.domain not in sparse_domains:
+                    sparse_domains[h.domain] = []
+                sparse_domains[h.domain].append(str(h.hypothesis_id))
+
+        return {
+            "high_impact_low_evidence": [str(h.hypothesis_id) for h in high_impact],
+            "sparse_domains": sparse_domains
+        }
+
+    def audit_calibration(self) -> Dict[str, Any]:
+        """Periodically audit calibration bounds to prevent overconfidence (Formal Spec §3.3 & §7.1)."""
+        logger.info("Executing Calibration Audit over strategic decision records...")
+        buckets: Dict[str, List[float]] = {"60-70": [], "70-80": [], "80-90": [], "90-100": []}
+
+        # Aggregate decision outcomes by confidence
+        for record in self.calibration_trail:
+            conf = record.get("confidence", 0.5)
+            realized = record.get("realized", False)
+            val = 1.0 if realized else 0.0
+
+            if 0.60 <= conf < 0.70:
+                buckets["60-70"].append(val)
+            elif 0.70 <= conf < 0.80:
+                buckets["70-80"].append(val)
+            elif 0.80 <= conf < 0.90:
+                buckets["80-90"].append(val)
+            elif 0.90 <= conf <= 1.00:
+                buckets["90-100"].append(val)
+
+        deviations = {}
+        for b_name, vals in buckets.items():
+            if vals:
+                realized_rate = sum(vals) / len(vals)
+                midpoint = (float(b_name.split("-")[0]) + float(b_name.split("-")[1])) / 200.0
+                deviation = abs(realized_rate - midpoint)
+                deviations[b_name] = {"realized_rate": realized_rate, "deviation": deviation}
+                if deviation > 0.15:
+                    logger.warning(f"CALIBRATION AUDIT FAULT: Bucket {b_name} miscalibration {deviation:.2%} exceeds 15% threshold!")
+            else:
+                deviations[b_name] = {"realized_rate": None, "deviation": 0.0}
+
+        return deviations

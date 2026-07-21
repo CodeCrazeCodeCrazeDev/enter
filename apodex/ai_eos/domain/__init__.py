@@ -12,6 +12,8 @@ from .models import (
     Evidence,
     Theory,
     Contradiction,
+    Relationship,
+    DecisionRecord,
     Experiment,
     Capability,
 )

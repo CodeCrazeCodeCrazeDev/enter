@@ -1,4 +1,4 @@
-"""Domain models, types, and schemas for the SERO v2.1 Operating System.
+"""Domain models, types, and schemas for the SERO v2.1 Operating System (Formal Spec v1.0).
 
 This module houses the core aggregate roots and entities representing the state
 of the system, ensuring strict boundaries and adhering to Domain-Driven Design.
@@ -104,18 +104,31 @@ class Hypothesis(BaseModel):
     """A registered scientific business hypothesis under statistical evaluation."""
     hypothesis_id: UUID = Field(default_factory=uuid4)
 
-    # New SERO v2 fields (with defaults for backward-compatibility)
+    # Formal Spec v1.0 Fields
     statement: str = Field(default="", description="The target hypothesis statement.")
     domain: str = Field(default="general", description="Scientific or business domain classification.")
+    venture_id: Optional[str] = Field(None, description="Null if venture-agnostic / cross-cutting.")
+
     prior_confidence: float = Field(0.50, ge=0.0, le=1.0)
     posterior_confidence: float = Field(0.50, ge=0.0, le=1.0)
+    confidence_distribution: Dict[str, Any] = Field(
+        default_factory=lambda: {"type": "beta", "params": {"alpha": 10.0, "beta": 10.0}},
+        description="Probability distribution over success ratio."
+    )
+
     supporting_evidence: List[str] = Field(default_factory=list, description="List of supporting Evidence IDs.")
     contradicting_evidence: List[str] = Field(default_factory=list, description="List of contradicting Evidence IDs.")
     dependent_hypotheses: List[str] = Field(default_factory=list, description="Hypotheses assumed true.")
     downstream_decisions: List[str] = Field(default_factory=list, description="Decisions relying on this claim.")
-    status: str = Field("active", description="Status (e.g. active, falsified, superseded, theory-promoted).")
 
-    # Old Phase 2 fields (retained for backward compatibility)
+    # Derived flags for Epistemic Risk queries
+    assumption_count: int = Field(0, description="Count of unproven dependent hypotheses.")
+    single_source_flag: bool = Field(False, description="True if evidence count == 1.")
+    high_impact_low_evidence_flag: bool = Field(False, description="True if high impact and low evidence count.")
+
+    status: str = Field("proposed", description="Status (proposed, under_test, active, falsified, superseded, theory_promoted).")
+
+    # Backward compatibility fields
     title: Optional[str] = None
     description: Optional[str] = None
     null_hypothesis: Optional[str] = None
@@ -123,6 +136,7 @@ class Hypothesis(BaseModel):
     significance_level_alpha: float = Field(0.05, ge=0.001, le=0.2)
 
     created_at: datetime = Field(default_factory=datetime.utcnow)
+    last_updated: datetime = Field(default_factory=datetime.utcnow)
 
     def model_post_init(self, __context: Any) -> None:
         """Autofill new fields from old ones if needed."""
@@ -130,18 +144,36 @@ class Hypothesis(BaseModel):
             self.statement = self.description
         if not self.title and self.statement:
             self.title = self.statement[:50]
+        self.assumption_count = len(self.dependent_hypotheses)
+        evidence_count = len(self.supporting_evidence) + len(self.contradicting_evidence)
+        self.single_source_flag = (evidence_count == 1)
+        self.high_impact_low_evidence_flag = (len(self.downstream_decisions) >= 3 and evidence_count <= 1)
 
 
 class Evidence(BaseModel):
     """A factual measurement node in KOS graph."""
     evidence_id: str = Field(..., description="Unique Evidence ID identifier.")
     source: str = Field(..., description="Origin of measurement, e.g. paid pilot, simulation.")
-    method: str = Field(..., description="Method: experiment, observation, literature, simulation.")
-    strength: Dict[str, Any] = Field(default_factory=dict, description="Contains effect_size, sample_size, p_value.")
+    source_type: str = Field(default="experiment", description="experiment | observation | literature | simulation.")
+    method: str = Field(default="experiment", description="Method (backward compatibility): experiment, observation, literature, simulation.")
+    evidence_quality_tier: str = Field(default="survey", description="rct | natural_experiment | longitudinal | survey | interview | opinion | synthetic.")
+    reliability_weight: float = Field(0.50, ge=0.0, le=1.0)
+
+    strength: Dict[str, Any] = Field(default_factory=dict, description="Contains effect_size, sample_size, p_value, interval.")
     causal_or_correlational: str = Field("correlational", description="causal or correlational classification.")
     linked_hypotheses: List[str] = Field(default_factory=list, description="Linked Hypothesis IDs.")
+
+    replicated_by: List[str] = Field(default_factory=list, description="List of replica Evidence IDs.")
+    replication_status: str = Field(default="unreplicated", description="unreplicated | replicated | failed_replication.")
+
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     decay_rate: float = Field(0.02, ge=0.0)
+    current_relevance: float = Field(1.0, ge=0.0, le=1.0)
+
+    def model_post_init(self, __context: Any) -> None:
+        """Autofill new fields from old ones if needed."""
+        if self.method and self.source_type == "experiment":
+            self.source_type = self.method
 
 
 class Theory(BaseModel):
@@ -151,7 +183,26 @@ class Theory(BaseModel):
     constituent_hypotheses: List[str] = Field(default_factory=list, description="Validated Hypothesis IDs backing this theory.")
     predictive_scope: List[str] = Field(default_factory=list, description="Untested predictions queued for validation.")
     confidence: float = Field(0.50, ge=0.0, le=1.0)
+
+    # Formal Spec v1.0 predictive track record and promotion criteria
+    predictive_track_record: Dict[str, Any] = Field(
+        default_factory=lambda: {
+            "predictions_made": 0,
+            "predictions_confirmed": 0,
+            "predictions_falsified": 0,
+            "accuracy_rate": 1.0
+        }
+    )
+    promotion_criteria_met: Dict[str, Any] = Field(
+        default_factory=lambda: {
+            "independent_evidence_count": 0,
+            "generalization_tested": False,
+            "predictive_success_threshold_met": False
+        }
+    )
+
     contradictions: List[str] = Field(default_factory=list, description="List of raised Contradiction IDs.")
+    status: str = Field("draft", description="Status (draft, active, contradicted, retired).")
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
@@ -161,19 +212,61 @@ class Contradiction(BaseModel):
     node_a: str = Field(..., description="First inconsistent Hypothesis ID.")
     node_b: str = Field(..., description="Second inconsistent Hypothesis ID.")
     detected_by: str = Field(..., description="Agent or module that identified the mismatch.")
+    severity: str = Field(default="low", description="low | medium | high.")
     resolution_status: str = Field(default="pending", description="Status of resolution: pending, resolved.")
     resolution_action: Optional[str] = None
+    routed_to: str = Field(default="chairman_agent", description="chairman_agent | human_governance.")
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class Relationship(BaseModel):
+    """Typed relationship edges connecting epistemic nodes."""
+    relationship_id: str = Field(default_factory=lambda: f"rel_{uuid4().hex[:12]}")
+    from_node: str = Field(..., description="Source node ID.")
+    to_node: str = Field(..., description="Target node ID.")
+    type: str = Field(..., description="supports | contradicts | causes | correlates | derived_from | generalizes | specializes.")
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class DecisionRecord(BaseModel):
+    """Institutional memory record representing strategic choices made."""
+    decision_id: str = Field(..., description="Unique Decision ID identifier.")
+    decision: str = Field(..., description="Decision summary statement.")
+    supporting_hypotheses: List[str] = Field(default_factory=list, description="Supporting Hypothesis IDs.")
+    confidence_at_decision: float = Field(0.50, ge=0.0, le=1.0)
+    rejected_alternatives: List[str] = Field(default_factory=list, description="Rejected alternative statements.")
+    rationale: str = Field(..., description="Textual rationale backing the choice.")
+    made_by: str = Field(default="agent", description="agent | human.")
+    outcome: Dict[str, Any] = Field(
+        default_factory=lambda: {
+            "realized": False,
+            "actual_result": None,
+            "confidence_in_hindsight": None
+        }
+    )
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
 class Experiment(BaseModel):
     """An execution instance of a scientific experiment in an isolated Sandbox."""
     experiment_id: UUID = Field(default_factory=uuid4)
-    hypothesis_id: UUID
+    hypothesis_tested: Optional[str] = Field(None, description="Hypothesis tested ID reference.")
+    design: Dict[str, Any] = Field(
+        default_factory=lambda: {
+            "method": "simulation",
+            "sample_size_planned": 100,
+            "power": 0.80,
+            "pre_registered": True
+        }
+    )
+    status: str = Field(default="designed", description="designed | running | complete | aborted.")
+    result_evidence: Optional[str] = Field(None, description="Resulting Evidence ID pointer.")
+
+    # Backward compatibility fields
+    hypothesis_id: UUID = Field(default_factory=uuid4)
     dataset_id: Optional[UUID] = None
     seed: int = Field(default=42)
     reproducibility_hash: str = Field(default="", description="Hash representation of sandbox state and seed.")
-    status: ExecutionStatus = Field(default=ExecutionStatus.QUEUED)
     started_at: Optional[datetime] = None
     ended_at: Optional[datetime] = None
 

@@ -1,7 +1,8 @@
 # SERO — Sovereign Entrepreneurial Research Organization
 ## Authoritative Architecture Specification & Contract (v2.1.0)
+### KOS/ROS Formal Specification — v1.0
 
-This document specifies the canonical, binding architecture contract for **SERO (Sovereign Entrepreneurial Research Organization) v2.1**, elevating the system from a sequential feature workflow to a **Research-as-Primary-Abstraction Architecture** fully aligned to a **7-Stage Cognitive Lifecycle**, **Research Economics**, and a **Multi-Paradigm Collective Intelligence Layer**.
+This document specifies the canonical, binding architecture contract and formal spec for **SERO (Sovereign Entrepreneurial Research Organization) v2.1**, elevating the system from a sequential feature workflow to a **Research-as-Primary-Abstraction Architecture** fully aligned to a **7-Stage Cognitive Lifecycle**, **Research Economics**, a **Multi-Paradigm Collective Intelligence Layer**, and a **Formal KOS/ROS Specification**.
 
 ---
 
@@ -47,49 +48,20 @@ SERO v2.1 represents the ultimate convergence of cognitive science, research eco
 
 ---
 
-## 2. Bounded Contexts, System Ownership & Context Map
+## 2. Bounded Contexts & Ownership
 
 SERO v2.1 decomposes its operations into exactly nine canonical Bounded Contexts, each with an explicit ownership boundary, inputs, outputs, and invariants.
 
-```
-       +-------------------------------------------------------------------------+
-       |                               AI-EOS OS                                 |
-       |                                                                         |
-       |   +-----------------------+                    +--------------------+   |
-       |   |       Research        |                    |     Executive      |   |
-       |   |      Operating        | ──[Publishes]────> |    Intelligence    |   |
-       |   |        System         |   (Research Ledger)|                    |   |
-       |   +-----------+-----------+                    +---------+----------+   |
-       |               |                                          |              |
-       |       Updates |                                          | Orchestrates |
-       |               v                                          v              |
-       |   +-----------+-----------+                    +---------+----------+   |
-       |   |        Memory &       |                    |     Execution      |   |
-       |   |       Knowledge       | ◄──[Retrieves]─────|      Systems       |   |
-       |   |     Infrastructure    |                    |    (AEAN/ARCS)     |   |
-       |   +-----------+-----------+                    +---------+----------+   |
-       |               |                                          |              |
-       |               | Updates (Proven Capabilities)            | Runs Inside  |
-       |               |                                          v              |
-       |   +-----------+-----------+                    +---------+----------+   |
-       |   |   Frontier Cap/Model  | ◄──[Monitors]──────|      Sandbox       |   |
-       |   |      Intelligence     |                    |    Environment     |   |
-       |   +-----------------------+                    +--------------------+   |
-       +-------------------------------------------------------------------------+
-```
-
-### 2.1 Bounded Context Definitions & Ownership
-
-1.  **System Composition & Composition Platform Context (`sero.composition`)**
+1.  **System Composition & Composition Context (`sero.composition`)**
     *   *Owner*: Systems Engineering Core.
-    *   *Mission*: Provide thread-safe Dependency Injection (DI), plugin loading, lifecycle coordination, configuration schemas, and service resolution.
+    *   *Mission*: Provide thread-safe Dependency Injection (DI), plugin loading, lifecycle coordination, and service resolution.
 2.  **Knowledge Operating System Context (`sero.kos`)**
     *   *Owner*: Knowledge Operations Division.
-    *   *Mission*: Expose the active knowledge graph and Bayesian updating core.
+    *   *Mission*: Expose the active knowledge graph, Bayesian updating, contradiction detection, and the Epistemic Risk query layers.
     *   *Invariants*: Referential integrity of evidence-hypothesis associations must be perfectly preserved.
 3.  **Research Operating System Context (`sero.ros`)**
     *   *Owner*: Scientific Research Division.
-    *   *Mission*: Conduct automated signal discovery, experimental design, and statistical validation.
+    *   *Mission*: Conduct automated signal discovery, experimental design, Research Compiler ingestion, and statistical validation.
     *   *Invariants*: Hypotheses can only be promoted to Theory status if multiple-testing correction is passed with $p < 0.05$.
 4.  **Entrepreneurial Intelligence System Context (`sero.eis`)**
     *   *Owner*: Strategic Decision Division.
@@ -112,78 +84,268 @@ SERO v2.1 decomposes its operations into exactly nine canonical Bounded Contexts
 
 ---
 
-## 3. The 7 Cognitive Stages
+## 3. Data Schemas
 
-Every major execution or adaptative lifecycle in SERO v2.1 maps directly onto seven discrete, measurable cognitive stages, aligning technical operations with biological cognitive frameworks.
+### 3.1 Hypothesis
 
-1.  **Imagine**: The creative generation phase. Generates candidate opportunity signals, hypothesis spaces, and alternative tactical scenarios.
-2.  **Plan**: The modeling and forecasting phase. Evaluates consequences inside the simulation sandbox, estimates NPV and Information Gain, and allocates budget and compute.
-3.  **Experiment**: The active intervention phase. Executes sandbox trials, physical testing pilots, or multi-armed ad campaigns under strict seed controls.
-4.  **Learn**: The analytical reflection phase. Measures prediction error (forecast vs. measurement), computes Bayes posterior updates, and extracts factual assertions.
-5.  **Generalize**: The inductive promotion phase. Synthesizes validated hypotheses into generalized Theory nodes, mapping predictive scopes across venture boundaries.
-6.  **Teach**: The propagation and distribution phase. Compiles playbooks, updates the shared substrate, and deploys distilled system capabilities to active agents.
-7.  **Govern**: The regulatory filter phase. Evaluates risk limits, security safety, legal compliance, complexity budgets, and architectural coupling conformance.
+```typescript
+Hypothesis {
+  id: string                          // uuid
+  statement: string
+  domain: string                      // e.g. "pricing", "onboarding", "channel-fit"
+  venture_id: string | null           // null if venture-agnostic / cross-cutting
+
+  prior_confidence: float             // 0-1, set at creation
+  posterior_confidence: float         // updated by Bayesian Belief Engine (§5)
+  confidence_distribution: {          // not just a point estimate
+    type: "beta" | "gaussian" | "dirichlet"
+    params: object                    // e.g. {alpha, beta} for Beta
+  }
+
+  supporting_evidence: EvidenceRef[]
+  contradicting_evidence: EvidenceRef[]
+  dependent_hypotheses: HypothesisRef[]   // what this claim assumes
+  downstream_decisions: DecisionRef[]     // what relies on this claim
+
+  assumption_count: int               // derived: count of unproven dependent_hypotheses
+  single_source_flag: bool            // derived: true if evidence_count == 1
+  high_impact_low_evidence_flag: bool // derived, see §7.2
+
+  status: "proposed" | "under_test" | "active" | "falsified" | "superseded" | "theory_promoted"
+  created_at: timestamp
+  last_updated: timestamp
+}
+```
+
+### 3.2 Evidence
+
+```typescript
+Evidence {
+  id: string
+  source: string                      // URI, document ref, experiment id
+  source_type: "experiment" | "observation" | "literature" | "simulation" | "interview" | "survey"
+
+  evidence_quality_tier: "rct" | "natural_experiment" | "longitudinal" |
+                          "survey" | "interview" | "opinion" | "synthetic"
+                                       // ordinal, drives reliability_weight below
+
+  reliability_weight: float           // 0-1, derived from quality_tier lookup table (§5.2),
+                                       // manually overridable with logged justification
+
+  strength: {
+    effect_size: float | null
+    sample_size: int | null
+    interval: [float, float] | null   // CI or credible interval
+    p_or_posterior: float | null
+  }
+
+  causal_or_correlational: "causal" | "correlational" | "unknown"
+  linked_hypotheses: HypothesisRef[]
+
+  replicated_by: EvidenceRef[]        // empty until independently replicated
+  replication_status: "unreplicated" | "replicated" | "failed_replication"
+
+  timestamp: timestamp
+  decay_rate: float                   // relevance half-life, domain-dependent default
+  current_relevance: float            // derived: decays over time, flags for review when < threshold
+}
+```
+
+### 3.3 Theory
+
+```typescript
+Theory {
+  id: string
+  statement: string                   // general explanatory model
+  constituent_hypotheses: HypothesisRef[]
+  predictive_scope: Prediction[]      // untested implications, auto-queued as new Hypotheses
+
+  confidence: float
+  predictive_track_record: {          // NEW — round 4 refinement
+    predictions_made: int
+    predictions_confirmed: int
+    predictions_falsified: int
+    accuracy_rate: float              // confirmed / (confirmed + falsified)
+  }
+
+  promotion_criteria_met: {
+    independent_evidence_count: int   // >= 2 required, from distinct source_types
+    generalization_tested: bool       // has scope been tested outside origin context
+    predictive_success_threshold_met: bool   // accuracy_rate >= 0.7 after >= 3 predictions
+  }
+
+  contradictions: ContradictionRef[]
+  status: "draft" | "active" | "contradicted" | "retired"
+}
+```
+
+### 3.4 Contradiction
+
+```typescript
+Contradiction {
+  id: string
+  node_a: HypothesisRef | TheoryRef
+  node_b: HypothesisRef | TheoryRef
+  detected_by: "contradiction_detection_agent" | "manual"
+  detected_at: timestamp
+  severity: "low" | "medium" | "high"      // derived from downstream_decisions impact
+  resolution_status: "open" | "escalated" | "resolved"
+  resolution_action: string | null
+  routed_to: "chairman_agent" | "human_governance"  // high severity always routes to human
+}
+```
+
+### 3.5 Typed Relationships
+
+```typescript
+Relationship {
+  from: HypothesisRef | TheoryRef
+  to: HypothesisRef | TheoryRef
+  type: "supports" | "contradicts" | "causes" | "correlates" |
+        "derived_from" | "generalizes" | "specializes" | "requires" |
+        "duplicates" | "updates"
+}
+```
 
 ---
 
-## 4. Research Economics & Knowledge ROI
+## 4. Research Compiler (KOS Ingestion Capability)
 
-To prevent exploratory research from becoming an unaccountable capital drain, SERO v2.1 introduces strict quantitative metrics representing **Knowledge ROI** ($K_{ROI}$):
+The Research Compiler converts raw materials (papers, transcripts, etc.) into structured, deduplicated, and normalized Evidence nodes, ensuring clean updates.
 
-*   **Cost per Validated Theory** ($C_{VT}$): Total Research Portfolio budget spent divided by the number of hypotheses successfully promoted to general Theory status.
-*   **Cost per Uncertainty Reduction** ($C_{UR}$): Total research spend divided by the sum of belief entropy reduction ($\Delta H$) achieved across all KOS Hypothesis nodes.
-*   **Cost per Reusable Insight** ($C_{RI}$): Cost divided by the count of playbooks and capabilities successfully distilled and adopted by multiple downstream Venture Cells.
-*   **Cost per Future Venture Unlocked** ($C_{VU}$): Research spend divided by the number of high-tier commercial Venture Cells launched directly on top of promoted KOS Theories.
+### 4.1 Ingestion Pipeline Flow
 
----
-
-## 5. Multi-Paradigm Collective Intelligence Layer
-
-Rather than relying on a single large language model or isolated ReAct agents, SERO v2.1 routes all complex strategic decisions through a multi-mind **Collective Intelligence Layer** representing **six distinct reasoning paradigms**:
-
-1.  **Bayesian Reasoner**: Thinks probabilistically. Updates conversion and success priors, and models expected information gain and belief entropy.
-2.  **Symbolic Reasoner**: Thinks in strict logic and rules. Enforces schema validations, bounded context constraints, and invariant rules.
-3.  **Causal Reasoner**: Thinks in causes and counterfactuals. Distinguishes correlation from causation using structural causal path models.
-4.  **Economic Reasoner**: Thinks in unit economics and capital optimization. Maximizes P&L margins, LTV, and capital efficiency ratios.
-5.  **Game-Theoretic Reasoner**: Thinks in payoffs and competitive equilibria. Analyzes competitor reactions, ad auctions, and pricing game strategies.
-6.  **Mechanistic Reasoner**: Thinks in physical/operational flows. Scans step-by-step API responses, latency budgets, and system bottleneck paths.
-
-The consensus score emerges from combining these six dimensions.
+```
+Raw input (paper | patent | interview transcript | market report | filing | reviews)
+   ↓
+[Extraction]        — pull claims, numbers, effect sizes (no raw copyright text)
+   ↓
+[Normalization]      — map extracted claims onto existing domain vocabulary synonyms
+   ↓
+[Deduplication]      — check against existing Evidence nodes to avoid double-counting
+   ↓
+[Conflict Resolution] — if a claim contradicts existing Evidence, raise a Contradiction
+   ↓
+[Evidence Node Creation] — assign quality_tier and calculate reliability_weight
+   ↓
+[Hypothesis Update]  — Bayesian Belief Engine triggered on all linked hypotheses
+```
 
 ---
 
-## 6. Measurable Phase Exit Criteria
+## 5. Bayesian Belief Engine
 
-A phase of the SERO v2.1 implementation is not complete when its code is written; it is complete only when all objective criteria listed below are verified and satisfied.
+The Bayesian Belief Engine performs standard conjugate updates to propagate evidence.
 
-| Phase | Core Deliverables | Verification Methodology | Mandatory Measurable Exit Criteria |
-|---|---|---|---|
-| **Phase 0** | Bounded context maps, system specification, and legacy documentation update. | Architectural audit. | 100% of bounded contexts documented; all ADRs accepted; legacy specifications mapped via traceability table. |
-| **Phase 1** | DI container, event bus, config, state machine, deterministic IDs, and persistence layers. | Conformance tests. | Zero direct cross-package imports; 100% of DI registrations resolved; event bus publishes and consumes concurrently with zero message loss. |
-| **Phase 2** | Active knowledge graph, Bayesian belief updating, contradiction detection, and theory loops. | Mathematical validation. | Correctly propagates confidence downstream and resolves contradictions via conjugate Beta/Gaussian updates. |
-| **Phase 3** | Discovery Engine, opportunity ranking, and Autonomous Science writeups. | Simulation tests. | Blended mathematical opportunity scoring allocates priority correctly to high-information-value signal opportunities. |
-| **Phase 4** | Meta-economic form decision framework. | Deliberation replay. | EIS selects build/license/open-source form correctly based on capital constraints. |
-| **Phase 5** | Multi-Timescale Planning and Research Portfolio Management. | Portfolio allocation simulation. | POS distributes budget between venture and research portfolios correctly based on Expected Discovery Value. |
-| **Phase 6** | Discovery-to-rollback pipelines, detailed Capability Registry and Lineage Database. | Sandbox test run. | Extracted capabilities successfully compiled and metadata records mapped; sandbox verifies capability isolation. |
-| **Phase 7** | GRC gates, Meta-Governance, and IES Agent Lifecycle. | Chaos injection. | Spawning and splitting of agents executes successfully within complexity budgets under strict invariants. |
-| **Phase 8** | Replay, chaos, fault, security, and economic benchmarks. | Test suite execution. | 100% pass on regression and replay tests; system recovers gracefully from injected database/network failures within $<500\text{ ms}$. |
-| **Phase 9** | Progressive rollout, capability/flag rollbacks, and kill switches. | Rollback simulation. | Simulated SLA degradation triggers complete automatic rollback to previous stable version within $<100\text{ ms}$. |
+### 5.1 Update Rule
+
+For a Hypothesis with Beta(α, β) posterior:
+
+```
+On new Evidence e with reliability_weight w and directional strength s (support=+1/contradict=-1):
+  α_new = α + (w × s_positive_component)
+  β_new = β + (w × s_negative_component)
+  posterior_confidence = α_new / (α_new + β_new)
+```
+
+For continuous estimates (CAC, elasticity), standard conjugate normal updates are performed.
+
+### 5.2 Reliability Weight Lookup Table
+
+| evidence_quality_tier | default reliability_weight |
+|---|---|
+| rct | 1.0 |
+| natural_experiment | 0.8 |
+| longitudinal | 0.7 |
+| survey | 0.5 |
+| interview | 0.4 |
+| opinion | 0.2 |
+| synthetic | 0.15 |
 
 ---
 
-## 7. Legacy Document Traceability & Status Matrix
+## 6. Contradiction Detection & Routing
 
-To avoid documentation drift and maintain a clear, single source of truth, we establish the following traceability table:
+```
+on_evidence_added(e: Evidence):
+  for h in e.linked_hypotheses:
+    for h2 in KOS.hypotheses where h2.domain == h.domain and h2.id != h.id:
+      if semantic_overlap(h, h2) > threshold and posterior_confidence(h) and posterior_confidence(h2) are inconsistent:
+        create Contradiction(node_a=h, node_b=h2, severity=compute_severity(h, h2))
+        if severity == "high": route_to_human_governance()
+        else: route_to_chairman_agent()
+```
 
-| Document | Path | Status | Relationship & Traceability Guidance |
-|---|---|---|---|
-| **SERO_ARCHITECTURE** | `docs/architecture/SERO_ARCHITECTURE.md` | **Active / Authoritative** | The master, controlling architecture contract for SERO v2.1. Supersedes `AI_EOS_ARCHITECTURE.md`. |
-| **AI_EOS_ARCHITECTURE** | `docs/architecture/AI_EOS_ARCHITECTURE.md` | **Superseded** | Fully superseded by the Research-as-Primary-Abstraction architecture of SERO. |
-| **APODEX_SYSTEM_DESIGN** | `APODEX_SYSTEM_DESIGN.md` | **Partially Superseded** | Superseded on the master self-evolution flow by SERO Active Inference and Meta-Governance design. The basic Personal Evolution Profile (PEP) and Verifier node definitions remain valid as subcomponents of the memory and validation contexts. |
-| **ARCS_ARCHITECTURE** | `ARCS_ARCHITECTURE.md` | **Subsystem** | Serves as the authoritative domain model for execution/revenue services within the ARCS execution context. Coordinates directly with `sero.ves`. |
-| **AEAN_DESIGN** | `apodex/aean/README.md` | **Subsystem** | Serves as the authoritative specification of the 6-stage flywheel micro-cell execution loop. Coordinates directly with `sero.ves`. |
-| **IMPLEMENTATION_ROADMAP**| `IMPLEMENTATION_ROADMAP.md` | **Historical Roadmap** | Superseded by the dependency-driven implementation phases of SERO. |
-| **APODEX2_MEMORY_SYSTEM_DESIGN** | `docs/design/APODEX2_MEMORY_SYSTEM_DESIGN.md` | **Subsystem** | Serves as the technical specification of the underlying 5-tier memory models (T0-T4) and hybrid scoring formula. Maps directly to the `sero.kos` context. |
+---
+
+## 7. Epistemic Risk (KOS Query Layer)
+
+Four queries run on a schedule to surface false certainty and blind-spots:
+
+### 7.1 Calibration Audit
+
+Runs monthly, comparing recorded decision confidences against actual success outcomes:
+
+```
+audit_calibration():
+  for each confidence bucket (e.g. 60-70%, 70-80%):
+    realized_rate = count(DecisionRecord where confidence_at_decision in bucket and outcome.realized == true) / count(in bucket)
+    flag if |realized_rate - bucket_midpoint| > 0.15
+```
+
+### 7.2 High-Impact / Low-Evidence Flag
+
+Identifies unproven assumptions that have a high operational impact:
+
+```
+flag_high_impact_low_evidence():
+  return Hypothesis where downstream_decisions.count >= impact_threshold AND supporting_evidence.count <= 1
+```
+
+### 7.3 Assumption Count / Depth
+
+Recursively counts the depth of unproven dependent hypotheses supporting any active decision.
+
+### 7.4 Ignorance Registry (Composite View)
+
+Consolidates unproven high-impact nodes and sparse-evidence domains, automatically boosting their Expected Information Gain score inside Discovery Mathematics.
+
+---
+
+## 8. State Machines & Subsystem API Contracts
+
+### 8.1 Hypothesis to Theory Promotion State Machine
+
+```
+proposed → under_test → active
+                            │
+                            ├── evidence accumulates, Bayesian updates continue
+                            │
+                            ▼
+                    promotion_check (all required):
+                      - independent_evidence_count >= 2, distinct source_types
+                      - generalization_tested == true
+                      - predictive_success_threshold_met == true
+                        (>= 3 predictions made, accuracy_rate >= 0.7)
+                            │
+                            ▼
+                    theory_promoted  →  Theory.status = "draft"
+                                          → predictive_scope generates new Hypotheses
+                                          → Theory.status = "active" once first prediction confirms
+```
+
+---
+
+## 9. Explicitly Deferred (with stated trigger)
+
+The following items are deferred from the build scope, only to be constructed when their specific trigger conditions are met:
+
+| Deferred Item | Trigger to Build |
+|---|---|
+| **Formal Ontology** | Contradiction Detection false-positive rate exceeds 20% (semantic drift artifacts), OR the normalization synonym table exceeds 200 entries. |
+| **Standalone Epistemic Risk Subsystem** | Epistemic Risk query layers require advanced cross-hypothesis blind-spot inference that basic queries cannot express. |
+| **Multi-Level World Models as Separate Systems** | A single domain's update cadence or data source differs so heavily from others that coupling them causes stale-data errors. |
+| **Full Scientific-Institution Layer** | Multiple independent human researchers/reviewers exist, requiring actual headcount and complex proper-scoring metrics (e.g., CRPS) to be meaningful. |
 
 ---
 

@@ -6,9 +6,37 @@ This is the canonical, binding architecture contract for **SERO (Sovereign Entre
 
 ---
 
-## 0. System-Wide Architecture
+## 0. The Six Subsystems
 
-### 0.1 Layered Stack
+```
+                    ┌─────────────────────────────────┐
+                    │  IES — Institutional Evolution   │  (governs all below)
+                    └────────────────┬────────────────┘
+                                     │
+        ┌────────────────────────────┼────────────────────────────┐
+        │                            │                             │
+┌───────▼────────┐         ┌─────────▼─────────┐         ┌─────────▼────────┐
+│  ROS            │◄───────►│  KOS               │◄───────►│  EIS              │
+│  Research OS    │         │  Knowledge OS       │         │  Entrepreneurial  │
+│                 │         │  (shared substrate)  │         │  Intelligence     │
+└───────┬─────────┘         └─────────┬───────────┘         └─────────┬────────┘
+        │                             │                                │
+        └────────────────┬────────────┴───────────────┬────────────────┘
+                          │                             │
+                 ┌────────▼────────┐          ┌─────────▼────────┐
+                 │  VES             │◄────────►│  POS              │
+                 │  Venture         │          │  Portfolio OS      │
+                 │  Execution       │          │  (capital + risk)  │
+                 └──────────────────┘          └───────────────────┘
+```
+
+**KOS is the substrate, not a peer node.** ROS writes theories and evidence into it; VES writes real-world outcomes into it; EIS reads it to decide what's worth pursuing; POS reads it to price risk. Nothing in the system holds private, ungraphed beliefs — that was v1's core flaw (memory without epistemics).
+
+---
+
+## 1. System-Wide Architecture
+
+### 1.1 Layered Stack
 
 ```
 L7  GOVERNANCE          Human Governance Council · Policy Engine · Kill-Switches · Audit Ledger
@@ -21,14 +49,14 @@ L1  MEMORY               Episodic · Semantic · Procedural · Working Memory ·
 L0  DATA & TOOL FABRIC   Market data · Web/API access · Payment rails · Ad platforms · CRM · Accounting · Compliance
 ```
 
-### 0.2 Governing Principles
+### 1.2 Governing Principles (inherited from AEAN, generalized)
 1. **Capital-gated expansion** — no subsystem activates above its funded tier until the upstream loop has proven itself economically (analogous to the 14-day profitable-loop gate, generalized to "N days of positive unit economics" per venture).
 2. **Verifiable reward over vibes** — every agent loop that can be graded against a real-world signal (PnL, conversion, retention, CAC:LTV) is trained/selected via verifiable reward (GRPO-style), not subjective LLM self-scoring alone.
 3. **Simulate before spending** — every action with real capital or reputational cost must pass through the Simulation Sandbox and a causal pre-mortem before execution.
 4. **Human-in-the-loop at irreversibility boundaries** — capital deployment, legal commitments, brand-identity lock-in, hiring, and pricing changes above a materiality threshold are non-waivable gates (same posture as ADGS's non-waivable human approval gate in AlphaAlgo).
 5. **One venture, one microfish loop, one owner-agent** — each business unit is a bounded "venture cell" with its own P&L, agent team, and memory namespace, orchestrated but not entangled with siblings until portfolio-level capital allocation decisions are made.
 
-### 0.3 Core Cross-Cutting Systems
+### 1.3 Core Cross-Cutting Systems
 
 | System | Function | Notes |
 |---|---|---|
@@ -42,7 +70,7 @@ L0  DATA & TOOL FABRIC   Market data · Web/API access · Payment rails · Ad pl
 
 ---
 
-## 1. Cross-Cutting Agent Registry
+## 2. Cross-Cutting Agent Registry
 
 | Agent | Role | Reports To |
 |---|---|---|
@@ -80,7 +108,7 @@ Each Orchestrator is a chairman-agent pattern (specialists propose → peer-revi
 
 ---
 
-## 2. Model Stack
+## 3. Model Stack
 
 | Category | Purpose | Examples of Technique |
 |---|---|---|
@@ -97,7 +125,7 @@ Each Orchestrator is a chairman-agent pattern (specialists propose → peer-revi
 
 ---
 
-## 3. Required Datasets (by domain)
+## 4. Required Datasets (by domain)
 
 - **Macro/industry**: government statistics, trade data, industry reports, patent filings, job postings (demand signal proxy)
 - **Competitor**: pricing pages, review sites, ad libraries, hiring pages, funding databases
@@ -109,7 +137,7 @@ Each Orchestrator is a chairman-agent pattern (specialists propose → peer-revi
 
 ---
 
-## 4. Lifecycle Phases
+## 5. Lifecycle Phases
 
 ### Phase 0 — Opportunity Discovery & Market Research
 *   **Objectives:** Continuously surface and rank venture-worthy demand signals; convert raw signal into scientifically grounded market understanding.
@@ -236,19 +264,6 @@ Each Orchestrator is a chairman-agent pattern (specialists propose → peer-revi
 *   **Risk management:** Hard-coded invariants; kill-switch retained by human Governance Council at all times.
 *   **Feedback loops:** This is the master feedback loop — every other phase terminates here.
 *   **Self-improvement:** Recursive, bounded self-evolution of venture running, never governance.
-
----
-
-## 5. Build Sequencing (mapped to your existing Tier system)
-
-| Stage | What ships | Tier |
-|---|---|---|
-| 1 | Phase 0–1 pipeline for a single venture cell (Opportunity → Validated Idea) | Tier 1 — zero-cost defaults, no real capital |
-| 2 | Phase 2–3 for that same cell (Brand/MVP/GTM), MVP built via Jules handoff | Tier 1→2, gated on smoke-test conversion |
-| 3 | Phase 4 revenue engine live, 14-day-equivalent profitable-loop validation | Tier 2, real but bounded capital |
-| 4 | Phase 5 capital/portfolio layer activates — second venture cell permitted | Tier 2→3, gated on Phase-4 validation |
-| 5 | Phase 6 org/legal scaffolding, Phase 8 self-improvement loop goes live in shadow mode | Tier 3, revenue-funded |
-| 6 | Phase 7 expansion, full AEAN-Prime multi-cell portfolio operation | Tier 3, fully proven |
 
 ---
 

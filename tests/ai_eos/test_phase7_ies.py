@@ -8,8 +8,8 @@ def test_ies_agent_lifecycle_management():
     """Verify that agents can be spawned and retired under complexity constraints."""
     ies = GovernanceGateway()
 
-    # Initial roster has 4 default agents
-    assert len(ies.agent_registry) == 4
+    # Initial roster has 29 default agents
+    assert len(ies.agent_registry) == 29
 
     # Spawn new econometrics agent
     res = ies.manage_agent_lifecycle(action="SPAWN", agent_id="agent_pricing_econometrics")

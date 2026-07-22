@@ -26,8 +26,38 @@ class GovernanceGateway(IGovernanceGateway):
         self.active_complexity_score = 0.0
         self.technical_debt_score = 0.0
 
-        # IES Ledgers
-        self.agent_registry: List[str] = ["agent_ceo", "agent_cfo", "agent_cto", "agent_scout"]
+        # IES Ledgers — Registering all 29 specialized cross-cutting agents from AI-EOS spec
+        self.agent_registry: List[str] = [
+            "Opportunity Scout",
+            "Market Research Analyst",
+            "Competitor Intelligence Agent",
+            "Customer Discovery Agent",
+            "Idea Synthesis Agent",
+            "Business Model Architect",
+            "Financial Modeling Agent",
+            "Brand Strategist / Namer",
+            "Product Architect",
+            "Pricing Strategist",
+            "Codegen/MVP Agent",
+            "GTM Strategist",
+            "Content Generation Agent",
+            "SEO Agent",
+            "Paid Media Agent",
+            "Social/Community Agent",
+            "Sales Funnel Agent",
+            "CRM/Automation Agent",
+            "Customer Support Agent",
+            "Revenue Optimization Agent",
+            "Fundraising Agent",
+            "Capital Allocation Agent",
+            "Risk Analyst Agent",
+            "Expansion Strategist",
+            "Org Design Agent",
+            "Legal/Compliance Agent",
+            "KPI/Telemetry Agent",
+            "Experimentation Agent",
+            "Self-Improvement Agent"
+        ]
         self.decision_record_ledger: List[Dict[str, Any]] = []
 
     # ------------------------------------------------------------------

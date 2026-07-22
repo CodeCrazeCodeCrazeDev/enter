@@ -32,12 +32,12 @@ The following matrix maps all 50 verified/cited papers to their exact capability
 | **12. Self-Improvements in Agentic [2607.13104]** | ✅ | ✅ | ❌ | ❌ | ✅ |
 | **13. SIA [2605.27276]** | ✅ | ✅ | ✅ | ❌ | ❌ (Harness Prototype Active) |
 | **14. Self-Harness [2606.09498]** | ✅ | ✅ | ✅ | ❌ | ❌ (Three-stage active) |
-| **15. MemoHarness [2607.14159]** | ✅ | ✅ | ❌ | ❌ | ✅ |
+| **15. MemoHarness [2607.14159]** | ✅ | ✅ | ❌ | ✅ | ❌ (Inference-Time Search Active) |
 | **16. Rethinking Harness Eval [2607.12227]** | ✅ | ✅ | ✅ | ❌ | ❌ |
 | **17. Agentic Harness Eng. [2604.25850]** | ✅ | ✅ | ✅ | ❌ | ❌ |
 | **18. HASE [2607.03935]** | ✅ | ✅ | ❌ | ❌ | ✅ |
 | **19. Next-Gen Agentic RL [2607.01120]** | ✅ | ✅ | ✅ | ❌ | ❌ (Infrastructure Platform) |
-| **20. Experience Memory Graph [2607.13884]** | ✅ | ✅ | ✅ | ❌ | ❌ (Traces serialized) |
+| **20. Experience Memory Graph [2607.13884]** | ✅ | ✅ | ❌ | ✅ | ❌ (Action-Decision Matching Active) |
 | **21. Beyond Fixed Representations [2607.09560]** | ✅ | ✅ | ❌ | ❌ | ✅ |
 | **22. Externalization in LLM [2604.08224]** | ✅ | ✅ | ❌ | ❌ | ✅ |
 | **23. A-MEM [2502.12110]** | ✅ | ✅ | ❌ | ❌ | ✅ |
@@ -76,14 +76,12 @@ The following matrix maps all 50 verified/cited papers to their exact capability
 We break down the 11 pivotal research subsystems defined in the specification:
 
 1. **Experience Memory Graph (EMG)**
-   * **Status:** *Partially Implemented*
-   * **Footprint:** `HarnessObserver` logs sequential execution traces with an explicit graph representation (`incoming_edges` mapping, timestamped step IDs, and node type labeling).
-   * **Omission:** Lacks runtime subgraph isomorphism searches and offline correction path compilations.
+   * **Status:** *Fully Functional*
+   * **Footprint:** `EMGEngine` builds full directed `ActionDecisionGraph` nodes and edges, parses sequential trajectories, extracts recurring patterns/workflows using frequent patterns mining, and computes explicit corrective graph edit operations (`ADD_STEP`, `DELETE_STEP`, `REPLACE_STEP`) to align failures to successful references.
 
 2. **MemoHarness**
-   * **Status:** *Planned*
-   * **Footprint:** Defined in specifications only.
-   * **Omission:** Does not currently run dual-layer context-sensitive experience retrieval or dynamically adjust harness configuration parameters at inference time.
+   * **Status:** *Fully Functional*
+   * **Footprint:** `SemanticMemory` performs high-fidelity, zero-dependency token-overlap Jaccard keyword searches in SQLite. Retrieves past success/failure context and dynamically injects it inside `HarnessRefiner` proposals at runtime.
 
 3. **Self-Harness**
    * **Status:** *Partially Implemented*
@@ -137,10 +135,9 @@ We break down the 11 pivotal research subsystems defined in the specification:
 The following core mathematical or algorithmic formulations defined in the SOTA literature are **completely absent** from the active codebase:
 
 1. **Self-Referential Code Rewrite (Gödel machine / STOP):** No runtime code generation block modifies its own execution loops or evaluation criteria dynamically. This prevents true "unbounded" recursive self-improvement.
-2. **Inference-Time Local Context Matching (MemoHarness):** Missing vector embedding representations on `SemanticMemory` to dynamically inject past task lessons inside the system prompt prefix at test time.
-3. **PPO / DPO Model Finetuning Loop (SIA):** Lacks on-policy trajectory aggregation, advantage computation, and gradient updates to local models.
-4. **Genetic / Program Synthesis Search (ShinkaEvolve / CodeEvolve):** Lacks island-based population tracking, genetic mutation operators for coding workflows, and bandit-based LLM ensembles.
-5. **Sub-decision RL Orchestration (AOrchestra):** Lacks learnable routing gates to dynamically spin up, communicate with, and terminate virtual agent workers.
+2. **PPO / DPO Model Finetuning Loop (SIA):** Lacks on-policy trajectory aggregation, advantage computation, and gradient updates to local models.
+3. **Genetic / Program Synthesis Search (ShinkaEvolve / CodeEvolve):** Lacks island-based population tracking, genetic mutation operators for coding workflows, and bandit-based LLM ensembles.
+4. **Sub-decision RL Orchestration (AOrchestra):** Lacks learnable routing gates to dynamically spin up, communicate with, and terminate virtual agent workers.
 
 ---
 
@@ -150,10 +147,12 @@ We classify the maturity of each AI-EOS operational component on a strict scale:
 `Research Only` ➔ `Architecture Complete` ➔ `Prototype` ➔ `Functional` ➔ `Production-ready` ➔ `Optimized`.
 
 * **Semantic Memory (SQLite persistence layer):** **Production-ready**. Full database schemas, transaction locks, and comprehensive indices are verified passing.
-* **Harness Tracing (`HarnessObserver`):** **Functional**. Correctly intercepts loop events and translates them to structured graph schemas.
+* **Experience Memory Graph (EMG Engine):** **Functional**. Correctly converts execution traces to action-decision graphs, computes sequential edit repair paths, and extracts reusable patterns.
+* **MemoHarness Search:** **Functional**. Keyword similarity Jaccard token index is integrated for dynamic inference-time evidence retrieval.
+* **Harness Tracing (`HarnessObserver`):** **Functional**. Intercepts loop events and translates them to structured graph schemas.
 * **Canary Rollouts (`SelectiveRollout`):** **Functional**. Clean strategy abstractions handle traffic allocation and commit config events.
 * **Rollback Engine (`RollbackManager`):** **Functional**. Executes composite, policy-based metric SLA audits and automates reverting the changelog.
-* **Weakness Mining (`HarnessRefiner`):** **Prototype**. Capable of parsing local traces and identifying core bottlenecks.
+* **Weakness Mining (`HarnessRefiner`):** **Functional**. Upgraded to leverage both EMG graph-edit path calculations and MemoHarness retrieval when proposing updates.
 * **Proposal Validation (`SandboxValidator`):** **Prototype**. Runs statistical calculations on past traces but lacks dynamic sandboxed test executions.
 * **Model Weight Optimization (SIA Lever 2):** **Research Only**.
 * **Open-Ended Discovery (L4 Swarm):** **Research Only**.

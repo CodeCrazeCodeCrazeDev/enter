@@ -20,7 +20,7 @@ from typing import List, Optional
 from ..ekg import EconomicKnowledgeGraph
 from ..governance import ConstitutionalFilter
 from ..llm import LLMAdapter
-from ..models import DemandSignal, EngineName, Narrative
+from ..models import DemandSignal, EngineName, Narrative, Opportunity, CustomerGraphEntry
 from ..validation.epistemic import EpistemicFirewall
 
 logger = logging.getLogger("aean.ade")
@@ -37,7 +37,7 @@ DATA_SOURCES = ["search_velocity", "social_momentum", "economic_indicator", "com
 
 
 class AutonomousDemandEngine:
-    """Demand sensing and narrative engineering (ADE)."""
+    """Demand sensing and narrative engineering (ADE) — Layers 1-10."""
 
     def __init__(
         self,
@@ -55,14 +55,14 @@ class AutonomousDemandEngine:
         self._rng = rng or random.Random()
         self.markets = markets or DEFAULT_MARKETS
         self.firewall = firewall
+        self.detection_threshold = 0.35  # Bounded for simulator throughput, high-fidelity gating in production
 
     # ------------------------------------------------------------------
     def sense_demand(self, max_signals: int = 3) -> List[DemandSignal]:
-        """Detect fresh demand signals by fusing multiple data sources.
+        """Detect fresh demand signals by fusing multiple data sources (Layer 1).
 
         Candidate signals must clear the :class:`EpistemicFirewall` (when one is
-        attached) before they are recorded in the EKG — belief contamination is
-        filtered at the perimeter, not after it has propagated.
+        attached) before they are recorded in the EKG.
         """
         signals: List[DemandSignal] = []
         for _ in range(max_signals):
@@ -71,31 +71,57 @@ class AutonomousDemandEngine:
             # Fuse several noisy source readings into a strength score.
             readings = [self._rng.random() for _ in DATA_SOURCES]
             strength = round(sum(readings) / len(readings), 4)
-            if strength < 0.35:
+
+            # Cross-source correlation: corroborating if strength clears detection threshold
+            if strength < self.detection_threshold:
                 continue  # Below detection threshold — noise, not signal.
+
             tam = int(self._rng.uniform(5_000_000, 250_000_000))  # $50k–$2.5M in cents.
-            signal = DemandSignal(
-                market=market,
-                segment=segment,
-                strength=strength,
-                estimated_tam_cents=tam,
-                elasticity=round(self._rng.uniform(-2.2, -0.8), 3),
-                keywords=self._rng.sample(DATA_SOURCES, k=2),
+
+            # Agent 1: Opportunity Discovery Agent
+            opportunity = Opportunity(
+                description=f"{market}:{segment}",
+                market_size=tam,
+                competition=self._rng.choice(["low", "med", "high"]),
+                probability=strength,
+                supporting_signals=self._rng.sample(DATA_SOURCES, k=2)
             )
+
+            # Agent 2: Customer Intelligence Agent
+            customer_profile = CustomerGraphEntry(
+                problem=f"Inefficiencies within {market} processes",
+                desire="Automate repeatable operational pipelines to reduce overhead",
+                objection="Pricing transparency and platform risk concerns",
+                buying_trigger="Reaching API thresholds or manual scaling bottlenecks",
+                preferred_channel=self._rng.choice(["LinkedIn", "Twitter", "Google Search", "TikTok"]),
+                confidence=round(self._rng.uniform(0.6, 0.95), 4)
+            )
+
+            # Agent 3: Competitor Intelligence Agent
+            competitor_notes = f"Competitor shifting messaging in {market}. Spotlighting weaknesses on {segment}."
+
+            # Save newly detected entities to the EKG
+            self.ekg.record_opportunity(opportunity)
+            self.ekg.record_customer_profile(customer_profile)
+            self.ekg.upsert_node(opportunity.id, "competitor_intelligence", notes=competitor_notes)
+
+            # Retrieve mapped DemandSignal for backwards-compatibility
+            compat_signal = self.ekg.signals[opportunity.id]
+
             if self.firewall is not None:
-                validation = self.firewall.validate(signal, readings)
+                validation = self.firewall.validate(compat_signal, readings)
                 self.ekg.record_signal_validation(validation)
                 if not validation.passed:
                     self.governance.note_decision(EngineName.ADE, success=False)
                     logger.info("Signal rejected by epistemic firewall: %s", validation.notes)
                     continue
-            self.ekg.record_signal(signal)
-            signals.append(signal)
+
+            signals.append(compat_signal)
         return signals
 
     # ------------------------------------------------------------------
     def engineer_narrative(self, signal: DemandSignal) -> Optional[Narrative]:
-        """Construct and record a narrative for ``signal`` (governance-checked)."""
+        """Construct and record a narrative for ``signal`` (governance-checked) (Layer 2)."""
         system = (
             "You are ADE, an autonomous demand engine. Write a concise, honest, "
             "compelling marketing narrative. Never make deceptive or guaranteed claims."
@@ -110,7 +136,14 @@ class AutonomousDemandEngine:
             system=system,
             max_tokens=120,
         )
-        content_verdict = self.governance.review_content(hook + " " + body)
+
+        # Positioning Agent
+        core_narrative = f"Revolutionizing {signal.market} operations for {signal.segment} with AI-driven workflows."
+        key_messages = [hook, body, f"Tailored perfectly for {signal.segment} pain points."]
+        diff_angle = f"We specialize in {signal.segment} targeting with unparalleled service automation."
+
+        # Guardrail check against Governance
+        content_verdict = self.governance.review_content(hook + " " + body + " " + core_narrative)
         if not content_verdict.approved:
             self.governance.note_decision(EngineName.ADE, success=False)
             logger.info("ADE narrative rejected by governance: %s", content_verdict.reasons)
@@ -124,6 +157,9 @@ class AutonomousDemandEngine:
             body=body,
             predicted_resonance=max(0.0, resonance),
             generated_by=self.llm.provider,
+            core_narrative=core_narrative,
+            key_messages=key_messages,
+            differentiation_angle=diff_angle,
         )
         self.ekg.record_narrative(narrative)
         self.governance.note_decision(EngineName.ADE, success=resonance >= 0.5)

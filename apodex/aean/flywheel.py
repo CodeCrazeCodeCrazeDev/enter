@@ -33,6 +33,20 @@ from .validation.epistemic import EpistemicFirewall
 from .validation.pretrade import PreTradeValidationEngine
 from .validation.rgae import RealityGroundedAdaptiveEngine
 
+# AI-EOS Core Imports
+from .core import (
+    SystemEconomics,
+    PaymentsFinancialOps,
+    LegalComplianceLayer,
+    PlatformRiskManager,
+    IdentityResolver,
+    SecurityRobustness,
+    UnifiedHITLFramework,
+    SelfImprovementEngine,
+    SelfEvolutionEngine,
+    CapitalAllocationLayer,
+)
+
 logger = logging.getLogger("aean.flywheel")
 
 
@@ -54,6 +68,18 @@ class Organism:
         self.ekg = EconomicKnowledgeGraph()
         self.governance = ConstitutionalFilter()
         self.llm = llm or LLMAdapter()
+
+        # AI-EOS Core Services (Sections 7.1–7.12)
+        self.economics = SystemEconomics()
+        self.payments = PaymentsFinancialOps(self.economics)
+        self.legal = LegalComplianceLayer()
+        self.platform_risk = PlatformRiskManager()
+        self.identity_resolver = IdentityResolver()
+        self.security = SecurityRobustness()
+        self.hitl = UnifiedHITLFramework()
+        self.self_improvement = SelfImprovementEngine()
+        self.self_evolution = SelfEvolutionEngine()
+        self.capital_allocation = CapitalAllocationLayer()
 
         # Reality & validation systems (Part II of the architecture).
         self.firewall = EpistemicFirewall(governance=self.governance)
@@ -119,18 +145,28 @@ class Organism:
             if self.cycle % 15 == 0:
                 arch = self.evolution.evaluate_architecture(self._architecture_candidate())
                 self.ekg.record_architecture_evolution(arch)
+                # Self Evolution proposals proposal integration
+                self.self_evolution.propose_architectural_shift(recent_performance=self.cumulative_roi())
 
         # Stage 1: demand detection.
         if grants.get("sense_demand"):
             signals = self.ade.sense_demand()
             result.signals_detected = len(signals)
+            for s in signals:
+                self.identity_resolver.resolve_identity([s.segment, s.market])
+                self.economics.attribute_cost("ADE", "Layer1_Sensing", 150, opportunity_id=s.signal_id)
 
         # Stage 2: narrative creation.
         if grants.get("engineer_narratives"):
             for signal in self.ekg.open_signals():
                 if not self.ekg.narratives_for(signal.signal_id):
+                    # Scan for prompt injection
+                    if self.security.scan_for_injection(signal.market):
+                        self.hitl.raise_escalation("ADE", f"Blocked suspicious market string injection: {signal.market}", "high")
+                        continue
                     if self.ade.engineer_narrative(signal):
                         result.narratives_created += 1
+                        self.economics.attribute_cost("ADE", "Layer2_Narrative", 300, opportunity_id=signal.signal_id)
 
         # Stage 3: visual production + RGAE reality validation. Newly produced
         # assets are screened through the three-layer pipeline; only creatives
@@ -140,6 +176,8 @@ class Organism:
                 if not self.ekg.assets_for(narrative.narrative_id):
                     assets = self.avie.produce_assets(narrative)
                     result.assets_produced += len(assets)
+                    for asset in assets:
+                        self.economics.attribute_cost("AVIE", "Layer3_Generative", 250, opportunity_id=narrative.signal_id)
                     signal = self.ekg.signals.get(narrative.signal_id)
                     if signal is not None and assets:
                         for record in self.rgae.screen(narrative, assets, signal):
@@ -163,6 +201,12 @@ class Organism:
                 revenue = self.are.run_funnel(cell)
                 cycle_spend += cell.deployed_cents - before
                 cycle_revenue += revenue
+
+                # Payment operations & cost attribution
+                if revenue > 0:
+                    tx = self.payments.process_payment(cell.cell_id, revenue)
+                    self.payments.reconcile_payments()
+                    self.economics.attribute_cost("ARE", "Layer4_Sales", 400, opportunity_id=cell.signal_id)
             self.treasury_cents += cycle_revenue
 
         # Stage 6: capital reallocation (learn + kill/scale). Killed cells
@@ -173,6 +217,14 @@ class Organism:
             self.treasury_cents += counts["refund_cents"] - counts["extra_commit_cents"]
             result.cells_killed = counts["killed"]
             result.cells_scaled = counts["scaled"]
+
+        # Self-Improvement diagnostics over losing/poor performing cells
+        for cell in self.ekg.cells.values():
+            if cell.roi < 0:
+                self.self_improvement.diagnose_and_suggest(
+                    f"low_roi_{cell.cell_id[:8]}",
+                    f"Cell underperforming with negative ROI: {cell.roi}"
+                )
 
         # Research + bookkeeping.
         total_decisions = sum(r.decisions for r in self.governance.records.values())
@@ -354,4 +406,10 @@ class Organism:
                 }
                 for c in sorted(self.ekg.cells.values(), key=lambda c: c.roi, reverse=True)
             ],
+            "system_economics": {
+                "total_tokens_cost": sum(log.token_cost for log in self.economics.logs),
+                "total_dollars_cost": sum(log.dollars_cost for log in self.economics.logs),
+                "escalations_pending": sum(1 for i in self.hitl.queue.values() if i.status == "PENDING"),
+                "total_payments_reconciled": sum(1 for tx in self.payments.transactions.values() if tx.status == "RECONCILED"),
+            }
         }

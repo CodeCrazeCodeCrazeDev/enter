@@ -36,6 +36,18 @@ from .validation.epistemic import EpistemicFirewall
 from .validation.perception import CalibrationLayer, PerceptionPredictor
 from .validation.pretrade import PreTradeValidationEngine
 from .validation.rgae import RealityGroundedAdaptiveEngine
+from .core import (
+    SystemEconomics,
+    PaymentsFinancialOps,
+    LegalComplianceLayer,
+    PlatformRiskManager,
+    IdentityResolver,
+    SecurityRobustness,
+    UnifiedHITLFramework,
+    SelfImprovementEngine,
+    SelfEvolutionEngine,
+    CapitalAllocationLayer,
+)
 
 __all__ = [
     "Organism",
@@ -60,4 +72,14 @@ __all__ = [
     "ObjectiveStability",
     "CapabilityEvolution",
     "ArchitectureEvolution",
+    "SystemEconomics",
+    "PaymentsFinancialOps",
+    "LegalComplianceLayer",
+    "PlatformRiskManager",
+    "IdentityResolver",
+    "SecurityRobustness",
+    "UnifiedHITLFramework",
+    "SelfImprovementEngine",
+    "SelfEvolutionEngine",
+    "CapitalAllocationLayer",
 ]

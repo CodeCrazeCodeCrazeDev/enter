@@ -33,7 +33,7 @@ from .validation.epistemic import EpistemicFirewall
 from .validation.pretrade import PreTradeValidationEngine
 from .validation.rgae import RealityGroundedAdaptiveEngine
 
-# AI-EOS Core Imports
+# AI-EOS Core & KOS/ROS Spec v1.1 Imports
 from .core import (
     SystemEconomics,
     PaymentsFinancialOps,
@@ -45,6 +45,12 @@ from .core import (
     SelfImprovementEngine,
     SelfEvolutionEngine,
     CapitalAllocationLayer,
+    # v1.1 Pattern Managers
+    EventSourcingManager,
+    VersionedNodeManager,
+    ProvenanceEngine,
+    DecisionLifecycleManager,
+    RBACGuard,
 )
 
 logger = logging.getLogger("aean.flywheel")
@@ -80,6 +86,13 @@ class Organism:
         self.self_improvement = SelfImprovementEngine()
         self.self_evolution = SelfEvolutionEngine()
         self.capital_allocation = CapitalAllocationLayer()
+
+        # KOS/ROS Spec v1.1 Pattern Managers
+        self.events_sourced = EventSourcingManager()
+        self.versioned_nodes = VersionedNodeManager()
+        self.provenance = ProvenanceEngine(self.events_sourced)
+        self.decisions = DecisionLifecycleManager(self.events_sourced)
+        self.rbac = RBACGuard()
 
         # Reality & validation systems (Part II of the architecture).
         self.firewall = EpistemicFirewall(governance=self.governance)
@@ -147,6 +160,8 @@ class Organism:
                 self.ekg.record_architecture_evolution(arch)
                 # Self Evolution proposals proposal integration
                 self.self_evolution.propose_architectural_shift(recent_performance=self.cumulative_roi())
+                # Publish Event
+                self.events_sourced.publish("AgentLifecycleChanged", {"cycle": self.cycle, "arch_name": arch.candidate})
 
         # Stage 1: demand detection.
         if grants.get("sense_demand"):
@@ -155,6 +170,8 @@ class Organism:
             for s in signals:
                 self.identity_resolver.resolve_identity([s.segment, s.market])
                 self.economics.attribute_cost("ADE", "Layer1_Sensing", 150, opportunity_id=s.signal_id)
+                # KOS/ROS: Publish Event
+                self.events_sourced.publish("EvidenceCreated", {"signal_id": s.signal_id, "market": s.market})
 
         # Stage 2: narrative creation.
         if grants.get("engineer_narratives"):
@@ -167,6 +184,8 @@ class Organism:
                     if self.ade.engineer_narrative(signal):
                         result.narratives_created += 1
                         self.economics.attribute_cost("ADE", "Layer2_Narrative", 300, opportunity_id=signal.signal_id)
+                        # KOS/ROS: Publish Event
+                        self.events_sourced.publish("HypothesisUpdated", {"signal_id": signal.signal_id})
 
         # Stage 3: visual production + RGAE reality validation. Newly produced
         # assets are screened through the three-layer pipeline; only creatives

@@ -466,3 +466,67 @@ class WinningPattern(BaseModel):
     outcome_metric: float
     sample_size: int = 0
     confidence: float = Field(ge=0.0, le=1.0)
+
+
+# ===========================================================================
+# KOS/ROS Spec — Addendum v1.1: Production Patterns
+# ===========================================================================
+
+class Event(BaseModel):
+    id: str = Field(default_factory=_uuid)
+    type: str  # e.g., "EvidenceCreated" | "HypothesisUpdated" | "TheoryPromoted" | ...
+    payload: Dict[str, Any] = Field(default_factory=dict)
+    caused_by: Optional[str] = None
+    timestamp: datetime = Field(default_factory=_now)
+
+
+class Evidence(BaseModel):
+    id: str = Field(default_factory=_uuid)
+    statement: str
+    evidence_quality_tier: str  # "RCT" | "COHORT" | "ANECDOTAL"
+    reliability_weight: float = Field(ge=0.0, le=1.0)
+    effect_size: Optional[float] = None
+    interval: Optional[str] = None
+    version: int = 1
+    current: bool = True
+    timestamp: datetime = Field(default_factory=_now)
+
+
+class Hypothesis(BaseModel):
+    id: str = Field(default_factory=_uuid)
+    statement: str
+    confidence: float = Field(ge=0.0, le=1.0)
+    version: int = 1
+    current: bool = True
+    timestamp: datetime = Field(default_factory=_now)
+
+
+class Theory(BaseModel):
+    id: str = Field(default_factory=_uuid)
+    statement: str
+    predictive_success_rate: float = Field(ge=0.0, le=1.0)
+    version: int = 1
+    current: bool = True
+    timestamp: datetime = Field(default_factory=_now)
+
+
+class DecisionProposal(BaseModel):
+    id: str = Field(default_factory=_uuid)
+    decision: str
+    supporting_hypotheses: List[str] = Field(default_factory=list)  # Pinned to specific Hypothesis version ids
+    proposed_by: str  # AgentRef
+    status: str = "proposed"  # "proposed" | "simulating" | "approved" | "rejected" | "executed" | "cancelled"
+    simulation_result: Optional[Dict[str, Any]] = None
+    approval: Dict[str, Any] = Field(default_factory=lambda: {
+        "required": False,
+        "approved_by": None,
+        "approved_at": None
+    })
+    execution_result: Optional[Dict[str, Any]] = None
+    decision_record: Optional[str] = None
+
+
+class AgentScope(BaseModel):
+    agent_id: str
+    can_call: List[str] = Field(default_factory=list)
+    can_approve: List[str] = Field(default_factory=list)

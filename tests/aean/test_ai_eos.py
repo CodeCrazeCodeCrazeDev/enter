@@ -24,6 +24,12 @@ from apodex.aean.models import (
     WinningPattern,
     MicroCell,
     Narrative,
+    Event,
+    Evidence,
+    Hypothesis,
+    Theory,
+    DecisionProposal,
+    AgentScope,
 )
 from apodex.aean.core import (
     SystemEconomics,
@@ -36,6 +42,12 @@ from apodex.aean.core import (
     SelfImprovementEngine,
     SelfEvolutionEngine,
     CapitalAllocationLayer,
+    EventSourcingManager,
+    VersionedNodeManager,
+    ProvenanceEngine,
+    DecisionLifecycleManager,
+    RBACGuard,
+    DataContractValidator,
 )
 
 
@@ -298,3 +310,128 @@ def test_organism_flywheel_integration():
     assert "system_economics" in snap
     assert snap["system_economics"]["total_tokens_cost"] >= 0
     assert snap["system_economics"]["total_dollars_cost"] >= 0
+
+
+# ===========================================================================
+# 7. KOS/ROS Spec — Addendum v1.1 Tests
+# ===========================================================================
+
+def test_kos_ros_event_sourcing_and_subscriber():
+    esm = EventSourcingManager()
+    triggered = []
+
+    def handle_hyp_update(event):
+        triggered.append(event)
+
+    esm.subscribe("HypothesisUpdated", handle_hyp_update)
+    evt = esm.publish("HypothesisUpdated", {"hyp_id": "hyp-123"}, caused_by="event-abc")
+
+    assert len(esm.events) == 1
+    assert len(triggered) == 1
+    assert triggered[0].payload["hyp_id"] == "hyp-123"
+    assert triggered[0].caused_by == "event-abc"
+
+
+def test_kos_ros_node_versioning():
+    vnm = VersionedNodeManager()
+    hyp1 = Hypothesis(id="hyp-1", statement="Original Hypothesis", confidence=0.5)
+    vnm.save_hypothesis(hyp1)
+
+    assert hyp1.version == 1
+    assert hyp1.current is True
+
+    # Save a newer version of same hypothesis ID
+    hyp2 = Hypothesis(id="hyp-1", statement="Updated Hypothesis", confidence=0.8)
+    vnm.save_hypothesis(hyp2)
+
+    assert hyp2.version == 2
+    assert hyp2.current is True
+    assert hyp1.current is False  # Replaced
+
+    chain = vnm.version_chain("hyp-1", "Hypothesis")
+    assert len(chain) == 2
+    assert chain[0].statement == "Original Hypothesis"
+    assert chain[1].statement == "Updated Hypothesis"
+    assert vnm.current("hyp-1", "Hypothesis") == hyp2
+
+
+def test_kos_ros_provenance_lineage():
+    esm = EventSourcingManager()
+    prov = ProvenanceEngine(esm)
+
+    evt1 = esm.publish("EvidenceCreated", {"node_id": "ev-1"})
+    evt2 = esm.publish("HypothesisUpdated", {"hyp_id": "hyp-1"}, caused_by=evt1.id)
+    evt3 = esm.publish("DecisionProposed", {"prop_id": "prop-1", "hyp_id": "hyp-1"}, caused_by=evt2.id)
+
+    lineage_chain = prov.lineage("prop-1")
+    assert len(lineage_chain) == 3
+    assert lineage_chain[0].type == "DecisionProposed"
+    assert lineage_chain[1].type == "HypothesisUpdated"
+    assert lineage_chain[2].type == "EvidenceCreated"
+
+
+def test_kos_ros_decision_proposal_state_machine():
+    esm = EventSourcingManager()
+    dlm = DecisionLifecycleManager(esm)
+
+    prop = dlm.propose("Allocate $10k to campaign A", ["hyp-1:v1"], proposed_by="CapitalAllocationAgent")
+    assert prop.status == "proposed"
+
+    dlm.start_simulation(prop.id, {"sim_roi": 0.45})
+    assert prop.status == "simulating"
+
+    dlm.approve(prop.id, "human-governor")
+    assert prop.status == "approved"
+    assert prop.approval["approved_by"] == "human-governor"
+
+    dlm.execute(prop.id, {"real_roi": 0.48}, "record-007")
+    assert prop.status == "executed"
+    assert prop.decision_record == "record-007"
+
+
+def test_kos_ros_rbac_guard():
+    guard = RBACGuard()
+    scope = AgentScope(
+        agent_id="CapitalAgent",
+        can_call=["allocate_capital", "propose_decision"],
+        can_approve=[]
+    )
+    guard.register_scope(scope)
+
+    assert guard.check_call("CapitalAgent", "allocate_capital") is True
+    assert guard.check_call("CapitalAgent", "update_theory") is False
+    assert guard.check_approve("CapitalAgent", "capital_expansion") is False
+
+
+def test_kos_ros_data_contract_validator():
+    # Valid RCT evidence
+    ev_valid = Evidence(
+        statement="Double-blind RCT proves 40% CTR lift",
+        evidence_quality_tier="RCT",
+        reliability_weight=0.95,
+        effect_size=0.40,
+        interval="[0.35, 0.45]"
+    )
+    ok, msg = DataContractValidator.validate(ev_valid)
+    assert ok is True
+    assert msg == "Accepted"
+
+    # Invalid RCT evidence (missing effect size / interval)
+    ev_invalid_rct = Evidence(
+        statement="Missing RCT data",
+        evidence_quality_tier="RCT",
+        reliability_weight=0.9
+    )
+    ok, msg = DataContractValidator.validate(ev_invalid_rct)
+    assert ok is False
+    assert "Business rule invalid" in msg
+
+    # Invalid tier
+    ev_invalid_tier = Evidence(
+        statement="Fake tier",
+        evidence_quality_tier="OPINION",
+        reliability_weight=0.8
+    )
+    ok, msg = DataContractValidator.validate(ev_invalid_tier)
+    assert ok is False
+    assert "Quality invalid" in msg

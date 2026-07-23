@@ -49,6 +49,15 @@ from .core import (
     CapitalAllocationLayer,
 )
 
+from .models import (
+    Event,
+    Evidence,
+    Hypothesis,
+    Theory,
+    DecisionProposal,
+    AgentScope,
+)
+
 __all__ = [
     "Organism",
     "EconomicKnowledgeGraph",
@@ -82,4 +91,10 @@ __all__ = [
     "SelfImprovementEngine",
     "SelfEvolutionEngine",
     "CapitalAllocationLayer",
+    "Event",
+    "Evidence",
+    "Hypothesis",
+    "Theory",
+    "DecisionProposal",
+    "AgentScope",
 ]

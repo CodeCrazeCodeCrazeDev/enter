@@ -11,6 +11,7 @@ import random
 from datetime import datetime
 from typing import Dict, Any, List, Optional
 from pydantic import BaseModel, Field
+from .models import Event, Evidence, Hypothesis, Theory, DecisionProposal, AgentScope
 
 logger = logging.getLogger("aean.core")
 
@@ -272,3 +273,211 @@ class CapitalAllocationLayer:
         # Score ranges from 0 to 1
         adjusted_score = expected_return * (1.0 - risk_factor)
         return int(base_budget * adjusted_score)
+
+
+# ===========================================================================
+# KOS/ROS Spec — Addendum v1.1: Production Patterns
+# ===========================================================================
+
+class EventSourcingManager:
+    """1. In-process event sourcing and dispatching."""
+    def __init__(self) -> None:
+        self.events: List[Event] = []
+        self.subscribers: Dict[str, List[Any]] = {}  # event_type -> callbacks
+
+    def subscribe(self, event_type: str, callback: Any) -> None:
+        if event_type not in self.subscribers:
+            self.subscribers[event_type] = []
+        self.subscribers[event_type].append(callback)
+
+    def publish(self, event_type: str, payload: Dict[str, Any], caused_by: Optional[str] = None) -> Event:
+        evt = Event(type=event_type, payload=payload, caused_by=caused_by)
+        self.events.append(evt)
+        # Notify subscribers
+        for callback in self.subscribers.get(event_type, []):
+            try:
+                callback(evt)
+            except Exception as e:
+                logger.error("Error in subscriber callback for %s: %s", event_type, e)
+        return evt
+
+
+class VersionedNodeManager:
+    """2. Versioning pattern for Hypothesis, Evidence, Theory (Append-only insert)."""
+    def __init__(self) -> None:
+        self.evidences: Dict[str, List[Evidence]] = {}   # node_id -> versions
+        self.hypotheses: Dict[str, List[Hypothesis]] = {} # node_id -> versions
+        self.theories: Dict[str, List[Theory]] = {}     # node_id -> versions
+
+    def save_evidence(self, ev: Evidence) -> None:
+        versions = self.evidences.setdefault(ev.id, [])
+        # If there's an existing current version, set current=False
+        for existing in versions:
+            if existing.current:
+                existing.current = False
+        new_version_num = len(versions) + 1
+        ev.version = new_version_num
+        ev.current = True
+        versions.append(ev)
+
+    def save_hypothesis(self, hyp: Hypothesis) -> None:
+        versions = self.hypotheses.setdefault(hyp.id, [])
+        for existing in versions:
+            if existing.current:
+                existing.current = False
+        new_version_num = len(versions) + 1
+        hyp.version = new_version_num
+        hyp.current = True
+        versions.append(hyp)
+
+    def save_theory(self, th: Theory) -> None:
+        versions = self.theories.setdefault(th.id, [])
+        for existing in versions:
+            if existing.current:
+                existing.current = False
+        new_version_num = len(versions) + 1
+        th.version = new_version_num
+        th.current = True
+        versions.append(th)
+
+    def version_chain(self, node_id: str, node_type: str) -> List[Any]:
+        if node_type == "Evidence":
+            return self.evidences.get(node_id, [])
+        elif node_type == "Hypothesis":
+            return self.hypotheses.get(node_id, [])
+        elif node_type == "Theory":
+            return self.theories.get(node_id, [])
+        return []
+
+    def current(self, node_id: str, node_type: str) -> Optional[Any]:
+        chain = self.version_chain(node_id, node_type)
+        for node in chain:
+            if node.current:
+                return node
+        return None
+
+
+class ProvenanceEngine:
+    """3. Provenance walks caused_by chains + supporting evidence/constituent edges."""
+    def __init__(self, event_manager: EventSourcingManager) -> None:
+        self.event_manager = event_manager
+
+    def lineage(self, target_id: str) -> List[Event]:
+        """Returns ordered lineage history by walking caused_by chains."""
+        lineage_chain = []
+        current_event = None
+
+        # Find starting event for the node
+        for evt in reversed(self.event_manager.events):
+            payload_vals = list(evt.payload.values())
+            if target_id == evt.id or target_id in payload_vals:
+                current_event = evt
+                break
+
+        while current_event is not None:
+            lineage_chain.append(current_event)
+            if current_event.caused_by:
+                parent = None
+                for evt in self.event_manager.events:
+                    if evt.id == current_event.caused_by:
+                        parent = evt
+                        break
+                current_event = parent
+            else:
+                current_event = None
+
+        return lineage_chain
+
+
+class DecisionLifecycleManager:
+    """4. Handles the lifecycle of DecisionProposals via state machine."""
+    def __init__(self, event_manager: EventSourcingManager) -> None:
+        self.proposals: Dict[str, DecisionProposal] = {}
+        self.event_manager = event_manager
+
+    def propose(self, decision: str, supporting_hypotheses: List[str], proposed_by: str) -> DecisionProposal:
+        prop = DecisionProposal(
+            decision=decision,
+            supporting_hypotheses=supporting_hypotheses,
+            proposed_by=proposed_by,
+            status="proposed"
+        )
+        self.proposals[prop.id] = prop
+        self.event_manager.publish("DecisionProposed", {"proposal_id": prop.id, "decision": decision})
+        return prop
+
+    def start_simulation(self, prop_id: str, sim_result: Dict[str, Any]) -> None:
+        prop = self.proposals.get(prop_id)
+        if prop and prop.status == "proposed":
+            prop.status = "simulating"
+            prop.simulation_result = sim_result
+
+    def approve(self, prop_id: str, approved_by: str) -> None:
+        prop = self.proposals.get(prop_id)
+        if prop and prop.status == "simulating":
+            prop.status = "approved"
+            prop.approval["approved_by"] = approved_by
+            prop.approval["approved_at"] = datetime.utcnow()
+            self.event_manager.publish("DecisionApproved", {"proposal_id": prop.id, "approved_by": approved_by})
+
+    def reject(self, prop_id: str) -> None:
+        prop = self.proposals.get(prop_id)
+        if prop and prop.status == "simulating":
+            prop.status = "rejected"
+
+    def execute(self, prop_id: str, exec_result: Dict[str, Any], record_ref: str) -> None:
+        prop = self.proposals.get(prop_id)
+        if prop and prop.status == "approved":
+            prop.status = "executed"
+            prop.execution_result = exec_result
+            prop.decision_record = record_ref
+            self.event_manager.publish("DecisionExecuted", {"proposal_id": prop.id, "record_ref": record_ref})
+
+    def cancel(self, prop_id: str) -> None:
+        prop = self.proposals.get(prop_id)
+        if prop and prop.status == "approved":
+            prop.status = "cancelled"
+
+
+class RBACGuard:
+    """5. Minimal RBAC guard checks scopes on agent calls and approvals."""
+    def __init__(self) -> None:
+        self.scopes: Dict[str, AgentScope] = {}
+
+    def register_scope(self, scope: AgentScope) -> None:
+        self.scopes[scope.agent_id] = scope
+
+    def check_call(self, agent_id: str, method_name: str) -> bool:
+        scope = self.scopes.get(agent_id)
+        if not scope:
+            return False
+        return method_name in scope.can_call
+
+    def check_approve(self, agent_id: str, decision_category: str) -> bool:
+        scope = self.scopes.get(agent_id)
+        if not scope:
+            return False
+        return decision_category in scope.can_approve
+
+
+class DataContractValidator:
+    """6. Explicit data contract validation for evidence nodes."""
+    @staticmethod
+    def validate(evidence: Evidence) -> tuple[bool, str]:
+        # 1. Schema Validation (required fields present and non-null)
+        if not evidence.statement or not evidence.evidence_quality_tier:
+            return False, "RejectedWithReason: Schema invalid: missing required fields statement or evidence_quality_tier"
+
+        # 2. Quality Validation
+        recognized_tiers = {"RCT", "COHORT", "ANECDOTAL"}
+        if evidence.evidence_quality_tier not in recognized_tiers:
+            return False, "RejectedWithReason: Quality invalid: unrecognized evidence_quality_tier"
+        if not (0.0 <= evidence.reliability_weight <= 1.0):
+            return False, "RejectedWithReason: Quality invalid: reliability_weight must be in [0,1]"
+
+        # 3. Business Rule Validation
+        if evidence.evidence_quality_tier == "RCT":
+            if evidence.effect_size is None or not evidence.interval:
+                return False, "RejectedWithReason: Business rule invalid: RCT tier evidence must have non-null effect_size and interval"
+
+        return True, "Accepted"

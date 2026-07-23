@@ -44,11 +44,22 @@ The goal is to implement **AI-EOS (Autonomous Entrepreneurial Research & Executi
 
 ---
 
+## KOS/ROS Spec Addendum v1.1: Production Patterns
+
+We have fully incorporated the KOS/ROS Spec Addendum v1.1 production patterns into the core codebase:
+1.  **In-Process Event-Sourcing (`EventSourcingManager`):** Every mutating call appends an immutable `Event` structure to the provenance registry, notifying subscribed capabilities. This captures causality (`caused_by`) and serves as an immutable provenance ledger.
+2.  **Append-Only Versioning (`VersionedNodeManager`):** Applies to Hypothesis, Evidence, and Theory. Instead of updating nodes directly, the system inserts a new version, updating `current` attributes. `version_chain(node_id)` and `current(node_id)` lookups are supported out of the box.
+3.  **Traversable Provenance (`ProvenanceEngine`):** Allows backtracking from target ID through `caused_by` and constituent links to establish complete lineage trees.
+4.  **Centralized Decision Lifecycle (`DecisionLifecycleManager`):** Manages `DecisionProposal` state machine transitions: `proposed → simulating → (approved | rejected) → executed → [DecisionRecord created]` or `approved → cancelled`.
+5.  **Granular Role-Based Access (`RBACGuard`):** Governs operations by registering `AgentScope` objects defining whitelisted API and approval scopes.
+6.  **Explicit Data Contract Validation (`DataContractValidator`):** Explicitly verifies Evidence schema validity, quality attributes, and specific RCT-tier business rules.
+
 ## Consequences
 - **Pros:**
   - One unified, clean architecture with zero technical debt or redundant logic.
-  - Complete inter-engine contract adherence.
+  - Complete inter-engine and KOS/ROS contract adherence.
   - Robust operational hooks for financial, legal, platform risk, and system cost visibility.
   - 100% test pass rate with flawless backward compatibility.
+  - Fully in-process and light-weight Event-Sourcing, Versioning, and RBAC implementation avoiding unnecessary message brokers or bloated infrastructure.
 - **Cons:**
   - The simulated model calls remain mock-based in local test suites (expected).

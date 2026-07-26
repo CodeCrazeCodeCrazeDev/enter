@@ -26,6 +26,7 @@ from .models import (
     TheoryNode,
     ClaimNode,
     EvidenceNode,
+    ContradictionNode,
 )
 
 from .events import (
@@ -67,7 +68,6 @@ from .governance import (
 
 from .knowledge_graph import (
     ActiveKnowledgeGraph,
-    ContradictionNode,
     ContradictionDetected,
 )
 
@@ -79,4 +79,26 @@ from .workflow import (
     WorkflowRun,
     WorkflowEngine,
     create_builtin_workflows,
+)
+
+from .uncertainty import (
+    update_belief,
+    calculate_expected_probability,
+    calculate_epistemic_entropy,
+    apply_temporal_decay,
+)
+
+from .portfolio import (
+    ProjectAllocation,
+    PortfolioScheduler,
+)
+
+from .provenance import (
+    ProvenanceRelation,
+    ProvenanceEngine,
+)
+
+from .self_improvement import (
+    WorkflowFailureTrace,
+    SelfImprovementFlywheel,
 )

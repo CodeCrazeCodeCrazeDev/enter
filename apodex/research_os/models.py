@@ -20,6 +20,14 @@ class BaseArtifact(BaseModel):
     validation_status: str = "PENDING"  # "PENDING" | "VALIDATED" | "FALSIFIED"
     digital_signature: str = ""
 
+    # Advanced Institutional Metadata Fields
+    uncertainty_meta: Dict[str, Any] = Field(
+        default_factory=lambda: {"beta_alpha": 1.0, "beta_beta": 1.0, "epistemic_pct": 0.5, "lambda_decay": 0.05}
+    )
+    reproducibility_meta: Dict[str, Any] = Field(
+        default_factory=lambda: {"seed": 42, "docker_hash": "sha256:88383", "dataset_hash": "sha256:99381"}
+    )
+
     model_config = {"frozen": True}
 
     def compute_signature(self) -> str:
@@ -31,6 +39,8 @@ class BaseArtifact(BaseModel):
             "author": self.author,
             "confidence": self.confidence,
             "validation_status": self.validation_status,
+            "uncertainty": str(self.uncertainty_meta),
+            "reproducibility": str(self.reproducibility_meta),
         }
         # Add all fields except excluded system ones
         for k, v in self.__dict__.items():
@@ -55,6 +65,8 @@ class ResearchProject(BaseArtifact):
     name: str
     funding_budget: float
     metrics_goals: Dict[str, Any] = Field(default_factory=dict)
+    priority_score: float = 0.5  # Managed by Portfolio Scheduler
+    expected_discovery_value: float = 1000.0
 
 
 class ResearchProposal(BaseArtifact):

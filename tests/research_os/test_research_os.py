@@ -1,5 +1,6 @@
 import asyncio
 import pytest
+import time
 from uuid import uuid4
 
 from apodex.research_os.models import (
@@ -13,6 +14,7 @@ from apodex.research_os.models import (
     TheoryNode,
     PeerReviewCritique,
     Publication,
+    InstitutionalPolicy,
 )
 from apodex.research_os.events import (
     EventBus,
@@ -33,6 +35,17 @@ from apodex.research_os.governance import (
 from apodex.research_os.knowledge_graph import ActiveKnowledgeGraph, ContradictionNode, ContradictionDetected
 from apodex.research_os.workflow import WorkflowEngine, create_builtin_workflows, WorkflowRun
 
+# Advanced subsystems
+from apodex.research_os.uncertainty import (
+    update_belief,
+    calculate_expected_probability,
+    calculate_epistemic_entropy,
+    apply_temporal_decay,
+)
+from apodex.research_os.portfolio import PortfolioScheduler, ProjectAllocation
+from apodex.research_os.provenance import ProvenanceEngine, ProvenanceRelation
+from apodex.research_os.self_improvement import SelfImprovementFlywheel, WorkflowFailureTrace
+
 
 # =====================================================================
 # Mock Plugin Implementations for Contract Testing
@@ -50,6 +63,10 @@ class MockDomainScientist(IAgentPlugin):
             confidence=0.9
         )
 
+
+# =====================================================================
+# Existing Core Test Suite
+# =====================================================================
 
 @pytest.mark.asyncio
 async def test_artifact_immutability_and_digital_signatures():
@@ -306,3 +323,124 @@ async def test_end_to_end_workflow_run_execution():
     assert run.status == "COMPLETED" or len(run.history) > 1
     assert "literature_review" in run.history
     assert len(repo.list_artifacts_by_type(Publication)) > 0
+
+
+# =====================================================================
+# Advanced Institutional Subsystems Test Cases
+# =====================================================================
+
+@pytest.mark.asyncio
+async def test_uncertainty_bayesian_updates_and_decay():
+    """Verify conjugate Beta-prior updates and temporal confidence decay functions."""
+    # Prior Beta distribution: alpha=2, beta=2 (unbiased prior, expected_prob = 0.5)
+    a, b = 2.0, 2.0
+    prob_prior = calculate_expected_probability(a, b)
+    assert prob_prior == 0.5
+
+    # 1. Update with supporting evidence (reliability = 0.8)
+    a, b = update_belief(a, b, evidence_support=1.0, evidence_conflict=0.0, evidence_reliability=0.8)
+    prob_post_support = calculate_expected_probability(a, b)
+    assert prob_post_support == 2.8 / (2.8 + 2.0)  # ~0.5833
+    assert calculate_epistemic_entropy(a, b) < 0.5  # Information gained decreases epistemic ignorance
+
+    # 2. Update with conflicting evidence
+    a, b = update_belief(a, b, evidence_support=0.0, evidence_conflict=1.0, evidence_reliability=1.0)
+    prob_post_conflict = calculate_expected_probability(a, b)
+    assert prob_post_conflict < prob_post_support
+
+    # 3. Temporal Decay validation
+    creation_time = time.time() - 100.0  # 100 seconds ago
+    decayed = apply_temporal_decay(initial_confidence=1.0, creation_timestamp=creation_time, lambda_decay=0.01)
+    # 1.0 * e^(-0.01 * 100) = e^(-1) ~ 0.3678
+    assert abs(decayed - 0.3678) < 0.01
+
+
+@pytest.mark.asyncio
+async def test_portfolio_scheduler_and_allocations():
+    """Verify compute allocation optimization and opportunities-cost based termination logic."""
+    scheduler = PortfolioScheduler(total_gpu_tokens_budget=100000)
+
+    # Register two competing research projects
+    p1 = ResearchProject(name="Project AI Large", funding_budget=50000.0, expected_discovery_value=500.0)
+    p2 = ResearchProject(name="Project Trading Beta", funding_budget=120000.0, expected_discovery_value=300.0)
+
+    scheduler.add_project(p1)
+    scheduler.add_project(p2)
+
+    # Setup historical success rates
+    success_rates = {p1.uuid: 0.8, p2.uuid: 0.4}
+
+    # Verify priority calculation
+    score_1 = scheduler.calculate_project_priority(p1, success_rates[p1.uuid])
+    score_2 = scheduler.calculate_project_priority(p2, success_rates[p2.uuid])
+
+    # AI Large (EDV = 0.8 * 500 = 400, no budget penalty) -> 400
+    # Trading Beta (EDV = 0.4 * 300 = 120, has penalty for over 100k budget) -> ~119.88
+    assert score_1 == 400.0
+    assert score_2 < 120.0
+
+    # Optimize resource quotas
+    allocations = scheduler.optimize_portfolio(success_rates)
+    assert len(allocations) == 2
+    alloc_p1 = [a for a in allocations if a.project_uuid == p1.uuid][0]
+    alloc_p2 = [a for a in allocations if a.project_uuid == p2.uuid][0]
+
+    assert alloc_p1.allocated_tokens > alloc_p2.allocated_tokens
+    assert abs((alloc_p1.compute_quota + alloc_p2.compute_quota) - 1.0) < 0.001
+
+    # Check for programmatic terminations
+    success_low = {p1.uuid: 0.8, p2.uuid: 0.01}  # Trading Beta EDV drops to 0.01 * 300 = 3
+    terminated_uuids = scheduler.check_for_terminations(success_low, min_edv_threshold=10.0)
+    assert p2.uuid in terminated_uuids
+    assert p2.uuid not in scheduler.active_projects
+
+
+@pytest.mark.asyncio
+async def test_w3c_provenance_graph():
+    """Verify building and querying of W3C PROV-O standard artifact lineage and dataset dependencies."""
+    engine = ProvenanceEngine()
+
+    dataset_uuid = uuid4()
+    task_run_uuid = uuid4()
+    experiment_uuid = uuid4()
+    claim_uuid = uuid4()
+
+    # Record relations
+    # task run used dataset
+    engine.record_relation("USED_DATASET", task_run_uuid, dataset_uuid)
+    # experiment was generated by task run
+    engine.record_relation("WAS_GENERATED_BY", experiment_uuid, task_run_uuid)
+    # claim was derived from experiment
+    engine.record_relation("DERIVED_FROM", claim_uuid, experiment_uuid)
+
+    # Trace backward to find original source dataset dependencies
+    sources = engine.trace_source_datasets(claim_uuid)
+    assert len(sources) == 1
+    assert sources[0] == dataset_uuid
+
+
+@pytest.mark.asyncio
+async def test_self_improvement_flywheel_policy_evolution():
+    """Verify logged failures compile and evolve into non-bypassable InstitutionalPolicies."""
+    repo = ResearchRepository()
+    bus = EventBus()
+    flywheel = SelfImprovementFlywheel(repository=repo, event_bus=bus)
+
+    # Log consecutive failures for the 'execution' stage
+    run_1 = uuid4()
+    run_2 = uuid4()
+    flywheel.log_failure(run_1, "execution", "ML training sandbox out of memory error.")
+    flywheel.log_failure(run_2, "execution", "Execution timeout after 1000 epochs.")
+
+    # Trigger bottleneck analysis and policy formulation
+    new_policy = flywheel.analyze_bottlenecks_and_evolve()
+
+    assert new_policy is not None
+    assert "Stricter Quality Rule for Execution" in new_policy.policy_name
+    assert len(new_policy.rules) == 2
+    assert "replicates" in new_policy.rules[1]
+
+    # Verify policy is compiled and successfully saved in Repository
+    retrieved_policies = repo.list_artifacts_by_type(InstitutionalPolicy)
+    assert len(retrieved_policies) == 1
+    assert retrieved_policies[0].uuid == new_policy.uuid

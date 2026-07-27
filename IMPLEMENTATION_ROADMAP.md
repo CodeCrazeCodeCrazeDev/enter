@@ -1,5 +1,8 @@
 # AgentHarness Architectural Upgrade Implementation Roadmap - Enhanced
 
+> ### ⚠️ DOCUMENT STATUS: HISTORICAL ROADMAP
+> This document is **Historical** and has been superseded by the dependency-driven implementation phases established in the authoritative blueprint [AI_EOS_ARCHITECTURE.md](docs/architecture/AI_EOS_ARCHITECTURE.md).
+
 This roadmap outlines the safe, step-by-step sequence of independently mergeable and reversible pull requests required to evolve the AgentHarness platform into a next-generation Multi-Agent Cognitive Architecture supporting an Autonomous Economic Agent Network (AEAN).
 
 ---

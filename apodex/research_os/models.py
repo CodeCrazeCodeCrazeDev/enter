@@ -1,194 +1,142 @@
+"""Domain models for the AlphaAlgo Research Operating System (Research OS).
+
+Pydantic models representing strongly-typed metadata, configurations, and results
+with canonical serialization and SHA-256 hashing.
+"""
 from __future__ import annotations
+
 import hashlib
 import json
-import time
-from uuid import UUID, uuid4
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
-# =====================================================================
-# Base Immutable Artifact
-# =====================================================================
 
-class BaseArtifact(BaseModel):
-    uuid: UUID = Field(default_factory=uuid4)
-    version: int = 1
-    lineage_parent_uuids: List[UUID] = Field(default_factory=list)
-    author: str = "unknown_agent"
-    timestamp: float = Field(default_factory=time.time)
-    confidence: float = 1.0
-    validation_status: str = "PENDING"  # "PENDING" | "VALIDATED" | "FALSIFIED"
-    digital_signature: str = ""
+def compute_config_hash(config_dict: Dict[str, Any]) -> str:
+    """Serialize a dictionary to a sorted canonical JSON string and compute its SHA-256 hash."""
+    canonical_json = json.dumps(config_dict, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(canonical_json.encode("utf-8")).hexdigest()
 
-    # Advanced Institutional Metadata Fields
-    uncertainty_meta: Dict[str, Any] = Field(
-        default_factory=lambda: {"beta_alpha": 1.0, "beta_beta": 1.0, "epistemic_pct": 0.5, "lambda_decay": 0.05}
+
+class Hypothesis(BaseModel):
+    """Scientific research hypothesis."""
+
+    hypothesis_id: str = Field(description="Unique ID for the hypothesis")
+    research_question_id: str = Field(description="Link to the target research question")
+    title: str = Field(description="Descriptive title of the hypothesis")
+    description: str = Field(description="Detailed scientific description of the claim")
+    economic_rationale: str = Field(description="Causal or economic rationale (e.g., MICROSTRUCTURE, BEHAVIORAL)")
+    null_hypothesis: str = Field(description="Definition of criteria under which the claim is false")
+    target_variable: str = Field(description="Variable the signal claims to predict")
+    registered_at: datetime = Field(default_factory=datetime.utcnow)
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+class Dataset(BaseModel):
+    """Metadata for an immutable, versioned dataset snapshot."""
+
+    dataset_id: str = Field(description="Unique ID of the dataset version")
+    version: str = Field(description="Version string (e.g., v1.0)")
+    raw_source: str = Field(description="Origin source URI or path")
+    ingestion_pipeline_hash: str = Field(description="SHA-256 hash of the ingestion pipeline code")
+    registered_at: datetime = Field(default_factory=datetime.utcnow)
+    data_quality_report: Dict[str, Any] = Field(default_factory=dict, description="Captured temporal & PIT quality checks")
+
+
+class Feature(BaseModel):
+    """Metadata for a versioned mathematical feature."""
+
+    feature_id: str = Field(description="Unique ID for the feature")
+    name: str = Field(description="Feature name")
+    formula: str = Field(description="Mathematical expression of the feature")
+    parameters: Dict[str, Any] = Field(default_factory=dict, description="Hyperparameters used to generate the feature")
+    lineage_dataset_id: str = Field(description="ID of the dataset snapshot used for calculation")
+    stationarity_p_value: Optional[float] = Field(None, description="P-value from ADF stationarity test")
+    registered_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class Experiment(BaseModel):
+    """Metadata and outcomes of an executed backtest or simulation."""
+
+    experiment_id: str = Field(description="Unique ID of the experiment")
+    hypothesis_id: str = Field(description="Link to the pre-registered hypothesis")
+    dataset_id: str = Field(description="Link to the dataset snapshot used")
+    feature_ids: List[str] = Field(default_factory=list, description="Features used in the model")
+    hyperparameters: Dict[str, Any] = Field(default_factory=dict, description="Model hyperparameters and code specs")
+    config_hash: str = Field("", description="SHA-256 configuration hash (computed over inputs)")
+    status: str = Field("PENDING", description="PENDING | RUNNING | COMPLETED | FAILED")
+    reproducibility_package: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Frozen package lock, OS, Python version, git commit, seed, etc."
     )
-    reproducibility_meta: Dict[str, Any] = Field(
-        default_factory=lambda: {"seed": 42, "docker_hash": "sha256:88383", "dataset_hash": "sha256:99381"}
-    )
+    metrics: Dict[str, float] = Field(default_factory=dict, description="Backtest metrics (Sharpe, drawdown, ROI, etc.)")
+    returns_time_series: List[float] = Field(default_factory=list, description="Time series of daily or step returns")
+    error_log: Optional[str] = Field(None, description="Captured traceback if status is FAILED")
+    registered_at: datetime = Field(default_factory=datetime.utcnow)
 
-    model_config = {"frozen": True}
-
-    def compute_signature(self) -> str:
-        """Deterministically serializes the artifact's state and returns a SHA-256 hash."""
-        data_to_hash = {
-            "uuid": str(self.uuid),
-            "version": self.version,
-            "lineage": [str(u) for u in self.lineage_parent_uuids],
-            "author": self.author,
-            "confidence": self.confidence,
-            "validation_status": self.validation_status,
-            "uncertainty": str(self.uncertainty_meta),
-            "reproducibility": str(self.reproducibility_meta),
+    def calculate_config_hash(self) -> str:
+        """Compute the SHA-256 configuration hash over all input configurations."""
+        inputs = {
+            "hypothesis_id": self.hypothesis_id,
+            "dataset_id": self.dataset_id,
+            "feature_ids": sorted(self.feature_ids),
+            "hyperparameters": self.hyperparameters,
+            "seed": self.reproducibility_package.get("seed", 42),
         }
-        # Add all fields except excluded system ones
-        for k, v in self.__dict__.items():
-            if k not in ["uuid", "lineage_parent_uuids", "digital_signature"]:
-                data_to_hash[k] = str(v)
-        serialized = json.dumps(data_to_hash, sort_keys=True)
-        return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
-
-    def with_signature(self) -> BaseArtifact:
-        """Returns a copy of the artifact with its digital signature computed and attached."""
-        sig = self.compute_signature()
-        kwargs = self.dict() if hasattr(self, "dict") else self.model_dump()
-        kwargs["digital_signature"] = sig
-        return self.__class__(**kwargs)
+        return compute_config_hash(inputs)
 
 
-# =====================================================================
-# Research Artifact Subtypes
-# =====================================================================
+class ValidationReport(BaseModel):
+    """Statistical validation report evaluating significance and overfitting."""
 
-class ResearchProject(BaseArtifact):
-    name: str
-    funding_budget: float
-    metrics_goals: Dict[str, Any] = Field(default_factory=dict)
-    priority_score: float = 0.5  # Managed by Portfolio Scheduler
-    expected_discovery_value: float = 1000.0
-
-
-class ResearchProposal(BaseArtifact):
-    project_uuid: UUID
-    proposal_title: str
-    proposal_abstract: str
+    validation_id: str = Field(description="Unique ID for the validation report")
+    experiment_id: str = Field(description="Link to the evaluated experiment")
+    raw_sharpe_ratio: float = Field(description="Raw Sharpe Ratio from the backtest")
+    deflated_sharpe_ratio: float = Field(description="Deflated Sharpe Ratio (DSR) adjusting for trials and overfitting")
+    p_value: float = Field(description="Statistical p-value of the returns")
+    adjusted_p_value: float = Field(description="Adjusted p-value after multiple hypothesis correction")
+    correction_method: str = Field(description="Adjustment method applied (e.g., BONFERRONI, HOLM, BH)")
+    probability_of_backtest_overfitting: float = Field(description="Probability of Backtest Overfitting (PBO)")
+    bootstrap_sharpe_quantile_5: float = Field(description="5th percentile Sharpe Ratio from block bootstrap")
+    is_statistically_significant: bool = Field(description="True if DSR and adjusted p-value meet targets")
+    validated_at: datetime = Field(default_factory=datetime.utcnow)
 
 
-class ResearchAgenda(BaseArtifact):
-    prioritized_proposals: List[UUID] = Field(default_factory=list)
+class Model(BaseModel):
+    """Metadata for a promoted, production-ready trading model."""
+
+    model_id: str = Field(description="Unique ID of the promoted model")
+    experiment_id: str = Field(description="Link to the source experiment")
+    decision_record_id: str = Field(description="Link to the peer-review decision record")
+    version: str = Field(description="Version identifier (e.g., v1.0.0)")
+    capacity_limit_usd: float = Field(description="Estimated maximum liquidity-based capacity limit")
+    correlation_to_portfolio: float = Field(description="Historical correlation to active portfolio")
+    status: str = Field("PROMOTED", description="PROMOTED | LIVE | REJECTED | SUSPENDED")
+    promoted_at: datetime = Field(default_factory=datetime.utcnow)
+    metadata: Dict[str, Any] = Field(default_factory=dict)
 
 
-class ResearchQuestion(BaseArtifact):
-    question_text: str
-    domain: str
+class DecisionRecord(BaseModel):
+    """Immutable peer-review decision record."""
 
+    decision_id: str = Field(description="Unique UUID")
+    experiment_id: str = Field(description="Link to the candidate experiment")
+    reviewers: List[str] = Field(default_factory=list, description="Names or IDs of reviewers")
+    approvals: Dict[str, bool] = Field(default_factory=dict, description="Approvals/votes mapping")
+    status: str = Field("APPROVED", description="APPROVED | REJECTED | REQUEST_REVISIONS")
+    metrics_summary: Dict[str, float] = Field(default_factory=dict, description="DSR, Sharpe, drawdown, etc.")
+    rejection_rationales: List[str] = Field(default_factory=list)
+    previous_log_hash: str = Field("", description="SHA-256 hash of the previous audit log entry")
+    entry_hash: str = Field("", description="SHA-256 hash over this entry + previous_log_hash")
+    created_at: datetime = Field(default_factory=datetime.utcnow)
 
-class LiteratureCorpus(BaseArtifact):
-    query: str
-    paper_titles: List[str] = Field(default_factory=list)
-    abstracts: List[str] = Field(default_factory=list)
-
-
-class KnowledgeGapAnalysis(BaseArtifact):
-    corpus_uuid: UUID
-    gaps: List[str] = Field(default_factory=list)
-
-
-class Hypothesis(BaseArtifact):
-    statement: str
-    predicted_expectations: Dict[str, Any] = Field(default_factory=dict)
-
-
-class ExperimentDesign(BaseArtifact):
-    hypothesis_uuid: UUID
-    parameters: Dict[str, Any] = Field(default_factory=dict)
-    code_snippet: str
-    execution_backend: str
-
-
-class ExperimentResult(BaseArtifact):
-    design_uuid: UUID
-    success: bool
-    metrics: Dict[str, Any] = Field(default_factory=dict)
-    logs: List[str] = Field(default_factory=list)
-
-
-class ReproducibilityReport(BaseArtifact):
-    experiment_uuid: UUID
-    reproducibility_rate: float
-    reproduced: bool
-
-
-class BenchmarkResult(BaseArtifact):
-    experiment_uuid: UUID
-    benchmark_name: str
-    score: float
-
-
-class DecisionRecord(BaseArtifact):
-    target_uuid: UUID
-    board_name: str
-    decision_outcome: str  # "APPROVE" | "REJECT" | "REQUEST_REVISION" | "ESCALATE" | "SUSPEND" | "ARCHIVE" | "REQUIRE_INDEPENDENT_REVIEW"
-    reason: str
-
-
-class GovernanceDecision(BaseArtifact):
-    decisions: List[DecisionRecord] = Field(default_factory=list)
-
-
-class PeerReviewCritique(BaseArtifact):
-    approved: bool
-    comment: str
-
-
-class Publication(BaseArtifact):
-    title: str
-    content: str
-    citation_graph_uuid: UUID
-
-
-class CitationGraph(BaseArtifact):
-    citations: Dict[str, List[str]] = Field(default_factory=dict)
-
-
-class ResearchRoadmap(BaseArtifact):
-    milestones: List[str] = Field(default_factory=list)
-
-
-class InstitutionalPolicy(BaseArtifact):
-    policy_name: str
-    rules: List[str] = Field(default_factory=list)
-
-
-class ContradictionNode(BaseArtifact):
-    conflict_node_a: UUID
-    conflict_node_b: UUID
-    explanation: str
-
-
-# =====================================================================
-# Knowledge Graph Nodes
-# =====================================================================
-
-class ConceptNode(BaseArtifact):
-    concept_name: str
-    definition: str
-
-
-class TheoryNode(BaseArtifact):
-    theory_name: str
-    description: str
-    linked_claims: List[UUID] = Field(default_factory=list)
-
-
-class ClaimNode(BaseArtifact):
-    assertion: str
-    evidence_ids: List[UUID] = Field(default_factory=list)
-    known_limitations: List[str] = Field(default_factory=list)
-
-
-class EvidenceNode(BaseArtifact):
-    source_url: str
-    content: str
-    provenance: str
+    def calculate_entry_hash(self) -> str:
+        """Compute the unique cryptographically-chained entry hash."""
+        fields = {
+            "decision_id": self.decision_id,
+            "experiment_id": self.experiment_id,
+            "reviewers": sorted(self.reviewers),
+            "status": self.status,
+            "previous_log_hash": self.previous_log_hash,
+        }
+        return compute_config_hash(fields)

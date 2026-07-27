@@ -1,104 +1,80 @@
-"""Research Operating System (Research OS) core exports."""
+"""AlphaAlgo Research Operating System (Research OS).
 
+Redesigned quantitative research platform incorporating institutional scientific
+research standards.
+"""
 from __future__ import annotations
 
+from .interfaces import (
+    IHypothesisRegistry,
+    IDatasetRegistry,
+    IFeatureRegistry,
+    IExperimentRegistry,
+    IModelRegistry,
+    IStatisticalValidator,
+    IGovernanceGateway,
+)
 from .models import (
-    BaseArtifact,
-    ResearchProject,
-    ResearchProposal,
-    ResearchAgenda,
-    ResearchQuestion,
-    LiteratureCorpus,
-    KnowledgeGapAnalysis,
     Hypothesis,
-    ExperimentDesign,
-    ExperimentResult,
-    ReproducibilityReport,
-    BenchmarkResult,
+    Dataset,
+    Feature,
+    Experiment,
+    Model,
+    ValidationReport,
     DecisionRecord,
-    GovernanceDecision,
-    PeerReviewCritique,
-    Publication,
-    CitationGraph,
-    ResearchRoadmap,
-    InstitutionalPolicy,
-    ConceptNode,
-    TheoryNode,
-    ClaimNode,
-    EvidenceNode,
-    ContradictionNode,
+    compute_config_hash,
+)
+from .registries import (
+    HypothesisRegistry,
+    DatasetRegistry,
+    FeatureRegistry,
+    ExperimentRegistry,
+    ModelRegistry,
+)
+from .statistical_validation import (
+    adjust_p_values,
+    calculate_dsr,
+    walk_forward_split,
+    block_bootstrap,
+)
+from .reproducibility import (
+    capture_environment_fingerprint,
+    verify_reproducibility,
+)
+from .pipeline import (
+    StatisticalValidator,
+    GovernanceGateway,
+    ResearchPipelineOrchestrator,
 )
 
-from .events import (
-    BaseEvent,
-    WorkflowStarted,
-    ArtifactCreated,
-    ExperimentCompleted,
-    ReviewFailed,
-    GovernanceRejected,
-    PublicationAccepted,
-    HypothesisFalsified,
-    EventBus,
-    InstitutionalMetricsCalculator,
-)
-
-from .storage import (
-    ResearchRepository,
-    DocumentStore,
-    VectorDB,
-    RelationalDB,
-    ArtifactStore,
-    PhysicalKnowledgeGraph,
-)
-
-from .plugins import (
-    IAgentPlugin,
-    IGovernancePlugin,
-    IExperimentBackend,
-    IEvidenceProvider,
-    PluginRegistry,
-)
-
-from .governance import (
-    EthicsReviewBoard,
-    ScientificQualityBoard,
-    SecurityBoard,
-    CapitalAllocationBoard,
-)
-
-from .knowledge_graph import (
-    ActiveKnowledgeGraph,
-    ContradictionDetected,
-)
-
-from .workflow import (
-    TransitionCondition,
-    FailurePolicy,
-    StageDefinition,
-    WorkflowDefinition,
-    WorkflowRun,
-    WorkflowEngine,
-    create_builtin_workflows,
-)
-
-from .uncertainty import (
-    update_belief,
-    calculate_expected_probability,
-    calculate_epistemic_entropy,
-    apply_temporal_decay,
-)
-
-from .portfolio import (
-    ProjectAllocation,
-    PortfolioScheduler,
-)
-
-from .provenance import (
-    ProvenanceRelation,
-    ProvenanceEngine,
-)
-
-from .self_improvement import (
-    WorkflowFailureTrace,
-    SelfImprovementFlywheel,
-)
+__all__ = [
+    "IHypothesisRegistry",
+    "IDatasetRegistry",
+    "IFeatureRegistry",
+    "IExperimentRegistry",
+    "IModelRegistry",
+    "IStatisticalValidator",
+    "IGovernanceGateway",
+    "Hypothesis",
+    "Dataset",
+    "Feature",
+    "Experiment",
+    "Model",
+    "ValidationReport",
+    "DecisionRecord",
+    "compute_config_hash",
+    "HypothesisRegistry",
+    "DatasetRegistry",
+    "FeatureRegistry",
+    "ExperimentRegistry",
+    "ModelRegistry",
+    "adjust_p_values",
+    "calculate_dsr",
+    "walk_forward_split",
+    "block_bootstrap",
+    "capture_environment_fingerprint",
+    "verify_reproducibility",
+    "StatisticalValidator",
+    "GovernanceGateway",
+    "ResearchPipelineOrchestrator",
+]

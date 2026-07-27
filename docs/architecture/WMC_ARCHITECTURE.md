@@ -200,3 +200,14 @@ The WMC is built with a 3-horizon plan that allows immediate implementation usin
 * **Core Technology:** Differentiable simulation engines (allowing gradient-based optimization over entire worlds), civilizational-scale generative simulation frameworks, and unified multi-modal world models running on specialized hardware.
 * **Orchestration:** Completely autonomous agent ecosystems with self-play and self-improvement loops that require zero human intervention.
 * **Limitations:** Physical hardware constraints, complex governance boundaries.
+
+---
+
+## 5. Architectural Alignment with Foundational Literature
+
+All active subsystems and multi-horizon development strategies are traceably aligned with state-of-the-art literature. For deep-dive analyses, refer to the following canonical documents:
+- [AI-EOS Comprehensive Research Bibliography](../research/papers/AI_EOS_RESEARCH_BIBLIOGRAPHY.md) — Comprehensive details on ~130 underlying research papers.
+- [AI-EOS Subsystem Implementation Matrix](../research/papers/AI_EOS_IMPLEMENTATION_MATRIX.md) — Maps papers directly to operational Layers (L1–L4).
+- [AI-EOS Research Dependency Graph](../research/papers/AI_EOS_DEPENDENCY_GRAPH.md) — Outlines dependency prerequisite hierarchies.
+- [AI-EOS Implementation Roadmap](../research/papers/AI_EOS_RESEARCH_ROADMAP.md) — Sequences development by leverage, risk, and empirical validation strength.
+- [AI-EOS Comprehensive Gap Analysis](../research/papers/AI_EOS_GAP_ANALYSIS.md) — Identifies and structures outstanding capabilities and potential structural conflicts.

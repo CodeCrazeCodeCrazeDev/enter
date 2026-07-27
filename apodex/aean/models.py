@@ -8,7 +8,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 from enum import Enum
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -64,6 +64,9 @@ class Narrative(BaseModel):
     body: str
     predicted_resonance: float = Field(ge=0.0, le=1.0)
     generated_by: str = "simulation"
+    core_narrative: str = ""
+    key_messages: List[str] = Field(default_factory=list)
+    differentiation_angle: str = ""
 
 
 class VisualAsset(BaseModel):
@@ -336,3 +339,194 @@ class OrganismState(BaseModel):
     cumulative_roi: float = 0.0
     history: List[CycleResult] = Field(default_factory=list)
     updated_at: datetime = Field(default_factory=_now)
+
+
+# ===========================================================================
+# AI-EOS Section 6 Inter-Engine API Contracts & Models
+# ===========================================================================
+
+class Opportunity(BaseModel):
+    """ADE L1 Opportunity model for inter-engine API contracts."""
+    id: str = Field(default_factory=_uuid)
+    description: str
+    market_size: int = Field(default=0, ge=0, description="Estimated market size in cents.")
+    competition: str = "low"  # low|med|high
+    probability: float = Field(default=0.0, ge=0.0, le=1.0)
+    supporting_signals: List[str] = Field(default_factory=list)
+
+    @property
+    def signal_id(self) -> str:
+        return self.id
+
+    @property
+    def market(self) -> str:
+        return self.description.split(":")[0] if ":" in self.description else "devtools"
+
+    @property
+    def segment(self) -> str:
+        return self.description.split(":")[1] if ":" in self.description else "startups"
+
+    @property
+    def strength(self) -> float:
+        return self.probability
+
+    @property
+    def estimated_tam_cents(self) -> int:
+        return self.market_size
+
+
+class CustomerGraphEntry(BaseModel):
+    """Customer Intelligence profile of problem/desire/objection/buying trigger/channel."""
+    customer_id: str = Field(default_factory=_uuid)
+    problem: str
+    desire: str
+    objection: str
+    buying_trigger: str
+    preferred_channel: str
+    confidence: float = Field(default=0.7, ge=0.0, le=1.0)
+
+
+class GenerationBrief(BaseModel):
+    """Visual Psychology Engine output for asset generation."""
+    required_features: List[str] = Field(default_factory=list)
+    avoid_features: List[str] = Field(default_factory=list)
+    target_emotion: str = ""
+    target_segment: str = ""
+    confidence: float = Field(default=0.7, ge=0.0, le=1.0)
+
+
+class Visual(BaseModel):
+    """Visual asset contract with output outcome optimization features."""
+    visual_id: str = Field(default_factory=_uuid)
+    narrative_id: str
+    features: Dict[str, Any] = Field(default_factory=dict)
+    channel_variants: List[str] = Field(default_factory=list)
+
+    @property
+    def asset_id(self) -> str:
+        return self.visual_id
+
+    @property
+    def concept(self) -> str:
+        return self.features.get("concept", "bold_typographic")
+
+    @property
+    def format(self) -> str:
+        return self.features.get("format", "social_square")
+
+    @property
+    def predicted_ctr(self) -> float:
+        return self.features.get("predicted_ctr", 0.05)
+
+    @property
+    def prompt(self) -> str:
+        return self.features.get("prompt", "")
+
+    @property
+    def generated_by(self) -> str:
+        return self.features.get("generated_by", "simulation")
+
+
+class Offer(BaseModel):
+    """ARE Offer details for a customer segment."""
+    offer_statement: str
+    bundle_options: List[str] = Field(default_factory=list)
+    price_floor: int = Field(ge=0, description="In cents")
+    price_ceiling: int = Field(ge=0, description="In cents")
+    guarantee: str = ""
+
+
+class LeadScore(BaseModel):
+    intent: float = Field(default=0.5, ge=0.0, le=1.0)
+    need: float = Field(default=0.5, ge=0.0, le=1.0)
+    budget: float = Field(default=0.5, ge=0.0, le=1.0)
+    timing: float = Field(default=0.5, ge=0.0, le=1.0)
+    fit: float = Field(default=0.5, ge=0.0, le=1.0)
+
+    @property
+    def total_score(self) -> float:
+        return round((self.intent + self.need + self.budget + self.timing + self.fit) / 5.0, 4)
+
+
+class Lead(BaseModel):
+    """Lead tracking for the Autonomous Sales Engine."""
+    lead_id: str = Field(default_factory=_uuid)
+    lead_score: LeadScore
+    customer_id: str
+    narrative_id: str
+    visual_id: str
+
+
+class WinningPattern(BaseModel):
+    """A pattern written back into the shared Revenue Memory Graph."""
+    pattern_type: str
+    segment: str
+    channel: str
+    feature_set: Dict[str, Any] = Field(default_factory=dict)
+    outcome_metric: float
+    sample_size: int = 0
+    confidence: float = Field(ge=0.0, le=1.0)
+
+
+# ===========================================================================
+# KOS/ROS Spec — Addendum v1.1: Production Patterns
+# ===========================================================================
+
+class Event(BaseModel):
+    id: str = Field(default_factory=_uuid)
+    type: str  # e.g., "EvidenceCreated" | "HypothesisUpdated" | "TheoryPromoted" | ...
+    payload: Dict[str, Any] = Field(default_factory=dict)
+    caused_by: Optional[str] = None
+    timestamp: datetime = Field(default_factory=_now)
+
+
+class Evidence(BaseModel):
+    id: str = Field(default_factory=_uuid)
+    statement: str
+    evidence_quality_tier: str  # "RCT" | "COHORT" | "ANECDOTAL"
+    reliability_weight: float = Field(ge=0.0, le=1.0)
+    effect_size: Optional[float] = None
+    interval: Optional[str] = None
+    version: int = 1
+    current: bool = True
+    timestamp: datetime = Field(default_factory=_now)
+
+
+class Hypothesis(BaseModel):
+    id: str = Field(default_factory=_uuid)
+    statement: str
+    confidence: float = Field(ge=0.0, le=1.0)
+    version: int = 1
+    current: bool = True
+    timestamp: datetime = Field(default_factory=_now)
+
+
+class Theory(BaseModel):
+    id: str = Field(default_factory=_uuid)
+    statement: str
+    predictive_success_rate: float = Field(ge=0.0, le=1.0)
+    version: int = 1
+    current: bool = True
+    timestamp: datetime = Field(default_factory=_now)
+
+
+class DecisionProposal(BaseModel):
+    id: str = Field(default_factory=_uuid)
+    decision: str
+    supporting_hypotheses: List[str] = Field(default_factory=list)  # Pinned to specific Hypothesis version ids
+    proposed_by: str  # AgentRef
+    status: str = "proposed"  # "proposed" | "simulating" | "approved" | "rejected" | "executed" | "cancelled"
+    simulation_result: Optional[Dict[str, Any]] = None
+    approval: Dict[str, Any] = Field(default_factory=lambda: {
+        "required": False,
+        "approved_by": None,
+        "approved_at": None
+    })
+    execution_result: Optional[Dict[str, Any]] = None
+    decision_record: Optional[str] = None
+
+
+class AgentScope(BaseModel):
+    agent_id: str
+    can_call: List[str] = Field(default_factory=list)
+    can_approve: List[str] = Field(default_factory=list)

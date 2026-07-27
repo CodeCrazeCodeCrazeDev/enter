@@ -1,87 +1,61 @@
 from __future__ import annotations
 import math
-import uuid
-from typing import Dict, Any, List, Optional
-from pydantic import BaseModel, Field
+import time
+from typing import Any, Dict
 
+# =====================================================================
+# Bayesian Belief Engine & Uncertainty Framework
+# =====================================================================
 
-class TheoryNode(BaseModel):
-    theory_id: uuid.UUID = Field(default_factory=uuid.uuid4)
-    name: str
-    target_variable: str
-    expected_value: float
-    confidence_level: float = 0.95
-
-
-class EvidenceCard(BaseModel):
-    evidence_id: uuid.UUID = Field(default_factory=uuid.uuid4)
-    hypothesis_id: uuid.UUID
-    empirical_mean: float
-    replications_count: int = 1
-    sample_size: int = 100
-
-
-class UncertaintyAnalyzer:
+def update_belief(
+    current_alpha: float,
+    current_beta: float,
+    evidence_support: float,  # weight of supporting evidence [0.0, 1.0]
+    evidence_conflict: float, # weight of conflicting/falsifying evidence [0.0, 1.0]
+    evidence_reliability: float = 1.0  # source reliability multiplier [0.0, 1.0]
+) -> tuple[float, float]:
     """
-    Evaluates epistemic uncertainty and performs conjugate Beta-Binomial belief updates.
-    Enforces automatic contradiction detection and theory promotion loops.
+    Performs conjugate Bayesian updating over Beta priors/posteriors.
+    Incorporates source reliability scale to discount uncertain evidence.
     """
+    updated_alpha = current_alpha + (evidence_support * evidence_reliability)
+    updated_beta = current_beta + (evidence_conflict * evidence_reliability)
+    return updated_alpha, updated_beta
 
-    def __init__(self, decay_rate: float = 0.05) -> None:
-        self.decay_rate = decay_rate
-        self.active_theories: Dict[uuid.UUID, TheoryNode] = {}
 
-    def calculate_epistemic_entropy(self, alpha: float, beta: float) -> float:
-        """Calculates Shannon entropy of Beta distribution as an uncertainty measure."""
-        # Standard beta entropy approximation
-        total = alpha + beta
-        if total <= 0:
-            return 1.0
-        return - (alpha / total) * math.log(alpha / total) - (beta / total) * math.log(beta / total)
+def calculate_expected_probability(alpha: float, beta: float) -> float:
+    """
+    Returns the expected probability of hypothesis validity based on Beta parameters.
+    E[p] = alpha / (alpha + beta).
+    """
+    total = alpha + beta
+    return alpha / total if total > 0 else 0.5
 
-    def update_beliefs_with_decay(
-        self,
-        prior_alpha: float,
-        prior_beta: float,
-        successes: int,
-        failures: int,
-        elapsed_days: float
-    ) -> tuple[float, float]:
-        """Applies Ebbinghaus Forgetting Curve exponential decay on historical priors before updating."""
-        decay_factor = math.exp(-self.decay_rate * elapsed_days)
 
-        # Decay excess evidence beyond uniform prior
-        decayed_alpha_excess = max(0.0, prior_alpha - 1.0) * decay_factor
-        decayed_beta_excess = max(0.0, prior_beta - 1.0) * decay_factor
+def calculate_epistemic_entropy(alpha: float, beta: float) -> float:
+    """
+    Measures the epistemic uncertainty (lack of information) vs aleatoric uncertainty.
+    A lower alpha + beta represents high epistemic uncertainty (ignorance).
+    """
+    total = alpha + beta
+    # Normalized epistemic index, bounded [0, 1] where 1.0 is total ignorance
+    return 1.0 / (1.0 + total)
 
-        return (1.0 + decayed_alpha_excess + successes, 1.0 + decayed_beta_excess + failures)
 
-    def detect_contradictions(self, evidence: EvidenceCard) -> List[Dict[str, Any]]:
-        """Scans active theories for claims contradicting the empirical evidence."""
-        contradictions = []
-        for theory_id, theory in self.active_theories.items():
-            # If evidence mean diverges by > 25% from theory expected value, flag contradiction
-            divergence = abs(evidence.empirical_mean - theory.expected_value)
-            if divergence > 0.25 * abs(theory.expected_value):
-                contradictions.append({
-                    "theory_id": theory_id,
-                    "theory_name": theory.name,
-                    "evidence_mean": evidence.empirical_mean,
-                    "expected_value": theory.expected_value,
-                    "divergence": divergence,
-                    "status": "critical_contradiction"
-                })
-        return contradictions
+def apply_temporal_decay(
+    initial_confidence: float,
+    creation_timestamp: float,
+    current_timestamp: float = None,
+    lambda_decay: float = 0.02
+) -> float:
+    """
+    Models confidence decay over time, modeling the decay of unverified historical memory.
+    C(t) = C0 * e^(-lambda * delta_t).
+    """
+    if current_timestamp is None:
+        current_timestamp = time.time()
 
-    def promote_to_theory(self, hypothesis_name: str, evidence: EvidenceCard) -> Optional[TheoryNode]:
-        """Promotes validated hypotheses to TheoryNodes if replications >= 3 and sample size >= 100."""
-        if evidence.replications_count >= 3 and evidence.sample_size >= 100:
-            theory = TheoryNode(
-                name=hypothesis_name,
-                target_variable="performance_metric",
-                expected_value=evidence.empirical_mean,
-                confidence_level=0.95
-            )
-            self.active_theories[theory.theory_id] = theory
-            return theory
-        return None
+    delta_t = max(0.0, current_timestamp - creation_timestamp)
+    # Scale delta_t appropriately for simulated/real time
+    decay_factor = math.exp(-lambda_decay * delta_t)
+    return max(0.0, initial_confidence * decay_factor)

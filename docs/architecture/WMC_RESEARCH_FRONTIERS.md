@@ -84,3 +84,14 @@ The **Evolution Engine** implements neuro-biological models of memory consolidat
 $$L(\theta) = L_{new}(\theta) + \sum_{i} \frac{\lambda}{2} F_i (\theta_i - \theta_{old, i})^2$$
 
 * **Episodic-to-Semantic Transfer:** Trajectories are first recorded in short-term episodic memory, compiled into semantic relationships in the background, and then consolidated into the central World Graph.
+
+---
+
+## 7. AI-EOS Academic and Engineering Foundations
+
+To ground these long-term academic frontiers in rigorous state-of-the-art literature, WMC maintains a fully mapped canonical research index:
+- [AI-EOS Comprehensive Research Bibliography](../research/papers/AI_EOS_RESEARCH_BIBLIOGRAPHY.md) — Maps ~130 primary research papers across 11 key architectural categories.
+- [AI-EOS Subsystem Implementation Matrix](../research/papers/AI_EOS_IMPLEMENTATION_MATRIX.md) — Links papers directly to operational Layers (L1–L4) and lists existing implementation footprints, target test coverages, and missing gaps.
+- [AI-EOS Research Dependency Graph](../research/papers/AI_EOS_DEPENDENCY_GRAPH.md) — Establishes topological prerequisite relationships (foundational, enabling, and optional clusters) governing capability rollouts.
+- [AI-EOS Implementation Roadmap](../research/papers/AI_EOS_RESEARCH_ROADMAP.md) — Defines the 4-phase technical roadmap prioritized by architectural leverage, ROI, and empirical validation strength.
+- [AI-EOS Comprehensive Gap Analysis](../research/papers/AI_EOS_GAP_ANALYSIS.md) — Audits remaining gaps, redundant capabilities, and potential architectural conflicts to secure structural alignment.

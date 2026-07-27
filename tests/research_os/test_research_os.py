@@ -1,193 +1,286 @@
+"""Unit and integration tests for AlphaAlgo Research OS.
+
+Verifies statistical calculations, multiple-testing adjustments, registries,
+immutability rules, and end-to-end pipeline execution.
+"""
 from __future__ import annotations
+
+import math
+from datetime import datetime
 import pytest
-import uuid
-import datetime
-
-from apodex.research_os.wdl import WorkflowExecutionEngine, WDLWorkflow
-from apodex.research_os.uncertainty import UncertaintyAnalyzer, EvidenceCard, TheoryNode
-from apodex.research_os.provenance import ProvenanceEngine, PROVEntity, PROVActivity
-from apodex.research_os.self_improvement import ResearchSelfImprovementEngine, BottleneckFailure
-from apodex.research_os.portfolio import ResearchPortfolioScheduler, ResearchProject
-from apodex.research_os.governance import MultiBoardGovernanceGateway, GovernanceProposal
-
-
-@pytest.mark.asyncio
-async def test_wdl_workflow_engine() -> None:
-    engine = WorkflowExecutionEngine()
-
-    raw_wdl = {
-        "research_project": "dynamic_learning_rate_optimization",
-        "hypothesis": {
-            "target_variable": "model_accuracy",
-            "null_hypothesis": "modifying learning rates has no effect.",
-            "alternative_hypothesis": "adaptive learning rates increase accuracy by 5%."
-        },
-        "tasks": [
-            {
-                "name": "generate_raw_traces",
-                "executor": "data_agent",
-                "sandbox_constraints": {
-                    "max_memory_gb": 2.0,
-                    "timeout_seconds": 120,
-                    "allow_network": False
-                },
-                "inputs": {"size": 500}
-            },
-            {
-                "name": "train_model",
-                "executor": "training_agent",
-                "sandbox_constraints": {
-                    "max_memory_gb": 8.0,
-                    "timeout_seconds": 600,
-                    "allow_network": True
-                }
-            }
-        ]
-    }
-
-    workflow = engine.parse_workflow(raw_wdl)
-    assert workflow.research_project == "dynamic_learning_rate_optimization"
-    assert len(workflow.tasks) == 2
-    assert workflow.tasks[0].sandbox_constraints.max_memory_gb == 2.0
-
-    # Run the execution simulation
-    result = await engine.execute_workflow_steps(workflow)
-    assert result["status"] == "success"
-    assert result["evidence_registered"] is True
-    assert len(result["task_outcomes"]) == 2
+from apodex.research_os import (
+    Hypothesis,
+    Dataset,
+    Feature,
+    Experiment,
+    Model,
+    HypothesisRegistry,
+    DatasetRegistry,
+    FeatureRegistry,
+    ExperimentRegistry,
+    ModelRegistry,
+    adjust_p_values,
+    calculate_dsr,
+    walk_forward_split,
+    block_bootstrap,
+    capture_environment_fingerprint,
+    verify_reproducibility,
+    StatisticalValidator,
+    GovernanceGateway,
+    ResearchPipelineOrchestrator,
+)
 
 
-def test_uncertainty_analyzer() -> None:
-    analyzer = UncertaintyAnalyzer(decay_rate=0.05)
+def test_multiple_testing_adjustments() -> None:
+    """Verify Bonferroni, Holm-Bonferroni, and BH corrections."""
+    p_values = [0.005, 0.01, 0.03, 0.05, 0.12]
 
-    # 1. Entropy calculation
-    entropy = analyzer.calculate_epistemic_entropy(10.0, 10.0)
-    assert entropy > 0.0
+    # Bonferroni: p * N, capped at 1.0
+    bonf = adjust_p_values(p_values, "BONFERRONI")
+    assert bonf[0] == pytest.approx(0.005 * 5)
+    assert bonf[4] == pytest.approx(0.12 * 5)
 
-    # 2. Update with decay
-    # Decays alpha=11 and beta=11 over 20 days: e^(-0.05*20) = e^(-1) ≈ 0.3678
-    # 10 successes, 0 failures added
-    new_alpha, new_beta = analyzer.update_beliefs_with_decay(
-        prior_alpha=11.0,
-        prior_beta=11.0,
-        successes=10,
-        failures=0,
-        elapsed_days=20.0
-    )
-    # Expected alpha excess = 10 * 0.3678 = 3.678. New alpha = 1 + 3.678 + 10 = 14.678
-    assert pytest.approx(new_alpha, abs=1e-2) == 14.678
-    assert pytest.approx(new_beta, abs=1e-2) == 4.678
+    # Holm-Bonferroni
+    holm = adjust_p_values(p_values, "HOLM")
+    assert holm[0] == pytest.approx(0.005 * 5)  # lowest sorted compared to alpha / (5 - 0)
+    assert holm[4] == pytest.approx(0.12 * 1)  # highest compared to alpha / 1
 
-    # 3. Theory promotion and contradiction detection
-    hyp_id = uuid.uuid4()
-    evidence = EvidenceCard(
-        hypothesis_id=hyp_id,
-        empirical_mean=0.85,
-        replications_count=3,
-        sample_size=150
+    # Benjamini-Hochberg (BH)
+    bh = adjust_p_values(p_values, "BH")
+    assert all(bh[i] >= p_values[i] for i in range(len(p_values)))
+    assert bh[4] == pytest.approx(0.12)
+
+
+def test_walk_forward_splits() -> None:
+    """Verify correct segment bounds generation for walk-forward splits."""
+    splits = walk_forward_split(total_length=100, train_size=50, test_size=10, step_size=10, rolling=True)
+    assert len(splits) == 5
+    # First split: train on 0-50, test on 50-60
+    assert splits[0] == ((0, 50), (50, 60))
+    # Second split (rolling): train on 10-60, test on 60-70
+    assert splits[1] == ((10, 60), (60, 70))
+
+
+def test_deflated_sharpe_ratio() -> None:
+    """Verify that increased trials number properly deflates (lowers) DSR."""
+    # Compute DSR for 1 trial vs 100 trials given the same Sharpe and observation size
+    dsr_10 = calculate_dsr(sharpe=2.0, trials=10, returns_length=252, trials_variance=0.1)
+    dsr_100 = calculate_dsr(sharpe=2.0, trials=100, returns_length=252, trials_variance=0.1)
+
+    # Higher trials number must increase the hurdle (SR_0), therefore lowering the DSR
+    assert dsr_10 > dsr_100
+
+
+def test_block_bootstrapping() -> None:
+    """Verify block bootstrap returns stable resampled returns."""
+    returns = [0.001, 0.002, -0.001, 0.003, -0.002, 0.001, 0.002, 0.004, -0.001, 0.002] * 10
+    boot = block_bootstrap(returns, block_size=5, num_samples=50, seed=42)
+    assert len(boot) == 50
+    assert all(isinstance(val, float) for val in boot)
+
+
+def test_registries_immutability() -> None:
+    """Verify registries prevent duplicate IDs and overwrites."""
+    hyp_reg = HypothesisRegistry()
+    h = Hypothesis(
+        hypothesis_id="H_01",
+        research_question_id="Q_01",
+        title="Momentum",
+        description="Exploits price trends",
+        economic_rationale="BEHAVIORAL",
+        null_hypothesis="Returns are zero",
+        target_variable="1_day_forward_ret",
     )
 
-    theory = analyzer.promote_to_theory("lr_effect", evidence)
-    assert theory is not None
-    assert theory.name == "lr_effect"
-    assert theory.expected_value == 0.85
+    hyp_reg.register_hypothesis(h)
+    assert hyp_reg.get_hypothesis("H_01") is not None
 
-    # Test contradiction detection with opposing evidence (empirical mean = 0.40)
-    opposing_evidence = EvidenceCard(
-        hypothesis_id=hyp_id,
-        empirical_mean=0.40
-    )
-    contradictions = analyzer.detect_contradictions(opposing_evidence)
-    assert len(contradictions) == 1
-    assert contradictions[0]["status"] == "critical_contradiction"
+    # Re-registering must raise a ValueError
+    with pytest.raises(ValueError, match="already exists"):
+        hyp_reg.register_hypothesis(h)
 
 
-def test_provenance_engine() -> None:
-    engine = ProvenanceEngine()
-
-    # Record entities, activities, and agents
-    dataset = engine.record_entity({"name": "mnist_raw_dataset"})
-    training = engine.record_activity({"name": "train_neural_network"})
-    agent = engine.record_agent({"name": "system_training_bot"})
-
-    # Map relationships
-    # training 'used' dataset
-    engine.assert_relation(training.id, dataset.id, "used")
-    # training 'wasAssociatedWith' agent
-    engine.assert_relation(training.id, agent.id, "wasAssociatedWith")
-
-    lineage = engine.query_lineage(training.id)
-    assert len(lineage) == 2
-    assert any(item["ancestor_id"] == dataset.id for item in lineage)
-    assert any(item["ancestor_id"] == agent.id for item in lineage)
-
-
-def test_self_improvement_engine() -> None:
-    engine = ResearchSelfImprovementEngine()
-
-    failure = BottleneckFailure(
-        task_name="train_model",
-        error_signature="TimeoutError in parallel compilation steps"
+def test_experiment_config_hashing() -> None:
+    """Verify that configuration changes alter the SHA-256 hash."""
+    exp1 = Experiment(
+        experiment_id="exp_1",
+        hypothesis_id="H_01",
+        dataset_id="ds_1",
+        feature_ids=["f_1", "f_2"],
+        hyperparameters={"learning_rate": 0.01},
+        reproducibility_package={"seed": 42},
     )
 
-    policy = engine.compile_failure_to_policy(failure)
-    assert policy.target_pattern == "train_model"
-    assert "parallel execution" in policy.remedy_instruction
-
-    # Verify prompt optimization
-    base_prompt = "You are a machine learning agent."
-    optimized = engine.optimize_system_prompts(base_prompt, "train_model")
-    assert "Self-Improvement Policy" in optimized
-    assert "Enforce batch-size reduction" in optimized
-
-
-def test_portfolio_scheduler() -> None:
-    scheduler = ResearchPortfolioScheduler()
-
-    proj_1 = ResearchProject(
-        name="lr_tuning",
-        expected_discovery_value_usd=5000.0,
-        cost_estimate_tokens=1000000,
-        probability_of_success=0.6,
-        epistemic_information_gain=1.5
+    exp2 = Experiment(
+        experiment_id="exp_2",
+        hypothesis_id="H_01",
+        dataset_id="ds_1",
+        feature_ids=["f_1", "f_2"],
+        hyperparameters={"learning_rate": 0.05},  # config change
+        reproducibility_package={"seed": 42},
     )
 
-    proj_2 = ResearchProject(
-        name="architecture_search",
-        expected_discovery_value_usd=10000.0,
-        cost_estimate_tokens=15000000,  # very high cost
-        probability_of_success=0.3,
-        epistemic_information_gain=0.8
+    hash1 = exp1.calculate_config_hash()
+    hash2 = exp2.calculate_config_hash()
+    assert hash1 != hash2
+
+
+def test_end_to_end_pipeline_success() -> None:
+    """Test successful pipeline flow through statistical and governance gates."""
+    # Setup registries
+    hyp_reg = HypothesisRegistry()
+    ds_reg = DatasetRegistry()
+    feat_reg = FeatureRegistry()
+    exp_reg = ExperimentRegistry()
+    mod_reg = ModelRegistry()
+
+    # Pre-register objects
+    h = Hypothesis(
+        hypothesis_id="H_01",
+        research_question_id="Q_01",
+        title="Trend Following",
+        description="Exploiting price persistence",
+        economic_rationale="BEHAVIORAL",
+        null_hypothesis="No trend exists",
+        target_variable="forward_ret",
+    )
+    hyp_reg.register_hypothesis(h)
+
+    ds = Dataset(
+        dataset_id="DS_01",
+        version="v1.0",
+        raw_source="s3://data",
+        ingestion_pipeline_hash="h123",
+    )
+    ds_reg.register_dataset(ds)
+
+    f1 = Feature(
+        feature_id="F_01",
+        name="SMA_10",
+        formula="mean(close, 10)",
+        lineage_dataset_id="DS_01",
+    )
+    feat_reg.register_feature(f1)
+
+    # Mock trial runner function returning significant returns
+    # Daily returns leading to high Sharpe (e.g. 2.5)
+    def mock_successful_trial(dataset, feature_ids, hyperparameters):
+        daily_returns = [0.002, 0.003, -0.001, 0.004, 0.001, 0.002, 0.003] * 30  # 210 observations
+        # Sharpe ratio is highly positive
+        metrics = {"sharpe": 2.5, "max_drawdown": 0.05}
+        return daily_returns, metrics
+
+    # Instantiate validators and gateway
+    validator = StatisticalValidator(correction_method="HOLM")
+    gateway = GovernanceGateway()
+
+    orchestrator = ResearchPipelineOrchestrator(
+        hypotheses=hyp_reg,
+        datasets=ds_reg,
+        features=feat_reg,
+        experiments=exp_reg,
+        models=mod_reg,
+        validator=validator,
+        gateway=gateway,
     )
 
-    prioritized = scheduler.prioritize_projects([proj_1, proj_2])
-    assert len(prioritized) == 2
-    # proj_1 should rank higher because high cost of proj_2 penalizes its utility index
-    assert prioritized[0][0].name == "lr_tuning"
+    reviewers = ["expert_human", "ai_critic"]
+    approvals = {"expert_human": True, "ai_critic": True}
 
-
-def test_governance_gateway() -> None:
-    gateway = MultiBoardGovernanceGateway(complexity_budget=40)
-
-    # 1. Compliant proposal
-    prop_ok = GovernanceProposal(
-        target_capability="parallel_optimization",
-        risk_score=0.2,
-        code_complexity=20
+    # Execute
+    exp, report, decision, model = orchestrator.execute_pipeline(
+        hypothesis_id="H_01",
+        dataset_id="DS_01",
+        feature_ids=["F_01"],
+        hyperparameters={"learning_rate": 0.01},
+        trial_runner_fn=mock_successful_trial,
+        reviewers=reviewers,
+        approvals=approvals,
     )
-    result_ok = gateway.evaluate_proposal(prop_ok)
-    assert result_ok["approved"] is True
-    assert result_ok["status"] == "APPROVED"
-    assert result_ok["boards"]["ethics"]["approved"] is True
-    assert result_ok["boards"]["capital"]["allocated_tokens"] == 800
 
-    # 2. Non-compliant proposal (violates complexity budget)
-    prop_bad = GovernanceProposal(
-        target_capability="heavy_mutation",
-        risk_score=0.1,
-        code_complexity=100  # violates complexity limit of 40
+    # Assertions
+    assert exp.status == "COMPLETED"
+    assert report is not None
+    assert report.raw_sharpe_ratio == 2.5
+    assert report.deflated_sharpe_ratio > 0.95
+    assert report.is_statistically_significant is True
+    assert decision.status == "APPROVED"
+    assert model is not None
+    assert mod_reg.get_model(model.model_id) is not None
+
+
+def test_end_to_end_pipeline_rejection() -> None:
+    """Test pipeline rejection on low-significance performance."""
+    hyp_reg = HypothesisRegistry()
+    ds_reg = DatasetRegistry()
+    feat_reg = FeatureRegistry()
+    exp_reg = ExperimentRegistry()
+    mod_reg = ModelRegistry()
+
+    h = Hypothesis(
+        hypothesis_id="H_01",
+        research_question_id="Q_01",
+        title="Mean Reversion",
+        description="Exploits temporary deviation",
+        economic_rationale="MICROSTRUCTURE",
+        null_hypothesis="No deviation",
+        target_variable="forward_ret",
     )
-    result_bad = gateway.evaluate_proposal(prop_bad)
-    assert result_bad["approved"] is False
-    assert result_bad["status"] == "REJECTED"
-    assert result_bad["boards"]["security"]["approved"] is False
+    hyp_reg.register_hypothesis(h)
+
+    ds = Dataset(
+        dataset_id="DS_01",
+        version="v1.0",
+        raw_source="s3://data",
+        ingestion_pipeline_hash="h123",
+    )
+    ds_reg.register_dataset(ds)
+
+    f1 = Feature(
+        feature_id="F_01",
+        name="RSI_14",
+        formula="rsi(close, 14)",
+        lineage_dataset_id="DS_01",
+    )
+    feat_reg.register_feature(f1)
+
+    # Mock trial runner returning flat/unprofitable returns
+    def mock_failed_trial(dataset, feature_ids, hyperparameters):
+        daily_returns = [0.0001, -0.0001, 0.0002, -0.0003] * 50
+        metrics = {"sharpe": 0.1, "max_drawdown": 0.15}
+        return daily_returns, metrics
+
+    validator = StatisticalValidator(correction_method="HOLM")
+    gateway = GovernanceGateway()
+
+    orchestrator = ResearchPipelineOrchestrator(
+        hypotheses=hyp_reg,
+        datasets=ds_reg,
+        features=feat_reg,
+        experiments=exp_reg,
+        models=mod_reg,
+        validator=validator,
+        gateway=gateway,
+    )
+
+    reviewers = ["expert_human", "ai_critic"]
+    approvals = {"expert_human": True, "ai_critic": True}
+
+    # Execute
+    exp, report, decision, model = orchestrator.execute_pipeline(
+        hypothesis_id="H_01",
+        dataset_id="DS_01",
+        feature_ids=["F_01"],
+        hyperparameters={"learning_rate": 0.01},
+        trial_runner_fn=mock_failed_trial,
+        reviewers=reviewers,
+        approvals=approvals,
+    )
+
+    # Assertions
+    assert exp.status == "COMPLETED"
+    assert report is not None
+    assert report.is_statistically_significant is False
+    assert decision.status == "REJECTED"
+    assert len(decision.rejection_rationales) > 0
+    assert model is None

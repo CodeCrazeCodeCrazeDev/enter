@@ -32,6 +32,13 @@ from .models import (
     SignalValidation,
     ValidationRecord,
     VisualAsset,
+    Opportunity,
+    CustomerGraphEntry,
+    GenerationBrief,
+    Visual,
+    Offer,
+    Lead,
+    WinningPattern,
 )
 
 logger = logging.getLogger("aean.ekg")
@@ -73,6 +80,13 @@ class EconomicKnowledgeGraph:
         self.narratives: Dict[str, Narrative] = {}
         self.assets: Dict[str, VisualAsset] = {}
         self.cells: Dict[str, MicroCell] = {}
+
+        # AI-EOS specific collections
+        self.opportunities: Dict[str, Opportunity] = {}
+        self.customer_profiles: Dict[str, CustomerGraphEntry] = {}
+        self.offers: Dict[str, Offer] = {}
+        self.leads: Dict[str, Lead] = {}
+        self.winning_patterns: List[WinningPattern] = []
 
         # Reality & validation systems (Part II of the architecture).
         self.validations: Dict[str, ValidationRecord] = {}       # keyed by asset_id
@@ -135,6 +149,83 @@ class EconomicKnowledgeGraph:
         )
         self.add_edge(signal.signal_id, f"market:{signal.market}", "TARGETS", weight=signal.strength)
         self._log("demand_signal", signal.signal_id, {"strength": signal.strength, "market": signal.market})
+
+    def record_opportunity(self, opportunity: Opportunity) -> None:
+        self.opportunities[opportunity.id] = opportunity
+        # To maintain compatibility with existing components expecting DemandSignal:
+        compat_signal = DemandSignal(
+            signal_id=opportunity.id,
+            market=opportunity.market,
+            segment=opportunity.segment,
+            strength=opportunity.probability,
+            estimated_tam_cents=opportunity.market_size,
+            keywords=opportunity.supporting_signals
+        )
+        self.signals[opportunity.id] = compat_signal
+        self.upsert_node(f"market:{opportunity.market}", "market", name=opportunity.market)
+        self.upsert_node(
+            opportunity.id,
+            "opportunity",
+            probability=opportunity.probability,
+            description=opportunity.description,
+            market_size=opportunity.market_size,
+            competition=opportunity.competition,
+        )
+        self.add_edge(opportunity.id, f"market:{opportunity.market}", "TARGETS", weight=opportunity.probability)
+        self._log("opportunity", opportunity.id, {"probability": opportunity.probability, "market": opportunity.market})
+
+    def record_customer_profile(self, profile: CustomerGraphEntry) -> None:
+        self.customer_profiles[profile.customer_id] = profile
+        self.upsert_node(
+            profile.customer_id,
+            "customer_profile",
+            problem=profile.problem,
+            desire=profile.desire,
+            objection=profile.objection,
+            buying_trigger=profile.buying_trigger,
+            preferred_channel=profile.preferred_channel,
+        )
+        self._log("customer_profile", profile.customer_id, {"preferred_channel": profile.preferred_channel})
+
+    def record_offer(self, offer: Offer) -> None:
+        # We can key by offer statement hash or use a sequence
+        offer_id = f"offer-{hash(offer.offer_statement)}"
+        self.offers[offer_id] = offer
+        self.upsert_node(
+            offer_id,
+            "offer",
+            offer_statement=offer.offer_statement,
+            price_floor=offer.price_floor,
+            price_ceiling=offer.price_ceiling,
+            guarantee=offer.guarantee,
+        )
+        self._log("offer", offer_id, {"price_floor": offer.price_floor})
+
+    def record_lead(self, lead: Lead) -> None:
+        self.leads[lead.lead_id] = lead
+        self.upsert_node(
+            lead.lead_id,
+            "lead",
+            score=lead.lead_score.total_score,
+            customer_id=lead.customer_id,
+        )
+        self.add_edge(lead.lead_id, lead.customer_id, "IDENTIFIES", weight=1.0)
+        self.add_edge(lead.lead_id, lead.narrative_id, "EXPOSED_TO", weight=1.0)
+        self.add_edge(lead.lead_id, lead.visual_id, "CONVERTED_BY", weight=1.0)
+        self._log("lead", lead.lead_id, {"score": lead.lead_score.total_score})
+
+    def record_winning_pattern(self, pattern: WinningPattern) -> None:
+        self.winning_patterns.append(pattern)
+        pattern_id = f"pattern-{len(self.winning_patterns)}"
+        self.upsert_node(
+            pattern_id,
+            "winning_pattern",
+            pattern_type=pattern.pattern_type,
+            segment=pattern.segment,
+            channel=pattern.channel,
+            outcome_metric=pattern.outcome_metric,
+        )
+        self._log("winning_pattern", pattern_id, {"outcome_metric": pattern.outcome_metric})
 
     def record_narrative(self, narrative: Narrative) -> None:
         self.narratives[narrative.narrative_id] = narrative

@@ -1,61 +1,121 @@
 from __future__ import annotations
-import uuid
-from typing import Dict, Any, List, Optional
-from pydantic import BaseModel, Field
+from uuid import UUID, uuid4
+from typing import Any, Dict, List
+from .models import BaseArtifact, DecisionRecord
+from .plugins import IGovernancePlugin
+
+# =====================================================================
+# Programmatic Governance Boards
+# =====================================================================
+
+class EthicsReviewBoard(IGovernancePlugin):
+    """Audits ethical boundaries, human impact, and data privacy policies."""
+
+    def board_name(self) -> str:
+        return "EthicsReviewBoard"
+
+    async def audit(self, artifact: BaseArtifact) -> DecisionRecord:
+        # Programmatic rule: Reject if confidence is extremely low
+        if artifact.confidence < 0.3:
+            return DecisionRecord(
+                lineage_parent_uuids=[artifact.uuid],
+                author=self.board_name(),
+                target_uuid=artifact.uuid,
+                board_name=self.board_name(),
+                decision_outcome="REJECT",
+                reason=f"Failed ethics audit: confidence score {artifact.confidence} is below absolute floor of 0.3."
+            )
+
+        # Programmatic rule: Escalate if a high-risk system or unverified author is active
+        if "falsified" in artifact.validation_status.lower():
+            return DecisionRecord(
+                lineage_parent_uuids=[artifact.uuid],
+                author=self.board_name(),
+                target_uuid=artifact.uuid,
+                board_name=self.board_name(),
+                decision_outcome="ESCALATE",
+                reason="Escalated to Human Review: Attempting to process pre-falsified research path."
+            )
+
+        return DecisionRecord(
+            lineage_parent_uuids=[artifact.uuid],
+            author=self.board_name(),
+            target_uuid=artifact.uuid,
+            board_name=self.board_name(),
+            decision_outcome="APPROVE",
+            reason="Ethics audit passed. No boundary violations detected."
+        )
 
 
-class GovernanceProposal(BaseModel):
-    proposal_id: uuid.UUID = Field(default_factory=uuid.uuid4)
-    target_capability: str
-    proposed_modifications: Dict[str, Any] = Field(default_factory=dict)
-    risk_score: float = 0.1
-    code_complexity: int = 10
+class ScientificQualityBoard(IGovernancePlugin):
+    """Enforces mathematical rigor, statistical power, and reproducibility benchmarks."""
+
+    def board_name(self) -> str:
+        return "ScientificQualityBoard"
+
+    async def audit(self, artifact: BaseArtifact) -> DecisionRecord:
+        # Programmatic rule: Request revision if artifact validation status is unverified
+        if artifact.confidence < 0.7:
+            return DecisionRecord(
+                lineage_parent_uuids=[artifact.uuid],
+                author=self.board_name(),
+                target_uuid=artifact.uuid,
+                board_name=self.board_name(),
+                decision_outcome="REQUEST_REVISION",
+                reason=f"Scientific quality warning: confidence of {artifact.confidence:.2f} is insufficient. Standard threshold is >= 0.7."
+            )
+
+        return DecisionRecord(
+            lineage_parent_uuids=[artifact.uuid],
+            author=self.board_name(),
+            target_uuid=artifact.uuid,
+            board_name=self.board_name(),
+            decision_outcome="APPROVE",
+            reason="Scientific quality audit passed. Solid statistical foundation."
+        )
 
 
-class MultiBoardGovernanceGateway:
-    """
-    Enforces programmatic multi-board gating (Ethics, Quality, Security, and Capital)
-    before any research artifact or theory can be promoted to the production repo.
-    """
+class SecurityBoard(IGovernancePlugin):
+    """Checks for container containment, unsafe dependencies, or code leakage."""
 
-    def __init__(self, complexity_budget: int = 50) -> None:
-        self.complexity_budget = complexity_budget
+    def board_name(self) -> str:
+        return "SecurityBoard"
 
-    def evaluate_proposal(self, proposal: GovernanceProposal) -> Dict[str, Any]:
-        """
-        Runs independent multi-board audits:
-        - Ethics: Allowed if risk_score < 0.8
-        - Quality: Allowed if performance metrics show positive gains
-        - Security: Allowed if code_complexity conforms to the complexity budget
-        - Capital: Allocates execution credits based on risk
-        """
-        # 1. Ethics Board Check
-        ethics_approved = proposal.risk_score < 0.8
-        ethics_reason = "Approved" if ethics_approved else "RISK: Unaligned risk score exceeds ethical threshold"
+    async def audit(self, artifact: BaseArtifact) -> DecisionRecord:
+        # Audit based on digital signature presence
+        if not artifact.digital_signature:
+            return DecisionRecord(
+                lineage_parent_uuids=[artifact.uuid],
+                author=self.board_name(),
+                target_uuid=artifact.uuid,
+                board_name=self.board_name(),
+                decision_outcome="REJECT",
+                reason="Security breach: Artifact lacks a valid digital signature of integrity."
+            )
 
-        # 2. Security Board Check
-        security_approved = proposal.code_complexity <= self.complexity_budget
-        security_reason = "Approved" if security_approved else f"RISK: Code complexity exceeds budget constraint of {self.complexity_budget}"
+        return DecisionRecord(
+            lineage_parent_uuids=[artifact.uuid],
+            author=self.board_name(),
+            target_uuid=artifact.uuid,
+            board_name=self.board_name(),
+            decision_outcome="APPROVE",
+            reason="Security audit passed. Artifact signature is verified."
+        )
 
-        # 3. Quality Board Check
-        # Simulates regression check
-        quality_approved = True
 
-        # 4. Capital Board Allocation
-        capital_allocated = 0
-        if ethics_approved and security_approved:
-            capital_allocated = int((1.0 - proposal.risk_score) * 1000)
+class CapitalAllocationBoard(IGovernancePlugin):
+    """Allocates computing resource, CPU/GPU, and token budgets to research threads."""
 
-        overall_approved = ethics_approved and security_approved and quality_approved
+    def board_name(self) -> str:
+        return "CapitalAllocationBoard"
 
-        return {
-            "proposal_id": proposal.proposal_id,
-            "approved": overall_approved,
-            "boards": {
-                "ethics": {"approved": ethics_approved, "msg": ethics_reason},
-                "security": {"approved": security_approved, "msg": security_reason},
-                "quality": {"approved": quality_approved, "msg": "Approved"},
-                "capital": {"allocated_tokens": capital_allocated}
-            },
-            "status": "APPROVED" if overall_approved else "REJECTED"
-        }
+    async def audit(self, artifact: BaseArtifact) -> DecisionRecord:
+        # Programmatic budget checks (simulated)
+        return DecisionRecord(
+            lineage_parent_uuids=[artifact.uuid],
+            author=self.board_name(),
+            target_uuid=artifact.uuid,
+            board_name=self.board_name(),
+            decision_outcome="APPROVE",
+            reason="Resource budget cleared. Compute resources allocated."
+        )

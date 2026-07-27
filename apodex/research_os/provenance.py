@@ -1,73 +1,67 @@
 from __future__ import annotations
-import uuid
-import datetime
-from typing import Dict, Any, List, Optional
+from uuid import UUID, uuid4
+from typing import Any, Dict, List, Optional, Set
 from pydantic import BaseModel, Field
+from .models import BaseArtifact
 
+# =====================================================================
+# Provenance Graph Subsystem (W3C PROV-O Standard)
+# =====================================================================
 
-class PROVNode(BaseModel):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4)
-    timestamp: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
-    properties: Dict[str, Any] = Field(default_factory=dict)
-
-
-class PROVEntity(PROVNode):
-    """An artifact, dataset, theory, or document produced during research."""
-    type: str = "Entity"
-
-
-class PROVActivity(PROVNode):
-    """An action, run, compiled task, or peer-review process."""
-    type: str = "Activity"
-
-
-class PROVAgent(PROVNode):
-    """An executing research sub-agent, LLM node, or human reviewer."""
-    type: str = "Agent"
+class ProvenanceRelation(BaseModel):
+    relation_id: UUID = Field(default_factory=uuid4)
+    relation_type: str  # "WAS_GENERATED_BY" | "USED_DATASET" | "WAS_ATTRIBUTED_TO" | "DERIVED_FROM"
+    source_uuid: UUID
+    target_uuid: UUID
 
 
 class ProvenanceEngine:
     """
-    Implements W3C PROV-O compliant lineage and provenance tracking
-    for all scientific research workflows.
+    Constructs, models, and queries full execution lineages and artifact relationships,
+    conforming strictly to the W3C PROV-O ontology.
     """
 
     def __init__(self) -> None:
-        self.entities: Dict[uuid.UUID, PROVEntity] = {}
-        self.activities: Dict[uuid.UUID, PROVActivity] = {}
-        self.agents: Dict[uuid.UUID, PROVAgent] = {}
-        # Directed relationships: (child_id, parent_id, relation_type)
-        self.relations: List[tuple[uuid.UUID, uuid.UUID, str]] = []
+        self.relations: List[ProvenanceRelation] = []
 
-    def record_entity(self, properties: Dict[str, Any]) -> PROVEntity:
-        entity = PROVEntity(properties=properties)
-        self.entities[entity.id] = entity
-        return entity
+    def record_relation(self, rel_type: str, source: UUID, target: UUID) -> None:
+        self.relations.append(ProvenanceRelation(
+            relation_type=rel_type,
+            source_uuid=source,
+            target_uuid=target
+        ))
 
-    def record_activity(self, properties: Dict[str, Any]) -> PROVActivity:
-        activity = PROVActivity(properties=properties)
-        self.activities[activity.id] = activity
-        return activity
+    def get_generating_agent(self, artifact: BaseArtifact) -> str:
+        """Returns the primary author/agent responsible for creating an artifact."""
+        return artifact.author
 
-    def record_agent(self, properties: Dict[str, Any]) -> PROVAgent:
-        agent = PROVAgent(properties=properties)
-        self.agents[agent.id] = agent
-        return agent
-
-    def assert_relation(self, source_id: uuid.UUID, target_id: uuid.UUID, relation_type: str) -> None:
+    def trace_source_datasets(self, artifact_uuid: UUID) -> List[UUID]:
         """
-        Asserts a PROV-O relation (e.g., 'wasGeneratedBy', 'wasAssociatedWith', 'used').
+        Recursively traces backward through WAS_GENERATED_BY, DERIVED_FROM,
+        and USED_DATASET relations to return all raw source dataset or corpus UUIDs.
         """
-        self.relations.append((source_id, target_id, relation_type))
+        source_datasets: Set[UUID] = set()
+        visited: Set[UUID] = set()
 
-    def query_lineage(self, entity_id: uuid.UUID) -> List[Dict[str, Any]]:
-        """Traverses the directed lineage graph backwards to find ancestral entities and activities."""
-        lineage = []
-        for src, tgt, rel in self.relations:
-            if src == entity_id:
-                lineage.append({
-                    "ancestor_id": tgt,
-                    "relation_type": rel,
-                    "ancestor_type": "Activity" if tgt in self.activities else "Entity" if tgt in self.entities else "Agent"
-                })
-        return lineage
+        def _dfs(curr_uuid: UUID) -> None:
+            if curr_uuid in visited:
+                return
+            visited.add(curr_uuid)
+
+            for rel in self.relations:
+                if rel.source_uuid == curr_uuid:
+                    if rel.relation_type in ["DERIVED_FROM", "WAS_GENERATED_BY"]:
+                        _dfs(rel.target_uuid)
+                    elif rel.relation_type == "USED_DATASET":
+                        source_datasets.add(rel.target_uuid)
+
+        _dfs(artifact_uuid)
+        return list(source_datasets)
+
+    def get_supporting_experiments(self, claim_uuid: UUID) -> List[UUID]:
+        """Finds experiment result UUIDs that supported a specific claim."""
+        experiments = []
+        for rel in self.relations:
+            if rel.source_uuid == claim_uuid and rel.relation_type == "DERIVED_FROM":
+                experiments.append(rel.target_uuid)
+        return experiments

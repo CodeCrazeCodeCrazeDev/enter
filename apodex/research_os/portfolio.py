@@ -1,43 +1,95 @@
 from __future__ import annotations
-import uuid
-from typing import Dict, Any, List, Optional
+from uuid import UUID
+from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
+from .models import ResearchProject
+
+# =====================================================================
+# Scheduler & Portfolio Orchestration
+# =====================================================================
+
+class ProjectAllocation(BaseModel):
+    project_uuid: UUID
+    compute_quota: float  # [0.0, 1.0] proportion of total cluster power
+    allocated_tokens: int
 
 
-class ResearchProject(BaseModel):
-    project_id: uuid.UUID = Field(default_factory=uuid.uuid4)
-    name: str
-    expected_discovery_value_usd: float = 1000.0
-    cost_estimate_tokens: int = 500000
-    probability_of_success: float = 0.5
-    epistemic_information_gain: float = 1.2
-
-
-class ResearchPortfolioScheduler:
+class PortfolioScheduler:
     """
-    Coordinates scheduling and prioritizes capital allocation across competing research projects
-    by calculating a robust utility index:
-    Score = (Expected_Discovery_Value * Probability_Success) - Expected_Cost + Information_Gain
+    Manages competing scientific projects, optimizing allocations based on
+    Expected Discovery Value (EDV), opportunity cost, and strict resource quotas.
     """
 
-    def __init__(self, token_cost_coefficient: float = 0.0001) -> None:
-        self.token_cost_coefficient = token_cost_coefficient
+    def __init__(self, total_gpu_tokens_budget: int = 1000000) -> None:
+        self.total_budget = total_gpu_tokens_budget
+        self.active_projects: Dict[UUID, ResearchProject] = {}
 
-    def calculate_priority_index(self, project: ResearchProject) -> float:
+    def add_project(self, project: ResearchProject) -> None:
+        self.active_projects[project.uuid] = project
+
+    def remove_project(self, project_uuid: UUID) -> None:
+        self.active_projects.pop(project_uuid, None)
+
+    def calculate_project_priority(self, project: ResearchProject, success_rate: float) -> float:
         """
-        Computes the prioritized utility score of a research project.
+        Computes dynamic priority score incorporating Expected Discovery Value (EDV)
+        and opportunity cost of capital/compute.
+        EDV = Success Probability * Expected Impact.
         """
-        success_payout = project.expected_discovery_value_usd * project.probability_of_success
-        cost_penalty = project.cost_estimate_tokens * self.token_cost_coefficient
-        exploration_bonus = project.epistemic_information_gain * 100.0  # weighted epistemic value
+        # Estimated Success Probability (prioritized by historical success_rate)
+        p_success = max(0.1, min(0.99, success_rate))
+        impact = project.expected_discovery_value
 
-        return success_payout - cost_penalty + exploration_bonus
+        # Calculate Expected Discovery Value
+        edv = p_success * impact
 
-    def prioritize_projects(self, projects: List[ResearchProject]) -> List[tuple[ResearchProject, float]]:
-        """Sorts projects in descending order based on their priority score."""
-        scored_projects = []
-        for proj in projects:
-            score = self.calculate_priority_index(proj)
-            scored_projects.append((proj, score))
+        # Opportunity cost: penalties for overspent funding budget
+        opportunity_penalty = 0.0
+        if project.funding_budget > 100000.0:
+            opportunity_penalty = 0.1 * (project.funding_budget / 100000.0)
 
-        return sorted(scored_projects, key=lambda x: x[1], reverse=True)
+        # Final Priority score
+        priority = edv - opportunity_penalty
+        return max(0.01, priority)
+
+    def optimize_portfolio(self, historical_success_rates: Dict[UUID, float]) -> List[ProjectAllocation]:
+        """
+        Allocates token quotas proportionally across competing projects
+        based on optimized priority scores.
+        """
+        if not self.active_projects:
+            return []
+
+        priority_scores = {}
+        total_priority = 0.0
+
+        for uuid, project in self.active_projects.items():
+            success = historical_success_rates.get(uuid, 0.5)
+            score = self.calculate_project_priority(project, success)
+            priority_scores[uuid] = score
+            total_priority += score
+
+        allocations = []
+        for uuid, project in self.active_projects.items():
+            score = priority_scores[uuid]
+            quota = score / total_priority if total_priority > 0 else (1.0 / len(self.active_projects))
+            tokens = int(quota * self.total_budget)
+
+            allocations.append(ProjectAllocation(
+                project_uuid=uuid,
+                compute_quota=quota,
+                allocated_tokens=tokens
+            ))
+
+        return allocations
+
+    def check_for_terminations(self, historical_success_rates: Dict[UUID, float], min_edv_threshold: float = 10.0) -> List[UUID]:
+        """Identifies and terminates projects whose expected discovery value falls below threshold."""
+        terminated = []
+        for uuid, project in list(self.active_projects.items()):
+            success = historical_success_rates.get(uuid, 0.5)
+            edv = success * project.expected_discovery_value
+            if edv < min_edv_threshold:
+                terminated.append(uuid)
+                self.remove_project(uuid)
+        return terminated

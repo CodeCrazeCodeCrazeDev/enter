@@ -1,5 +1,9 @@
 # Apodex Meta-System Architectural Specification: Self-Improving AI System
 
+> ### ⚠️ DOCUMENT STATUS: PARTIALLY SUPERSEDED
+> This document is **Partially Superseded** by the authoritative architecture blueprint [AI_EOS_ARCHITECTURE.md](docs/architecture/AI_EOS_ARCHITECTURE.md).
+> The core self-improvement, active inference, and meta-governance workflows defined in the AI-EOS blueprint control the system. Basic Personal Evolution Profile (PEP) and Verifier node definitions herein remain active as subcomponents of the memory and validation contexts.
+
 This document specifies the architecture, data flows, design patterns, safety guardrails, cost-awareness, and the newly integrated **Autonomous Verifier Layer** for **Apodex**—the self-evolving meta-system that wraps, observes, and continually improves the Autonomous Economic Agent Network (AEAN).
 
 ---

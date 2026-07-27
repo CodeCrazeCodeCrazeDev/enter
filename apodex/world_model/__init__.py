@@ -8,5 +8,4 @@ from __future__ import annotations
 from apodex.world_model.interfaces import IWorldModelService
 
 __version__ = "1.0.0"
-
 __all__ = ["IWorldModelService"]

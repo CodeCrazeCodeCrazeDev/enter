@@ -72,6 +72,31 @@ Goal: an end‑to‑end **deep research system** that:
 
 ---
 
+## 1.1 The Accuracy Leap: Anthropic 21% to 95% & Leni AI Universal Data Models
+
+To achieve elite performance, Apodex 2.0 incorporates the breakthrough agentic context and engineering lessons published by **Anthropic** (where raw agent accuracy jumped from **21% to 95%** through structural configuration) and the workflow principles of **Leni AI**:
+
+### 1.1.1 The Failure Modes of Naive Agents
+Anthropic identified three fundamental blockers to enterprise-grade accuracy:
+1.  **Concept-to-Entity Ambiguity:** Simple goals like "active users" or "available surplus" can map to forty plausible tables/definitions in a database. Without explicit canonical models, agents guess blindly and introduce silent bugs.
+2.  **Information & Skill Decay:** Schemas, APIs, and business definitions evolve constantly. Without explicit sync rules, the agent's context rots, and accuracy drifts from **95% down to 65% in a single month**.
+3.  **Retrieval Failures:** In massive datasets, raw retrieval over prior queries or historical files moves accuracy by less than **1 percentage point**. Crucially, in 80% of incorrect runs, the correct answer was in the retrieval corpus but the model passed right over it.
+
+### 1.1.2 The "Skill Files as the System" Solution (Anthropic & Leni AI)
+*   **The Model is Interchangeable; Context is the System:** High accuracy is not bought by a more powerful foundational model, but by a co-located, structured meta-context layer.
+*   **Structured Skill Files:** Authoring precise "Skill Files" defining tool schemas, input constraints, and deterministic outputs.
+*   **Co-Location with Source Code:** Putting skill documents and data models in the exact same Git repository, so 90% of structural changes are co-submitted with skill file updates (CI/CD sync).
+*   **Universal Data Model (UDM) Integration (Leni AI Style):** Standardizing messy input data and variables into a strict, polymorphic schema before reaching the reasoning model, resolving ambiguities deterministicly.
+*   **Adversarial Assumptions Challenge:** Deploying dedicated critic sub-agents (e.g., conflict and counter-evidence checkers) to challenge every initial hypothesis. This buys up to **6% extra accuracy** by forcing the model to repeatedly re-evaluate its assumptions.
+
+### 1.1.3 Integration in Apodex 2.0
+We directly encode these SOTA principles into Apodex 2.0:
+*   The **SkillRegistry** (`apodex/skills/registry.py`) pre-populates and co-locates 60 canonical business/research capabilities alongside the code.
+*   The **HarnessRefiner** (`apodex/evolution/self_harness/refiner.py`) and **HarnessCritic** (`apodex/evolution/self_harness/critic.py`) perform adversarial reviews on proposals before execution.
+*   Every task's metadata is validated against strict Pydantic schemas representing a clean UDM, neutralizing Concept-to-Entity ambiguity.
+
+---
+
 ## 2. Pieces You Must “Take” From AI Engineer Channel
 
 ### 2.1 Multi‑Agent Architecture That Ships (Factory “Missions”)

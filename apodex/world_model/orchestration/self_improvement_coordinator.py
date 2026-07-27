@@ -1,10 +1,11 @@
 from __future__ import annotations
 from datetime import datetime
+import copy
 import hashlib
 import logging
 import re
 from typing import List, Dict, Any, Optional
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from apodex.world_model.dependency_injection import DependencyContainer
 from apodex.world_model.config import WorldModelCreatorConfig
@@ -22,10 +23,22 @@ from apodex.world_model.interfaces.self_improvement import (
     IQaEngineer,
     IEvaluator
 )
+# Upgraded additions
+from apodex.world_model.world_model import WorldModel
+from apodex.world_model.graph.searcheyes_models import PerceptionKnowledgeChain, PKCHop
+from apodex.skills.registry import skill_registry
+from apodex.skills.implementations import (
+    RunFastSecurityScanInput,
+    FindRelatedFilesAndTestsInput,
+    GenerateCodePatchInput,
+    RunTestSuiteInput,
+    SummarizeBenchmarkResultsInput
+)
+from apodex.harness.schemas.protocol_spec import ProtocolSpec, StepSpec
+from apodex.protocols.loader import ProtocolLoader
 
 logger = logging.getLogger("apodex.world_model.self_improvement")
 
-# Production-grade cost weight configuration (not hard-coded magic numbers)
 COST_WEIGHTS = {
     "expensive_agent_call": {"tokens": 4000, "usd": 0.06, "latency_ms": 1200.0},
     "standard_call": {"tokens": 1500, "usd": 0.015, "latency_ms": 400.0},
@@ -61,22 +74,27 @@ class SelfImprovementFlywheelCoordinator:
             self.config.reality_engine.execution_tier = "EXPENSIVE"
             self.current_tier = "EXPENSIVE"
 
+        self.tenant_id = self.config.tenant_id if hasattr(self.config, "tenant_id") else "default_tenant"
+
         # Initialize tracking state
         self.cumulative_cost_usd = 0.0
         self.cumulative_tokens = 0
         self.cumulative_latency_ms = 0.0
         self.execution_log: List[Dict[str, Any]] = []
 
+        # Part 1 Integration: Graph model trace log
+        self.world_model = WorldModel()
+
     @classmethod
     def flush_cache(cls) -> None:
         """Flushes the static in-memory proposal cache."""
         cls._global_cache.clear()
 
-    def _generate_cache_key(self, finding: EngineeringFinding) -> str:
-        """Generates a rich, robust cache key from category and fingerprint of finding content."""
+    def _generate_cache_key(self, finding: EngineeringFinding, tenant_id: str, tier: str) -> str:
+        """Generates a rich, robust, isolated cache key preventing cross-tenant and CHEAP->EXPENSIVE pollution."""
         content_str = f"{finding.category}:{finding.file_path}:{finding.line_number or ''}:{finding.description}"
         fingerprint = hashlib.sha256(content_str.encode("utf-8")).hexdigest()
-        return f"{finding.category}:{fingerprint}"
+        return f"{tenant_id}:{tier}:{finding.category}:{fingerprint}"
 
     def _charge_operation(self, op_type: str, details: str = "") -> bool:
         """
@@ -124,75 +142,86 @@ class SelfImprovementFlywheelCoordinator:
 
         return True
 
-    def _run_fast_security_scan(self) -> List[EngineeringFinding]:
-        """A fast, non-LLM, regex-based security audit of the codebase."""
-        findings = []
-        files_to_scan = [
-            "apodex/world_model/config.py",
-            "apodex/world_model/orchestration/coordinator.py"
-        ]
-
-        patterns = {
-            "eval_usage": (r"\beval\s*\(", "Potential unsafe eval() call found in codebase."),
-            "exec_usage": (r"\bexec\s*\(", "Potential unsafe exec() call found in codebase."),
-            "api_key_leak": (r"(api_key|password|secret|token)\s*=\s*['\"][a-zA-Z0-9_\-]+['\"]", "Potential hardcoded credentials found in codebase."),
-        }
-
-        for path in files_to_scan:
-            try:
-                import os
-                if not os.path.exists(path):
-                    continue
-                with open(path, "r", encoding="utf-8") as f:
-                    content = f.read()
-
-                for key, (pattern, msg) in patterns.items():
-                    if re.search(pattern, content):
-                        findings.append(EngineeringFinding(
-                            severity="HIGH",
-                            category="SECURITY_VULNERABILITY",
-                            file_path=path,
-                            description=msg,
-                            suggested_fix="Load configuration dynamically and avoid static/unsafe executions."
-                        ))
-            except OSError:
-                logger.warning("Fast security scan could not read '%s'; skipping.", path, exc_info=True)
-        return findings
+    async def _run_fast_security_scan(self) -> List[EngineeringFinding]:
+        """Fast regex based security scan utilizing run_fast_security_scan skill."""
+        skill = skill_registry.get("run_fast_security_scan")
+        if not skill:
+            return []
+        output = await skill.execute(RunFastSecurityScanInput(), {"container": self.container})
+        return output.findings
 
     async def execute_optimization_cycle(self) -> List[SelfImprovementProposal]:
         """
-        Runs a complete self-improvement optimization cycle:
-        1. Gathers architectural, security, and performance findings (cost-optimized).
-        2. Selects the highest priority finding.
-        3. Generates a targeted fix/patch proposal with academic research citations.
-        4. Drafts QA test coverage.
-        5. Benchmarks the proposed solution, verifying it is positive-yield.
+        Runs a complete self-improvement optimization cycle wrapped under a protocol.
         """
-        proposals: List[SelfImprovementProposal] = []
+        # Load declarative protocol spec
+        import os
+        schema_path = "apodex/harness/schemas/code_improvement_protocol.yaml"
+        if os.path.exists(schema_path):
+            with open(schema_path, "r", encoding="utf-8") as f:
+                yaml_str = f.read()
+            protocol = ProtocolLoader.load_from_yaml(yaml_str)
+        else:
+            # Sane default configuration spec if file doesn't exist
+            protocol = ProtocolSpec(
+                protocol_id="code_improvement_protocol",
+                name="Fallback Protocol",
+                k_steps=5,
+                downshift_after_steps_without_progress=3,
+                halt_after_steps_without_progress=5,
+                steps=[
+                    StepSpec(step_id="security_scan", skill_name="run_fast_security_scan", anchors_to_hit=["ANCHOR_RAN_SECURITY_SCAN"]),
+                    StepSpec(step_id="triage", skill_name="find_related_files_and_tests", anchors_to_hit=["ANCHOR_FOUND_RELEVANT_FILES"]),
+                    StepSpec(step_id="patch", skill_name="generate_code_patch", anchors_to_hit=["ANCHOR_GENERATED_PATCH"]),
+                    StepSpec(step_id="qa_test", skill_name="run_test_suite", anchors_to_hit=["ANCHOR_RAN_TESTS"]),
+                    StepSpec(step_id="benchmark", skill_name="summarize_benchmark_results", anchors_to_hit=["ANCHOR_EVALUATED_PATCH"])
+                ]
+            )
 
-        # 1. Gather audit findings from specialized agents with Tier Gating
+        proposals: List[SelfImprovementProposal] = []
         findings: List[EngineeringFinding] = []
 
+        # Track the active PKC trace
+        trace = PerceptionKnowledgeChain()
+        self.world_model.register_pkc_trace(trace)
+
+        # -------------------------------------------------------------
+        # Protocol-Driven Multi-Step Execution Loop
+        # -------------------------------------------------------------
+        # Configurable anchors progress tracking
+        k_limit = protocol.k_steps
+        downshift_limit = protocol.downshift_after_steps_without_progress
+        halt_limit = protocol.halt_after_steps_without_progress
+        min_progress = protocol.progress_rate_threshold
+
+        steps_executed = 0
+        total_anchors_hit_set = set()
+        steps_since_last_new_anchor = 0
+
+        # Pre-cache or gather potential findings
         # ARCHITECT: Skipped entirely in CHEAP tier
         if self.current_tier != "CHEAP":
             try:
                 architect = self.container.resolve(IChiefArchitect)
                 if self._charge_operation("expensive_agent_call", "IChiefArchitect evaluate_architecture"):
                     findings.extend(await architect.evaluate_architecture())
+                    total_anchors_hit_set.add("ANCHOR_FOUND_RELEVANT_FILES")
             except Exception:
-                logger.exception("IChiefArchitect.evaluate_architecture failed; skipping architecture findings.")
+                logger.exception("IChiefArchitect.evaluate_architecture failed.")
 
-        # SECURITY: Replaced with ultra-fast regex scanning in CHEAP tier (not fully skipped)
+        # SECURITY finding gather
         if self.current_tier == "CHEAP":
             if self._charge_operation("lightweight_rules_call", "Lightweight regex-based security audit"):
-                findings.extend(self._run_fast_security_scan())
+                findings.extend(await self._run_fast_security_scan())
+                total_anchors_hit_set.add("ANCHOR_RAN_SECURITY_SCAN")
         else:
             try:
                 security_eng = self.container.resolve(ISecurityEngineer)
                 if self._charge_operation("expensive_agent_call", "ISecurityEngineer audit_security"):
                     findings.extend(await security_eng.audit_security())
+                    total_anchors_hit_set.add("ANCHOR_RAN_SECURITY_SCAN")
             except Exception:
-                logger.exception("ISecurityEngineer.audit_security failed; skipping security findings.")
+                logger.exception("ISecurityEngineer.audit_security failed.")
 
         # PERFORMANCE: Profile performance under all tiers
         try:
@@ -201,81 +230,178 @@ class SelfImprovementFlywheelCoordinator:
             if self._charge_operation(cost_type, "IPerformanceEngineer profile_performance"):
                 findings.extend(await performance_eng.profile_performance())
         except Exception:
-            logger.exception("IPerformanceEngineer.profile_performance failed; skipping performance findings.")
+            logger.exception("IPerformanceEngineer.profile_performance failed.")
 
         if not findings:
+            # Log clear status/error before returning
+            self.execution_log.append({
+                "status": "APPROVED",
+                "message": "No findings found during audit.",
+                "timestamp": datetime.utcnow().isoformat()
+            })
             return proposals
 
-        # 2. Select the highest-severity finding
+        # Priority Sort
         severity_order = {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3}
         findings.sort(key=lambda f: severity_order.get(f.severity, 4))
-
-        # Consistent with legacy logic: process only the top highest priority finding
         target_finding = findings[0]
 
-        # 3. Check local in-memory proposal cache
-        cache_key = self._generate_cache_key(target_finding)
+        # -------------------------------------------------------------
+        # Isolated Caching Refactor
+        # -------------------------------------------------------------
+        cache_key = self._generate_cache_key(target_finding, self.tenant_id, self.current_tier)
         if cache_key in self._global_cache:
-            # Highly optimized: Return cached proposal immediately (0 cost!)
-            if self._charge_operation("skipped_or_cached", f"In-memory Cache Hit for key {cache_key}"):
-                cached_proposal = self._global_cache[cache_key]
-                cached_proposal.status = "EVALUATED"
+            if self._charge_operation("skipped_or_cached", f"Isolated Cache Hit for key {cache_key}"):
+                # Ensure deep copies to callers to avoid shared mutable objects
+                cached_proposal = copy.deepcopy(self._global_cache[cache_key])
+                # We do NOT mutate cached entry status upon cache hit
                 proposals.append(cached_proposal)
+                self.execution_log.append({
+                    "status": "CACHE_HIT",
+                    "proposal_id": str(cached_proposal.proposal_id),
+                    "timestamp": datetime.utcnow().isoformat()
+                })
             return proposals
 
-        # 4. Generate a software fix proposal
-        try:
-            swe = self.container.resolve(ISoftwareEngineer)
-            charge_type = "standard_call" if self.current_tier == "CHEAP" else "expensive_agent_call"
-            if not self._charge_operation(charge_type, "ISoftwareEngineer generate_patch"):
+        # Execute protocol steps mapping to skills
+        proposal: Optional[SelfImprovementProposal] = None
+
+        for step in protocol.steps:
+            skill = skill_registry.get(step.skill_name)
+            if not skill:
+                # Log INFRA_ERROR precisely
+                self.execution_log.append({
+                    "status": "INFRA_ERROR",
+                    "error": f"Missing required skill: {step.skill_name}",
+                    "timestamp": datetime.utcnow().isoformat()
+                })
                 return proposals
-            proposal = await swe.generate_patch(target_finding)
-        except Exception:
-            logger.exception("ISoftwareEngineer.generate_patch failed; aborting optimization cycle.")
-            return proposals
 
-        # 5. Gather research-driven citations (Skipped in CHEAP tier)
-        if self.current_tier != "CHEAP":
-            try:
-                researcher = self.container.resolve(IResearchScientist)
-                if self._charge_operation("standard_call", "IResearchScientist research_topic"):
-                    citations = await researcher.research_topic(f"optimization of {target_finding.category}")
-                    proposal.research_citations.extend(citations)
-            except Exception:
-                logger.exception("IResearchScientist.research_topic failed; proceeding without research citations.")
-        else:
-            self._charge_operation("skipped_or_cached", "Skipped research scientist in CHEAP tier")
+            steps_executed += 1
 
-        # 6. Generate unit/integration tests (Skipped in CHEAP tier)
-        if self.current_tier != "CHEAP":
-            try:
-                qa = self.container.resolve(IQaEngineer)
-                if self._charge_operation("standard_call", "IQaEngineer generate_tests"):
-                    test_code = await qa.generate_tests(proposal)
-                    proposal.summary += f"\n[QA Test Generated]\n{test_code}"
-            except Exception:
-                logger.exception("IQaEngineer.generate_tests failed; proceeding without generated tests.")
-        else:
-            self._charge_operation("skipped_or_cached", "Skipped QA test generation in CHEAP tier")
-
-        # 7. Benchmark and evaluate the proposal to protect budget and prevent regressions
-        try:
-            evaluator = self.container.resolve(IEvaluator)
-            charge_type = "lightweight_rules_call" if self.current_tier == "CHEAP" else "standard_call"
-            if not self._charge_operation(charge_type, "IEvaluator benchmark_proposal"):
-                return proposals
-            report = await evaluator.benchmark_proposal(proposal)
-            proposal.benchmark_report = report
-
-            if not report.is_regression:
-                proposal.status = "EVALUATED"
-                # Cache the successfully evaluated proposal!
-                self._global_cache[cache_key] = proposal
+            # Progress tracking (Part 4 Credit / Downshift logic)
+            new_anchors_hit = [a for a in step.anchors_to_hit if a not in total_anchors_hit_set]
+            if new_anchors_hit:
+                total_anchors_hit_set.update(new_anchors_hit)
+                steps_since_last_new_anchor = 0
             else:
-                proposal.status = "REJECTED"
-        except Exception:
-            logger.exception("IEvaluator.benchmark_proposal failed; marking proposal as REJECTED.")
-            proposal.status = "REJECTED"
+                steps_since_last_new_anchor += 1
 
-        proposals.append(proposal)
+            # Determine downshift or halt conditions based on progress-to-cost anchors
+            if steps_since_last_new_anchor >= downshift_limit and self.current_tier == "EXPENSIVE":
+                old_tier = self.current_tier
+                self.current_tier = "CHEAP"
+                self.execution_log.append({
+                    "event": "anchor_progress_downshift",
+                    "old_tier": old_tier,
+                    "new_tier": "CHEAP",
+                    "steps_without_progress": steps_since_last_new_anchor,
+                    "timestamp": datetime.utcnow().isoformat()
+                })
+
+            if steps_since_last_new_anchor >= halt_limit:
+                print(f"[EVENT: budget_halt] Anchor progress halted for {steps_since_last_new_anchor} steps. Triggering budget_halt.")
+                self.execution_log.append({
+                    "event": "budget_halt",
+                    "status": "BUDGET_HALTED",
+                    "reason": "Halted due to lack of anchor progress",
+                    "timestamp": datetime.utcnow().isoformat()
+                })
+                return proposals
+
+            # Record PKC trace hop (SearchEyes framework)
+            hop = PKCHop(
+                step_index=steps_executed,
+                node_id=f"step:{step.step_id}",
+                node_type="protocol_step",
+                anchors_hit=step.anchors_to_hit,
+                cost_usd=0.01 if self.current_tier != "CHEAP" else 0.001,
+                timestamp=datetime.utcnow().isoformat()
+            )
+            trace.add_hop(hop)
+
+            # Execution logic mapping
+            if step.skill_name == "run_fast_security_scan":
+                # Already executed finding gathering above; skip or perform lightweight check
+                self._charge_operation("lightweight_rules_call", "Skill run_fast_security_scan")
+
+            elif step.skill_name == "find_related_files_and_tests":
+                charge_type = "lightweight_rules_call" if self.current_tier == "CHEAP" else "standard_call"
+                if not self._charge_operation(charge_type, "Skill find_related_files_and_tests"):
+                    return proposals
+                # Execute skill
+                await skill.execute(
+                    FindRelatedFilesAndTestsInput(category=target_finding.category, file_path=target_finding.file_path),
+                    {"container": self.container}
+                )
+
+            elif step.skill_name == "generate_code_patch":
+                charge_type = "standard_call" if self.current_tier == "CHEAP" else "expensive_agent_call"
+                if not self._charge_operation(charge_type, "Skill generate_code_patch"):
+                    return proposals
+                out = await skill.execute(
+                    GenerateCodePatchInput(finding=target_finding),
+                    {"container": self.container}
+                )
+                proposal = out.proposal
+
+                # IResearchScientist sub-call: Generate academic citations (Skipped in CHEAP tier)
+                if self.current_tier != "CHEAP":
+                    try:
+                        researcher = self.container.resolve(IResearchScientist)
+                        if self._charge_operation("standard_call", "IResearchScientist research_topic"):
+                            citations = await researcher.research_topic(f"optimization of {target_finding.category}")
+                            proposal.research_citations.extend(citations)
+                    except Exception:
+                        logger.exception("IResearchScientist.research_topic failed; continuing.")
+                else:
+                    self._charge_operation("skipped_or_cached", "Skipped research scientist in CHEAP tier")
+
+            elif step.skill_name == "run_test_suite":
+                if not proposal:
+                    continue
+                # Skipped in CHEAP tier
+                if self.current_tier != "CHEAP":
+                    if self._charge_operation("standard_call", "Skill run_test_suite"):
+                        out = await skill.execute(
+                            RunTestSuiteInput(proposal=proposal),
+                            {"container": self.container}
+                        )
+                        proposal.summary += f"\n[QA Test Generated]\n{out.test_code}"
+                else:
+                    self._charge_operation("skipped_or_cached", "Skipped QA test generation in CHEAP tier")
+
+            elif step.skill_name == "summarize_benchmark_results":
+                if not proposal:
+                    continue
+                charge_type = "lightweight_rules_call" if self.current_tier == "CHEAP" else "standard_call"
+                if not self._charge_operation(charge_type, "Skill summarize_benchmark_results"):
+                    return proposals
+
+                try:
+                    out = await skill.execute(
+                        SummarizeBenchmarkResultsInput(proposal=proposal),
+                        {"container": self.container}
+                    )
+                    report = out.report
+                    proposal.benchmark_report = report
+
+                    if not report.is_regression:
+                        proposal.status = "EVALUATED"
+                        # Cache isolated deep copy of proposal
+                        self._global_cache[cache_key] = copy.deepcopy(proposal)
+                    else:
+                        proposal.status = "REJECTED"
+                except Exception:
+                    # Log EVALUATOR_ERROR precisely
+                    self.execution_log.append({
+                        "status": "EVALUATOR_ERROR",
+                        "error": "Failed during benchmark execution",
+                        "timestamp": datetime.utcnow().isoformat()
+                    })
+                    proposal.status = "REJECTED"
+
+        if proposal:
+            proposals.append(proposal)
+
         return proposals

@@ -46,6 +46,9 @@ from .pipeline import (
     GovernanceGateway,
     ResearchPipelineOrchestrator,
 )
+from .research_ingestion import (
+    ResearchIngestionPipeline,
+)
 
 __all__ = [
     "IHypothesisRegistry",
@@ -77,4 +80,5 @@ __all__ = [
     "StatisticalValidator",
     "GovernanceGateway",
     "ResearchPipelineOrchestrator",
+    "ResearchIngestionPipeline",
 ]

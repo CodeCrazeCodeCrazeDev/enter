@@ -72,6 +72,46 @@ graph TD
         P128[#128 BabyAGI]
         P129[#129 AutoGPT]
         P130[#130 CrewAI / LangGraph / Task]
+        P131[#131 Monte Carlo Tree Search f]
+        P132[#132 PDDL-Guided Action Planni]
+        P133[#133 Hierarchical Goal Decompo]
+        P134[#134 Internal Monologue and Se]
+        P135[#135 Deductive Reasoning Syste]
+        P136[#136 Self-Explanation as a Reg]
+        P137[#137 Recurrent World Models fo]
+        P138[#138 Counterfactual World Mode]
+        P139[#139 Generative World Models a]
+        P140[#140 Episodic Retrieval via Hi]
+        P141[#141 Ebbinghaus Consolidation:]
+        P142[#142 Associative Memory Networ]
+        P143[#143 Standardized Communicatio]
+        P144[#144 Consensus Formations via ]
+        P145[#145 Emergent Swarm Intelligen]
+        P146[#146 Dynamic Load Balancing in]
+        P147[#147 SOP-driven Agentic Workfl]
+        P148[#148 Decoupled Orchestration a]
+        P149[#149 Uncertainty-Weighted Acti]
+        P150[#150 Curiosity-Driven Explorat]
+        P151[#151 Group Relative Policy Opt]
+        P152[#152 Verifiable Rewards Implic]
+        P153[#153 Q-Learning over Action-De]
+        P154[#154 Step-wise Process Reward ]
+        P155[#155 Unsupervised Process Rewa]
+        P156[#156 Prover-Verifier Games: Le]
+        P157[#157 Judging LLM-as-a-Judge: V]
+        P158[#158 ProcessBench: Systematic ]
+        P159[#159 Contamination Detection i]
+        P160[#160 Repository-Level Code Gen]
+        P161[#161 Automated Patch Synthesis]
+        P162[#162 SWE-Agent: Agentic Workfl]
+        P163[#163 Bayesian Decision Theory ]
+        P164[#164 Multi-Attribute Utility T]
+        P165[#165 Thompson Sampling for Mul]
+        P166[#166 Feedback Loop Stabilizati]
+        P167[#167 State Tracking via Extend]
+        P168[#168 Model Predictive Control ]
+        P169[#169 Consensus Protocols for A]
+        P170[#170 Distributed Vector Indexi]
     end
     subgraph L3 [L3 (Governance Layer)]
         P33[#33 Lets Verify Step by Step]
@@ -271,6 +311,46 @@ graph TD
     P125 -->|prerequisite| P127
     P128 -->|prerequisite| P129
     P128 -->|prerequisite| P130
+    P128 -->|prerequisite| P131
+    P128 -->|prerequisite| P132
+    P128 -->|prerequisite| P133
+    P128 -->|prerequisite| P134
+    P128 -->|prerequisite| P135
+    P128 -->|prerequisite| P136
+    P128 -->|prerequisite| P137
+    P128 -->|prerequisite| P138
+    P128 -->|prerequisite| P139
+    P128 -->|prerequisite| P140
+    P128 -->|prerequisite| P141
+    P128 -->|prerequisite| P142
+    P128 -->|prerequisite| P143
+    P128 -->|prerequisite| P144
+    P128 -->|prerequisite| P145
+    P128 -->|prerequisite| P146
+    P128 -->|prerequisite| P147
+    P128 -->|prerequisite| P148
+    P128 -->|prerequisite| P149
+    P128 -->|prerequisite| P150
+    P131 -->|prerequisite| P151
+    P132 -->|prerequisite| P152
+    P133 -->|prerequisite| P153
+    P134 -->|prerequisite| P154
+    P135 -->|prerequisite| P155
+    P136 -->|prerequisite| P156
+    P137 -->|prerequisite| P157
+    P138 -->|prerequisite| P158
+    P139 -->|prerequisite| P159
+    P140 -->|prerequisite| P160
+    P141 -->|prerequisite| P161
+    P142 -->|prerequisite| P162
+    P143 -->|prerequisite| P163
+    P144 -->|prerequisite| P164
+    P145 -->|prerequisite| P165
+    P146 -->|prerequisite| P166
+    P147 -->|prerequisite| P167
+    P148 -->|prerequisite| P168
+    P149 -->|prerequisite| P169
+    P150 -->|prerequisite| P170
 ```
 
 
@@ -659,3 +739,123 @@ graph TD
 
 ### #130 CrewAI / LangGraph / TaskWeaver / SuperAGI
 - **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #131 Monte Carlo Tree Search for Language Agents
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #132 PDDL-Guided Action Planning for Long-Horizon Agent Actions
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #133 Hierarchical Goal Decomposition via Bidirectional Subgoal Graph Search
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #134 Internal Monologue and Self-Talk: Incentivizing Latent Reasoning in Large Models
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #135 Deductive Reasoning Systems via Constraint Logic Programming
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #136 Self-Explanation as a Regularizer for Zero-Shot Out-of-Distribution Transfer
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #137 Recurrent World Models for Agentic State Estimation
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #138 Counterfactual World Models for Agent Action Evaluation
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #139 Generative World Models as Physical and Digital Simulators
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #140 Episodic Retrieval via Hierarchical Vector Indexes
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #141 Ebbinghaus Consolidation: Forgetting Curves for Agentic Memory Management
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #142 Associative Memory Networks for Cross-Domain Knowledge Retrieval
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #143 Standardized Communication Protocols for Heterogeneous Agent Swarms
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #144 Consensus Formations via Multi-Mind Peer Review
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #145 Emergent Swarm Intelligence for Open-Ended Spatial and Digital Search
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #146 Dynamic Load Balancing in Multi-Task Agent Orchestration
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #147 SOP-driven Agentic Workflow Execution
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #148 Decoupled Orchestration and Execution: Separating Strategic Planning from Task Actions
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #149 Uncertainty-Weighted Active Learning for Efficient Agent Exploration
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #150 Curiosity-Driven Exploration in High-Dimensional Task Spaces
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #151 Group Relative Policy Optimization for Reasoning and Calibration
+- **Relationship Type:** `prerequisite` target: `Paper #131`
+
+### #152 Verifiable Rewards Implicitly Align Base Models Without Human Intervention
+- **Relationship Type:** `prerequisite` target: `Paper #132`
+
+### #153 Q-Learning over Action-Decision Graphs for Agent Route Discovery
+- **Relationship Type:** `prerequisite` target: `Paper #133`
+
+### #154 Step-wise Process Reward Models for Rigorous Chain-of-Thought Validation
+- **Relationship Type:** `prerequisite` target: `Paper #134`
+
+### #155 Unsupervised Process Reward Models via Self-Consistency Verification
+- **Relationship Type:** `prerequisite` target: `Paper #135`
+
+### #156 Prover-Verifier Games: Legibility and Alignment of Complex Outputs
+- **Relationship Type:** `prerequisite` target: `Paper #136`
+
+### #157 Judging LLM-as-a-Judge: Validating Metric Biases in Automated Evaluation
+- **Relationship Type:** `prerequisite` target: `Paper #137`
+
+### #158 ProcessBench: Systematic Benchmarking of Process Reward Models
+- **Relationship Type:** `prerequisite` target: `Paper #138`
+
+### #159 Contamination Detection in Large-Scale Benchmark Evaluations
+- **Relationship Type:** `prerequisite` target: `Paper #139`
+
+### #160 Repository-Level Code Generation via Syntax-Graph Construction
+- **Relationship Type:** `prerequisite` target: `Paper #140`
+
+### #161 Automated Patch Synthesis via Deterministic Sandbox Regression Testing
+- **Relationship Type:** `prerequisite` target: `Paper #141`
+
+### #162 SWE-Agent: Agentic Workflows for Automated Repository-Level Software Engineering
+- **Relationship Type:** `prerequisite` target: `Paper #142`
+
+### #163 Bayesian Decision Theory under Epistemic Ambiguity
+- **Relationship Type:** `prerequisite` target: `Paper #143`
+
+### #164 Multi-Attribute Utility Theory for Venture Strategic Selection
+- **Relationship Type:** `prerequisite` target: `Paper #144`
+
+### #165 Thompson Sampling for Multi-Armed Bandit Capital Allocation
+- **Relationship Type:** `prerequisite` target: `Paper #145`
+
+### #166 Feedback Loop Stabilization in Autonomous Systems
+- **Relationship Type:** `prerequisite` target: `Paper #146`
+
+### #167 State Tracking via Extended Kalman Filters for Agentic Belief Update
+- **Relationship Type:** `prerequisite` target: `Paper #147`
+
+### #168 Model Predictive Control for Long-Horizon Dynamic Resource Allocation
+- **Relationship Type:** `prerequisite` target: `Paper #148`
+
+### #169 Consensus Protocols for Asynchronous Distributed Agent Networks
+- **Relationship Type:** `prerequisite` target: `Paper #149`
+
+### #170 Distributed Vector Indexing and Partitioning for Large-Scale Memory
+- **Relationship Type:** `prerequisite` target: `Paper #150`

@@ -14,7 +14,7 @@ from .models import (
     Model,
     compute_config_hash,
 )
-from .statistical_validation import adjust_p_values, calculate_dsr, block_bootstrap
+from .statistical_validation import adjust_p_values, calculate_dsr, block_bootstrap, standard_normal_cdf
 
 logger = logging.getLogger("research_os.pipeline")
 
@@ -44,8 +44,8 @@ class StatisticalValidator(IStatisticalValidator):
         std_ret = math_std = (var_ret ** 0.5) or 1e-12
 
         t_stat = (mean_ret / std_ret) * (n_obs ** 0.5) if std_ret > 0 else 0.0
-        # Single-sided p-value
-        raw_p = 1.0 - 0.5 * (1.0 + (t_stat / (2.0 ** 0.5)))  # normal approximation
+        # Single-sided p-value using exact Standard Normal CDF call
+        raw_p = 1.0 - standard_normal_cdf(t_stat)
         raw_p = max(1e-15, min(1.0 - 1e-15, raw_p))
 
         # Perform multiple testing correction across all completed trials
@@ -57,7 +57,8 @@ class StatisticalValidator(IStatisticalValidator):
                 t_mean = sum(trial_returns) / len(trial_returns)
                 t_std = (sum((tr - t_mean) ** 2 for tr in trial_returns) / (len(trial_returns) - 1)) ** 0.5 or 1e-12
                 t_stat_trial = (t_mean / t_std) * (len(trial_returns) ** 0.5)
-                tp = 1.0 - 0.5 * (1.0 + (t_stat_trial / (2.0 ** 0.5)))
+                # Single-sided p-value using exact Standard Normal CDF call
+                tp = 1.0 - standard_normal_cdf(t_stat_trial)
                 trial_p_values.append(max(1e-15, min(1.0, tp)))
             else:
                 trial_p_values.append(0.5)

@@ -73,9 +73,10 @@ def standard_normal_ppf(p: float) -> float:
     if y == 0.0:
         return 0.0
 
-    # Calculate approximation for erf_inv
-    term1 = 2.0 / (math.pi * a) + math.log(1.0 - y**2) / 2.0
-    term2 = math.log(1.0 - y**2) / a
+    # Calculate approximation for erf_inv with boundary hardening
+    arg = max(1e-15, 1.0 - y**2)
+    term1 = 2.0 / (math.pi * a) + math.log(arg) / 2.0
+    term2 = math.log(arg) / a
     inner = term1**2 - term2
     if inner < 0:
         inner = 0
@@ -125,7 +126,9 @@ def calculate_dsr(
     sr_daily = sharpe / math.sqrt(252.0)
 
     # Variance of estimated daily Sharpe ratio
-    var_sr_daily = (1.0 - skewness * sr_daily + (kurtosis - 1.0) / 4.0 * sr_daily**2) / (returns_length - 1)
+    # Guard against division by zero for returns series of length 1 or less
+    denom = max(1, returns_length - 1)
+    var_sr_daily = (1.0 - skewness * sr_daily + (kurtosis - 1.0) / 4.0 * sr_daily**2) / denom
     std_sr_daily = math.sqrt(max(1e-12, var_sr_daily))
 
     # Scale standard error back to annualized

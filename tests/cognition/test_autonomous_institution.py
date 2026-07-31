@@ -116,3 +116,69 @@ def test_consens_agent_engine() -> None:
     # Average is 0.8, but std_dev is 0.0, triggering sycophancy penalty of 0.8x
     assert s_std_dev < 1e-9
     assert pytest.approx(s_score) == 0.64  # 0.8 * 0.8
+
+
+def test_red_team_ucb1_mcts_convergence() -> None:
+    """Test our newly added Phase 10 exact UCB-1 MCTS convergence choosing exploration vs exploitation."""
+    from apodex.cognition.planning.unified_planner import UnifiedPlanner
+
+    planner = UnifiedPlanner()
+
+    policy_high_visits = {
+        "name": "policy_frequent_exploitation",
+        "visits": 100,
+        "probability_of_success": 0.9,
+        "expected_business_value": 0.8
+    }
+    policy_low_visits = {
+        "name": "policy_unexplored_curiosity",
+        "visits": 1,
+        "probability_of_success": 0.5,
+        "expected_business_value": 0.4
+    }
+
+    # Total visits = 101. Exploring highly curious path with curiosity_weight = 2.0
+    best, ucb = planner.run_mcts_rollout(
+        starting_state={},
+        policies=[policy_high_visits, policy_low_visits],
+        curiosity_weight=2.0
+    )
+
+    # Low visits node should get selected because of UCB-1 exploration bonus
+    assert best["name"] == "policy_unexplored_curiosity"
+
+
+def test_red_team_spawning_inflation_limit() -> None:
+    """Test dynamic agent capacity limits protecting against inflation/starvation."""
+    from apodex.cognition.research.autonomous_institution import ConsensAgentEngine
+
+    # Safe hard maximum capacity of 3 active agents
+    engine = ConsensAgentEngine(max_agent_capacity=3)
+
+    a1 = engine.spawn_agent("Researcher_1", "Research", [])
+    a2 = engine.spawn_agent("Researcher_2", "Research", [])
+    a3 = engine.spawn_agent("Researcher_3", "Research", [])
+
+    assert sum(1 for a in engine.active_agents.values() if a.is_active) == 3
+
+    # Spawning a fourth agent must trigger auto-retirement of a1 to respect capacity limits
+    a4 = engine.spawn_agent("Researcher_4", "Research", [])
+
+    assert engine.active_agents[a1.agent_id].is_active is False
+    assert sum(1 for a in engine.active_agents.values() if a.is_active) == 3
+
+
+def test_red_team_memory_recall_reinforcement() -> None:
+    """Test our active recall memory reinforcement offsetting Ebbinghaus forgetting curves."""
+    from apodex.cognition.memory.unified_memory import UnifiedMemory
+    from apodex.cognition.shared.schemas import EvidenceCard
+
+    memory = UnifiedMemory()
+    ev = EvidenceCard(source="Laboratory", description="Causal evidence statement of caching performance.", reliability=0.5)
+    memory.add_evidence(ev)
+
+    # Retrieval should trigger memory recall reinforcement and boost reliability/confidence
+    retrieved = memory.retrieve_similar_evidence("caching performance")
+    assert len(retrieved) == 1
+    assert retrieved[0].reliability > 0.5
+    assert retrieved[0].reliability == pytest.approx(0.65)

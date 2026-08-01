@@ -36,8 +36,10 @@ class SyntaxVerifier:
 class MetaVerifier:
     """Asynchronously evaluates verification reports in parallel and resolves a consensus score."""
 
-    def __init__(self, verifiers: List[Any]) -> None:
+    def __init__(self, verifiers: List[Any], *args, **kwargs) -> None:
         self.verifiers = verifiers
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
     async def verify_consensus(self, content: str) -> VerificationReport:
         import asyncio

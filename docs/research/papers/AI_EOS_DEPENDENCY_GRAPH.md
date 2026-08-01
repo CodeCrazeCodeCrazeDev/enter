@@ -72,6 +72,76 @@ graph TD
         P128[#128 BabyAGI]
         P129[#129 AutoGPT]
         P130[#130 CrewAI / LangGraph / Task]
+        P131[#131 LlamaIndex / LangChain RA]
+        P132[#132 Hugging Face Transformers]
+        P133[#133 PyTorch: An Imperative St]
+        P134[#134 vLLM: Easy, Fast, and Che]
+        P135[#135 Active Inference in Auton]
+        P136[#136 Minimizing Expected Free ]
+        P137[#137 Recursive Self-Alignment ]
+        P138[#138 Causal Do-Calculus for Dy]
+        P139[#139 TextGrad: In-Context Lear]
+        P140[#140 Optimizing Large Language]
+        P141[#141 Sycophancy Mitigation in ]
+        P142[#142 Mitigating Multi-Agent Ec]
+        P143[#143 Ebbinghaus Memory Decays ]
+        P144[#144 Conjugate Beta-Binomial U]
+        P145[#145 Lagrange Multipliers and ]
+        P146[#146 Bayesian Thompson Samplin]
+        P147[#147 Action-Decision Graph Par]
+        P148[#148 Sequential Graph Edit Pat]
+        P149[#149 DeepSeek-R1-Style Reinfor]
+        P150[#150 Group Relative Policy Opt]
+        P151[#151 Constitutional AI Safety ]
+        P152[#152 Preventing Cognitive Syst]
+        P153[#153 Topological-Sort DAG Depe]
+        P154[#154 Non-Bypassable Human-in-t]
+        P155[#155 A Survey on Deep Learning]
+        P156[#156 Recursive Self-Tuning of ]
+        P157[#157 Self-Improving Reasoning ]
+        P158[#158 Generative Self-Rewarding]
+        P159[#159 Calibrating Step-by-Step ]
+        P160[#160 Multi-Aspect Parallel Ver]
+        P161[#161 Outcome-Independent Rewar]
+        P162[#162 Hierarchical Multi-Agent ]
+        P163[#163 Decentralized Aspect-Veri]
+        P164[#164 Graph of Thought Reasonin]
+        P165[#165 Plan-and-Act Separation: ]
+        P166[#166 Autonomous Company Creati]
+        P167[#167 Continuous Opportunity Di]
+        P168[#168 Evolving Robust Code Arch]
+        P169[#169 Quality Diversity Search ]
+        P170[#170 Verifiable Rewards for Se]
+        P171[#171 Optimizing Enterprise Res]
+        P172[#172 Constitutional Policy Syn]
+        P173[#173 Sovereign Alignment: Buil]
+        P174[#174 Evaluating Agent Capabili]
+        P175[#175 Persistent Semantic Memor]
+        P176[#176 Modular Code Generation P]
+        P177[#177 An Orchestration Engine f]
+        P178[#178 Self-Refining Neural Netw]
+        P179[#179 Automatic Calibration of ]
+        P180[#180 Multi-Scale Process Verif]
+        P181[#181 Communication-Constrained]
+        P182[#182 MCTS Search Trees over Hi]
+        P183[#183 Autonomous Venture Valida]
+        P184[#184 Algorithmic Discovery of ]
+        P185[#185 Verifying Complex System ]
+        P186[#186 Preventing SFT Bloat and ]
+        P187[#187 SLA-Driven Latency and Co]
+        P188[#188 Declarative Schema Mappin]
+        P189[#189 Recursive Self-Evolution ]
+        P190[#190 Bayesian Regret Bounds fo]
+        P191[#191 Decoupled Verification an]
+        P192[#192 Minimizing Communication ]
+        P193[#193 Dynamic Backtracking over]
+        P194[#194 The AI Entrepreneur: Open]
+        P195[#195 Evolving Custom Domain Pr]
+        P196[#196 Outcome-Free Policy Reinf]
+        P197[#197 Vulnerability Detection i]
+        P198[#198 Graph-based Chronological]
+        P199[#199 Zero-Downtime Hot-Swappin]
+        P200[#200 Canonical Architecture Fr]
     end
     subgraph L3 [L3 (Governance Layer)]
         P33[#33 Lets Verify Step by Step]
@@ -271,6 +341,76 @@ graph TD
     P125 -->|prerequisite| P127
     P128 -->|prerequisite| P129
     P128 -->|prerequisite| P130
+    P128 -->|prerequisite| P131
+    P128 -->|prerequisite| P132
+    P128 -->|prerequisite| P133
+    P128 -->|prerequisite| P134
+    P128 -->|prerequisite| P135
+    P128 -->|prerequisite| P136
+    P128 -->|prerequisite| P137
+    P128 -->|prerequisite| P138
+    P128 -->|prerequisite| P139
+    P128 -->|prerequisite| P140
+    P128 -->|prerequisite| P141
+    P128 -->|prerequisite| P142
+    P128 -->|prerequisite| P143
+    P128 -->|prerequisite| P144
+    P128 -->|prerequisite| P145
+    P128 -->|prerequisite| P146
+    P128 -->|prerequisite| P147
+    P128 -->|prerequisite| P148
+    P128 -->|prerequisite| P149
+    P128 -->|prerequisite| P150
+    P128 -->|prerequisite| P151
+    P128 -->|prerequisite| P152
+    P128 -->|prerequisite| P153
+    P128 -->|prerequisite| P154
+    P128 -->|prerequisite| P155
+    P128 -->|prerequisite| P156
+    P128 -->|prerequisite| P157
+    P128 -->|prerequisite| P158
+    P128 -->|prerequisite| P159
+    P128 -->|prerequisite| P160
+    P128 -->|prerequisite| P161
+    P128 -->|prerequisite| P162
+    P128 -->|prerequisite| P163
+    P128 -->|prerequisite| P164
+    P128 -->|prerequisite| P165
+    P128 -->|prerequisite| P166
+    P128 -->|prerequisite| P167
+    P128 -->|prerequisite| P168
+    P128 -->|prerequisite| P169
+    P128 -->|prerequisite| P170
+    P128 -->|prerequisite| P171
+    P128 -->|prerequisite| P172
+    P128 -->|prerequisite| P173
+    P128 -->|prerequisite| P174
+    P128 -->|prerequisite| P175
+    P128 -->|prerequisite| P176
+    P128 -->|prerequisite| P177
+    P128 -->|prerequisite| P178
+    P128 -->|prerequisite| P179
+    P128 -->|prerequisite| P180
+    P128 -->|prerequisite| P181
+    P128 -->|prerequisite| P182
+    P128 -->|prerequisite| P183
+    P128 -->|prerequisite| P184
+    P128 -->|prerequisite| P185
+    P128 -->|prerequisite| P186
+    P128 -->|prerequisite| P187
+    P128 -->|prerequisite| P188
+    P128 -->|prerequisite| P189
+    P128 -->|prerequisite| P190
+    P128 -->|prerequisite| P191
+    P128 -->|prerequisite| P192
+    P128 -->|prerequisite| P193
+    P128 -->|prerequisite| P194
+    P128 -->|prerequisite| P195
+    P128 -->|prerequisite| P196
+    P128 -->|prerequisite| P197
+    P128 -->|prerequisite| P198
+    P128 -->|prerequisite| P199
+    P128 -->|prerequisite| P200
 ```
 
 
@@ -658,4 +798,214 @@ graph TD
 - **Relationship Type:** `prerequisite` target: `Paper #128`
 
 ### #130 CrewAI / LangGraph / TaskWeaver / SuperAGI
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #131 LlamaIndex / LangChain RAG Orchestration Frameworks
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #132 Hugging Face Transformers: State-of-the-Art Natural Language Processing
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #133 PyTorch: An Imperative Style, High-Performance Deep Learning Library
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #134 vLLM: Easy, Fast, and Cheap LLM Serving with PagedAttention
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #135 Active Inference in Autonomous Multi-Agent Exploration
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #136 Minimizing Expected Free Energy for Open-Ended Search Trees
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #137 Recursive Self-Alignment via Backdoor Causal Interventions
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #138 Causal Do-Calculus for Dynamic Strategic Bottleneck Identification
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #139 TextGrad: In-Context Learning and Optimization via Natural Language Gradients
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #140 Optimizing Large Language Model Prompts with Evolutionary TextGrad
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #141 Sycophancy Mitigation in Multi-Mind LLM Consensus Deliberations
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #142 Mitigating Multi-Agent Echo Chambers via Oppositional Prompting
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #143 Ebbinghaus Memory Decays and Conjugate Belief Reinforcements in LLM Memory Systems
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #144 Conjugate Beta-Binomial Updating for Non-Stationary Strategic Regime Shift Detection
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #145 Lagrange Multipliers and Shadow Price Formulations for Agentic Portfolio Constraints
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #146 Bayesian Thompson Sampling for Proportional Capital Allocation between Exploration and Exploitation
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #147 Action-Decision Graph Parsing and sequence-Pattern Mining for Autonomous Error Recovery
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #148 Sequential Graph Edit Path Algorithms for Self-Repairing Agentic Workflows
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #149 DeepSeek-R1-Style Reinforcement Learning with Verifiable Reward Games
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #150 Group Relative Policy Optimization for Mathematical Reasoning and Code Generation
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #151 Constitutional AI Safety Audits: Hendrycks Style Vulnerability Assessments
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #152 Preventing Cognitive System System-Prompt Bloat under Long-Horizon Executions
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #153 Topological-Sort DAG Dependency Executors for Transactional Multi-Agent Recovery Checkpoints
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #154 Non-Bypassable Human-in-the-Loop Gateway Control Protocols for Sovereign Enterprise Agents
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #155 A Survey on Deep Learning for Science: Focus on Autonomous Research Engines
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #156 Recursive Self-Tuning of Hyperparameters via In-Context Reinforcement Learning
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #157 Self-Improving Reasoning Trace Generation for Complex Mathematical Tasks
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #158 Generative Self-Rewarding Feedback Loops in Scientific Hypothesis Verification
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #159 Calibrating Step-by-Step Self-Evaluation in Mathematical Reasoners
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #160 Multi-Aspect Parallel Verification of Strategic Enterprise Codebases
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #161 Outcome-Independent Reward Models for Multi-Step Planning Refinement
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #162 Hierarchical Multi-Agent Coordination for Autonomous Venture Scaling
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #163 Decentralized Aspect-Verifiers in Sovereign Multi-Agent Societies
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #164 Graph of Thought Reasoning over Dynamic Portfolio Dependency DAGs
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #165 Plan-and-Act Separation: Isolating Strategic Planning from Operational Tool Execution
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #166 Autonomous Company Creation via Expected Free Energy Minimization
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #167 Continuous Opportunity Discovery and Validation in Non-Stationary Markets
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #168 Evolving Robust Code Architectures via Guided LLM Mutation Operators
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #169 Quality Diversity Search for Novel Business Strategy Formulation
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #170 Verifiable Rewards for Self-Correction in Base Language Models
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #171 Optimizing Enterprise Resource Allocations via Group Relative Policy Gradients
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #172 Constitutional Policy Synthesis for Autonomous Venture Regulation
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #173 Sovereign Alignment: Building GRC Gateways with Non-Bypassable Verifiers
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #174 Evaluating Agent Capabilities on 1000-Step Enterprise Benchmarks
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #175 Persistent Semantic Memory Databases for Lifelong Multi-Agent Context Retrieval
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #176 Modular Code Generation Pipelines for Automated Software Engineering
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #177 An Orchestration Engine for Federated Large Language Models
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #178 Self-Refining Neural Networks with External Dynamic Memory Access
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #179 Automatic Calibration of Self-Criticism Thresholds via Iterative Preference Learning
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #180 Multi-Scale Process Verifiers for Step-Level Logic Audisting
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #181 Communication-Constrained Capital Allocation in Virtual Agent Networks
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #182 MCTS Search Trees over Hierarchical Task Network Decomposition Graphs
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #183 Autonomous Venture Validation Pipelines with Causal Loop Feedback Auditing
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #184 Algorithmic Discovery of Optimal Strategic Decision Rules under Non-Stationary Markets
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #185 Verifying Complex System Hypotheses with Direct Reward Reinforcement Loops
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #186 Preventing SFT Bloat and System Degradation in Long-Running Task Loops
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #187 SLA-Driven Latency and Cost Safeguards for Long-Horizon Agent Swarms
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #188 Declarative Schema Mapping for Distributed Multi-Agent Protocols
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #189 Recursive Self-Evolution of Decision-Making Rules under Infinite Horizon Loops
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #190 Bayesian Regret Bounds for Iterative Verbal Feedback Optimization
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #191 Decoupled Verification and Execution Surfaces for Enterprise Reasoning Systems
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #192 Minimizing Communication Overhead in Decentralized Task-Allocation Multi-Agent Teams
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #193 Dynamic Backtracking over Expectation Maximization Search Trees
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #194 The AI Entrepreneur: Open-Ended Discovery of Profitable Market Gaps
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #195 Evolving Custom Domain Protocols via Sequential Grammar Mutation Networks
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #196 Outcome-Free Policy Reinforcement via Semantic Trajectory Coherence Scores
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #197 Vulnerability Detection in Sovereign Execution Environments via Adversarial Fuzzing Agents
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #198 Graph-based Chronological Memory Retrievals for 100-Turn Conversational Workflows
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #199 Zero-Downtime Hot-Swapping of Sub-Agent Role Configurations inside Sovereign Platforms
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #200 Canonical Architecture Frameworks for Decoupled Cognitive Operating Systems
 - **Relationship Type:** `prerequisite` target: `Paper #128`

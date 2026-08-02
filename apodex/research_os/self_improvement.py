@@ -64,7 +64,9 @@ class SelfImprovementFlywheel:
                 policy_name=f"Stricter Quality Rule for {bottleneck_stage.capitalize()}",
                 rules=[
                     f"All inputs to stage '{bottleneck_stage}' must possess a verification confidence rate of >= 0.85.",
-                    "Execute 3x independent replicates before presenting conclusions to peer review."
+                    "Execute 3x independent replicates before presenting conclusions to peer review.",
+                    f"Mandate step-wise process verification: all sub-steps of stage '{bottleneck_stage}' must be validated against discrete process reward benchmarks before transitioning.",
+                    f"Enforce Collective Intelligence Multi-Mind Consensus: a quorum of at least 3 distinct sub-agent perspectives must reach consensus on the correctness of '{bottleneck_stage}' execution outcomes."
                 ],
                 author="SelfImprovementFlywheel",
                 confidence=1.0

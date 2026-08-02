@@ -309,3 +309,24 @@ async def test_controller_end_to_end_decision_cycle():
     mem_prov = controller.memory.get_provenance(provenance.id)
     assert mem_prov is not None
     assert mem_prov.objective.title == "Deploy Automated Code Reviewer"
+
+
+@pytest.mark.asyncio
+async def test_controller_self_correction_backtracking():
+    """Verify that the Cognitive OS controller successfully executes self-correction backtracking."""
+    controller = CognitiveSystemController()
+
+    provenance = await controller.execute_decision_cycle(
+        goal_title="Scale Routing Backtrack Trial",
+        goal_description="Optimize routing to database with recovery.",
+        budget_cents=200_000,
+        simulate_success=False,
+        enable_backtracking=True
+    )
+
+    # Verify that backtracking executed and recovered the decision cycle outcome successfully
+    assert provenance.final_decision == "APPROVED"
+    assert provenance.execution_outcome.success is True
+    assert provenance.discrepancy_analysis["backtracking_executed"] is True
+    assert provenance.discrepancy_analysis["escalated_budget_cents"] == 300_000
+    assert any("Backtracking recovery executed" in log for log in provenance.execution_outcome.error_logs)

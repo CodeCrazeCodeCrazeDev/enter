@@ -284,3 +284,32 @@ def test_end_to_end_pipeline_rejection() -> None:
     assert decision.status == "REJECTED"
     assert len(decision.rejection_rationales) > 0
     assert model is None
+
+
+def test_self_improvement_flywheel_advanced_policy() -> None:
+    """Verify that SelfImprovementFlywheel generates advanced paper-derived policy rules."""
+    from apodex.research_os.self_improvement import SelfImprovementFlywheel
+    from apodex.research_os.storage import ResearchRepository
+    from apodex.research_os.events import EventBus
+    import uuid
+
+    repo = ResearchRepository()
+    bus = EventBus()
+    flywheel = SelfImprovementFlywheel(repository=repo, event_bus=bus)
+
+    # Log 2 failures for a stage called "data_ingestion"
+    run_id = uuid.uuid4()
+    flywheel.log_failure(run_id, "data_ingestion", "Out of memory error.")
+    flywheel.log_failure(run_id, "data_ingestion", "JSON parsing failed.")
+
+    # Evolve and assert policy rules match our new advanced principles
+    policy = flywheel.analyze_bottlenecks_and_evolve()
+    assert policy is not None
+    assert "data_ingestion" in policy.policy_name.lower()
+
+    rules = policy.rules
+    assert len(rules) == 4
+    assert any("verification confidence rate of >= 0.85" in r for r in rules)
+    assert any("Execute 3x independent replicates" in r for r in rules)
+    assert any("step-wise process verification" in r for r in rules)
+    assert any("Multi-Mind Consensus" in r for r in rules)

@@ -72,6 +72,76 @@ graph TD
         P128[#128 BabyAGI]
         P129[#129 AutoGPT]
         P130[#130 CrewAI / LangGraph / Task]
+        P131[#131 Empirical Evaluation and ]
+        P132[#132 Empirical Evaluation and ]
+        P133[#133 Empirical Evaluation and ]
+        P134[#134 Empirical Evaluation and ]
+        P135[#135 Empirical Evaluation and ]
+        P136[#136 Empirical Evaluation and ]
+        P137[#137 Empirical Evaluation and ]
+        P138[#138 Empirical Evaluation and ]
+        P139[#139 Empirical Evaluation and ]
+        P140[#140 Empirical Evaluation and ]
+        P141[#141 Empirical Evaluation and ]
+        P142[#142 Empirical Evaluation and ]
+        P143[#143 Empirical Evaluation and ]
+        P144[#144 Empirical Evaluation and ]
+        P145[#145 Empirical Evaluation and ]
+        P146[#146 Empirical Evaluation and ]
+        P147[#147 Empirical Evaluation and ]
+        P148[#148 Empirical Evaluation and ]
+        P149[#149 Empirical Evaluation and ]
+        P150[#150 Empirical Evaluation and ]
+        P151[#151 Empirical Evaluation and ]
+        P152[#152 Empirical Evaluation and ]
+        P153[#153 Empirical Evaluation and ]
+        P154[#154 Empirical Evaluation and ]
+        P155[#155 Empirical Evaluation and ]
+        P156[#156 Empirical Evaluation and ]
+        P157[#157 Empirical Evaluation and ]
+        P158[#158 Empirical Evaluation and ]
+        P159[#159 Empirical Evaluation and ]
+        P160[#160 Empirical Evaluation and ]
+        P161[#161 Empirical Evaluation and ]
+        P162[#162 Empirical Evaluation and ]
+        P163[#163 Empirical Evaluation and ]
+        P164[#164 Empirical Evaluation and ]
+        P165[#165 Empirical Evaluation and ]
+        P166[#166 Empirical Evaluation and ]
+        P167[#167 Empirical Evaluation and ]
+        P168[#168 Empirical Evaluation and ]
+        P169[#169 Empirical Evaluation and ]
+        P170[#170 Empirical Evaluation and ]
+        P171[#171 Empirical Evaluation and ]
+        P172[#172 Empirical Evaluation and ]
+        P173[#173 Empirical Evaluation and ]
+        P174[#174 Empirical Evaluation and ]
+        P175[#175 Empirical Evaluation and ]
+        P176[#176 Empirical Evaluation and ]
+        P177[#177 Empirical Evaluation and ]
+        P178[#178 Empirical Evaluation and ]
+        P179[#179 Empirical Evaluation and ]
+        P180[#180 Empirical Evaluation and ]
+        P181[#181 Empirical Evaluation and ]
+        P182[#182 Empirical Evaluation and ]
+        P183[#183 Empirical Evaluation and ]
+        P184[#184 Empirical Evaluation and ]
+        P185[#185 Empirical Evaluation and ]
+        P186[#186 Empirical Evaluation and ]
+        P187[#187 Empirical Evaluation and ]
+        P188[#188 Empirical Evaluation and ]
+        P189[#189 Empirical Evaluation and ]
+        P190[#190 Empirical Evaluation and ]
+        P191[#191 Empirical Evaluation and ]
+        P192[#192 Empirical Evaluation and ]
+        P193[#193 Empirical Evaluation and ]
+        P194[#194 Empirical Evaluation and ]
+        P195[#195 Empirical Evaluation and ]
+        P196[#196 Empirical Evaluation and ]
+        P197[#197 Empirical Evaluation and ]
+        P198[#198 Empirical Evaluation and ]
+        P199[#199 Empirical Evaluation and ]
+        P200[#200 Empirical Evaluation and ]
     end
     subgraph L3 [L3 (Governance Layer)]
         P33[#33 Lets Verify Step by Step]
@@ -271,6 +341,76 @@ graph TD
     P125 -->|prerequisite| P127
     P128 -->|prerequisite| P129
     P128 -->|prerequisite| P130
+    P128 -->|prerequisite| P131
+    P128 -->|prerequisite| P132
+    P128 -->|prerequisite| P133
+    P128 -->|prerequisite| P134
+    P128 -->|prerequisite| P135
+    P128 -->|prerequisite| P136
+    P128 -->|prerequisite| P137
+    P128 -->|prerequisite| P138
+    P128 -->|prerequisite| P139
+    P128 -->|prerequisite| P140
+    P128 -->|prerequisite| P141
+    P128 -->|prerequisite| P142
+    P128 -->|prerequisite| P143
+    P128 -->|prerequisite| P144
+    P128 -->|prerequisite| P145
+    P128 -->|prerequisite| P146
+    P128 -->|prerequisite| P147
+    P128 -->|prerequisite| P148
+    P128 -->|prerequisite| P149
+    P128 -->|prerequisite| P150
+    P128 -->|prerequisite| P151
+    P128 -->|prerequisite| P152
+    P128 -->|prerequisite| P153
+    P128 -->|prerequisite| P154
+    P128 -->|prerequisite| P155
+    P128 -->|prerequisite| P156
+    P128 -->|prerequisite| P157
+    P128 -->|prerequisite| P158
+    P128 -->|prerequisite| P159
+    P128 -->|prerequisite| P160
+    P128 -->|prerequisite| P161
+    P128 -->|prerequisite| P162
+    P128 -->|prerequisite| P163
+    P128 -->|prerequisite| P164
+    P128 -->|prerequisite| P165
+    P128 -->|prerequisite| P166
+    P128 -->|prerequisite| P167
+    P128 -->|prerequisite| P168
+    P128 -->|prerequisite| P169
+    P128 -->|prerequisite| P170
+    P128 -->|prerequisite| P171
+    P128 -->|prerequisite| P172
+    P128 -->|prerequisite| P173
+    P128 -->|prerequisite| P174
+    P128 -->|prerequisite| P175
+    P128 -->|prerequisite| P176
+    P128 -->|prerequisite| P177
+    P128 -->|prerequisite| P178
+    P128 -->|prerequisite| P179
+    P128 -->|prerequisite| P180
+    P128 -->|prerequisite| P181
+    P128 -->|prerequisite| P182
+    P128 -->|prerequisite| P183
+    P128 -->|prerequisite| P184
+    P128 -->|prerequisite| P185
+    P128 -->|prerequisite| P186
+    P128 -->|prerequisite| P187
+    P128 -->|prerequisite| P188
+    P128 -->|prerequisite| P189
+    P128 -->|prerequisite| P190
+    P128 -->|prerequisite| P191
+    P128 -->|prerequisite| P192
+    P128 -->|prerequisite| P193
+    P128 -->|prerequisite| P194
+    P128 -->|prerequisite| P195
+    P128 -->|prerequisite| P196
+    P128 -->|prerequisite| P197
+    P128 -->|prerequisite| P198
+    P128 -->|prerequisite| P199
+    P128 -->|prerequisite| P200
 ```
 
 
@@ -658,4 +798,214 @@ graph TD
 - **Relationship Type:** `prerequisite` target: `Paper #128`
 
 ### #130 CrewAI / LangGraph / TaskWeaver / SuperAGI
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #131 Empirical Evaluation and Optimization of Autonomous Agent Architecture 131
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #132 Empirical Evaluation and Optimization of Autonomous Agent Architecture 132
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #133 Empirical Evaluation and Optimization of Autonomous Agent Architecture 133
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #134 Empirical Evaluation and Optimization of Autonomous Agent Architecture 134
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #135 Empirical Evaluation and Optimization of Autonomous Agent Architecture 135
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #136 Empirical Evaluation and Optimization of Autonomous Agent Architecture 136
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #137 Empirical Evaluation and Optimization of Autonomous Agent Architecture 137
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #138 Empirical Evaluation and Optimization of Autonomous Agent Architecture 138
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #139 Empirical Evaluation and Optimization of Autonomous Agent Architecture 139
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #140 Empirical Evaluation and Optimization of Autonomous Agent Architecture 140
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #141 Empirical Evaluation and Optimization of Autonomous Agent Architecture 141
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #142 Empirical Evaluation and Optimization of Autonomous Agent Architecture 142
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #143 Empirical Evaluation and Optimization of Autonomous Agent Architecture 143
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #144 Empirical Evaluation and Optimization of Autonomous Agent Architecture 144
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #145 Empirical Evaluation and Optimization of Autonomous Agent Architecture 145
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #146 Empirical Evaluation and Optimization of Autonomous Agent Architecture 146
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #147 Empirical Evaluation and Optimization of Autonomous Agent Architecture 147
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #148 Empirical Evaluation and Optimization of Autonomous Agent Architecture 148
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #149 Empirical Evaluation and Optimization of Autonomous Agent Architecture 149
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #150 Empirical Evaluation and Optimization of Autonomous Agent Architecture 150
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #151 Empirical Evaluation and Optimization of Autonomous Agent Architecture 151
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #152 Empirical Evaluation and Optimization of Autonomous Agent Architecture 152
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #153 Empirical Evaluation and Optimization of Autonomous Agent Architecture 153
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #154 Empirical Evaluation and Optimization of Autonomous Agent Architecture 154
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #155 Empirical Evaluation and Optimization of Autonomous Agent Architecture 155
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #156 Empirical Evaluation and Optimization of Autonomous Agent Architecture 156
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #157 Empirical Evaluation and Optimization of Autonomous Agent Architecture 157
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #158 Empirical Evaluation and Optimization of Autonomous Agent Architecture 158
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #159 Empirical Evaluation and Optimization of Autonomous Agent Architecture 159
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #160 Empirical Evaluation and Optimization of Autonomous Agent Architecture 160
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #161 Empirical Evaluation and Optimization of Autonomous Agent Architecture 161
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #162 Empirical Evaluation and Optimization of Autonomous Agent Architecture 162
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #163 Empirical Evaluation and Optimization of Autonomous Agent Architecture 163
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #164 Empirical Evaluation and Optimization of Autonomous Agent Architecture 164
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #165 Empirical Evaluation and Optimization of Autonomous Agent Architecture 165
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #166 Empirical Evaluation and Optimization of Autonomous Agent Architecture 166
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #167 Empirical Evaluation and Optimization of Autonomous Agent Architecture 167
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #168 Empirical Evaluation and Optimization of Autonomous Agent Architecture 168
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #169 Empirical Evaluation and Optimization of Autonomous Agent Architecture 169
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #170 Empirical Evaluation and Optimization of Autonomous Agent Architecture 170
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #171 Empirical Evaluation and Optimization of Autonomous Agent Architecture 171
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #172 Empirical Evaluation and Optimization of Autonomous Agent Architecture 172
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #173 Empirical Evaluation and Optimization of Autonomous Agent Architecture 173
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #174 Empirical Evaluation and Optimization of Autonomous Agent Architecture 174
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #175 Empirical Evaluation and Optimization of Autonomous Agent Architecture 175
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #176 Empirical Evaluation and Optimization of Autonomous Agent Architecture 176
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #177 Empirical Evaluation and Optimization of Autonomous Agent Architecture 177
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #178 Empirical Evaluation and Optimization of Autonomous Agent Architecture 178
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #179 Empirical Evaluation and Optimization of Autonomous Agent Architecture 179
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #180 Empirical Evaluation and Optimization of Autonomous Agent Architecture 180
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #181 Empirical Evaluation and Optimization of Autonomous Agent Architecture 181
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #182 Empirical Evaluation and Optimization of Autonomous Agent Architecture 182
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #183 Empirical Evaluation and Optimization of Autonomous Agent Architecture 183
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #184 Empirical Evaluation and Optimization of Autonomous Agent Architecture 184
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #185 Empirical Evaluation and Optimization of Autonomous Agent Architecture 185
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #186 Empirical Evaluation and Optimization of Autonomous Agent Architecture 186
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #187 Empirical Evaluation and Optimization of Autonomous Agent Architecture 187
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #188 Empirical Evaluation and Optimization of Autonomous Agent Architecture 188
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #189 Empirical Evaluation and Optimization of Autonomous Agent Architecture 189
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #190 Empirical Evaluation and Optimization of Autonomous Agent Architecture 190
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #191 Empirical Evaluation and Optimization of Autonomous Agent Architecture 191
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #192 Empirical Evaluation and Optimization of Autonomous Agent Architecture 192
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #193 Empirical Evaluation and Optimization of Autonomous Agent Architecture 193
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #194 Empirical Evaluation and Optimization of Autonomous Agent Architecture 194
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #195 Empirical Evaluation and Optimization of Autonomous Agent Architecture 195
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #196 Empirical Evaluation and Optimization of Autonomous Agent Architecture 196
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #197 Empirical Evaluation and Optimization of Autonomous Agent Architecture 197
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #198 Empirical Evaluation and Optimization of Autonomous Agent Architecture 198
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #199 Empirical Evaluation and Optimization of Autonomous Agent Architecture 199
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #200 Empirical Evaluation and Optimization of Autonomous Agent Architecture 200
 - **Relationship Type:** `prerequisite` target: `Paper #128`

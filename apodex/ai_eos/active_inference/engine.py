@@ -197,3 +197,87 @@ class ExecutiveOptimizer(IExecutiveOptimizer):
                 deviations[b_name] = {"realized_rate": None, "deviation": 0.0}
 
         return deviations
+
+    # ------------------------------------------------------------------
+    # EIOS Strategic Mathematical Proofs & Safety Protocol Implementations
+    # ------------------------------------------------------------------
+    def calculate_ebbinghaus_memory_decay(
+        self,
+        initial_retention: float,
+        elapsed_time_steps: float,
+        decay_constant_strength: float = 0.06
+    ) -> float:
+        """Ebbinghaus Forgetting Curve exponential decay simulator.
+
+        Computes current retention: R = R_0 * exp(-t / S)
+        """
+        logger.info("EIOS executing Ebbinghaus Memory Decay calculation")
+        if elapsed_time_steps <= 0:
+            return float(initial_retention)
+        retention = initial_retention * math.exp(-elapsed_time_steps * decay_constant_strength)
+        return float(max(0.01, min(1.0, retention)))
+
+    def detect_regime_change(
+        self,
+        historical_variance: List[float],
+        current_observation: float,
+        surprise_threshold: float = 2.0
+    ) -> bool:
+        """Bayesian surprise regime change detection.
+
+        Checks if the absolute surprise of current observation exceeds our threshold bounds.
+        """
+        logger.info("EIOS executing Bayesian Surprise Regime Change Detection")
+        if not historical_variance:
+            return False
+        mean_val = sum(historical_variance) / len(historical_variance)
+        variance = sum((x - mean_val) ** 2 for x in historical_variance) / len(historical_variance)
+        std_dev = math.sqrt(max(1e-5, variance))
+        surprise = abs(current_observation - mean_val) / std_dev
+        return surprise > surprise_threshold
+
+    def vessel_depressurization_protocol(
+        self,
+        current_runway_months: float,
+        token_utilization_rate: float,
+        critical_safety_bounds: Dict[str, float]
+    ) -> str:
+        """Hazard-rate critical boundary system shutdown and depressurization protocol."""
+        logger.info("EIOS evaluating critical Hazard-Rate and Vessel Depressurization parameters")
+        min_runway = critical_safety_bounds.get("min_runway_months", 3.0)
+        max_token_rate = critical_safety_bounds.get("max_token_utilization_rate", 10000.0)
+
+        if current_runway_months < min_runway:
+            logger.critical("HAZARD-RATE FAULT: Runway breached! Activating Emergency Vessel Depressurization.")
+            return "DEPRESSURIZE_EMERGENCY_SHUTDOWN"
+        if token_utilization_rate > max_token_rate:
+            logger.critical("HAZARD-RATE FAULT: Token consumption surge! Throttling all non-essential pipelines.")
+            return "DEPRESSURIZE_THROTTLE_COMPUTE"
+
+        return "VESSEL_PRESSURE_STABLE"
+
+    def score_originality(
+        self,
+        candidate_proposal_tokens: List[str],
+        historical_ventures_corpus: List[List[str]]
+    ) -> float:
+        """Calculates Expected Originality using Jaccard distance against historical corpuses."""
+        logger.info("EIOS executing Originality/Novelty scoring")
+        if not candidate_proposal_tokens:
+            return 0.0
+        if not historical_ventures_corpus:
+            return 1.0
+
+        candidate_set = set(candidate_proposal_tokens)
+        min_distance = 1.0
+
+        for historical_tokens in historical_ventures_corpus:
+            hist_set = set(historical_tokens)
+            intersection = len(candidate_set.intersection(hist_set))
+            union = len(candidate_set.union(hist_set))
+            if union > 0:
+                jaccard_similarity = intersection / union
+                jaccard_distance = 1.0 - jaccard_similarity
+                min_distance = min(min_distance, jaccard_distance)
+
+        return float(min_distance)

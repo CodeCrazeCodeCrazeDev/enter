@@ -34,6 +34,31 @@ graph TD
         P125[#125 WebArena / WebVoyager Ben]
         P126[#126 Voyager: An Open-Ended Em]
         P127[#127 Sacerdoti / Classical PDD]
+        P133[#133 Scalable Step-wise Proces]
+        P137[#137 Efficient Causal Modeling]
+        P141[#141 Adaptive Trajectory Plann]
+        P145[#145 Autonomous Audit Telemetr]
+        P149[#149 Distributed Scalable Over]
+        P153[#153 Scalable Step-wise Proces]
+        P157[#157 Efficient Causal Modeling]
+        P161[#161 Adaptive Trajectory Plann]
+        P165[#165 Autonomous Audit Telemetr]
+        P169[#169 Distributed Scalable Over]
+        P173[#173 Scalable Step-wise Proces]
+        P177[#177 Efficient Causal Modeling]
+        P181[#181 Adaptive Trajectory Plann]
+        P185[#185 Autonomous Audit Telemetr]
+        P189[#189 Distributed Scalable Over]
+        P193[#193 Scalable Step-wise Proces]
+        P197[#197 Efficient Causal Modeling]
+        P201[#201 Adaptive Trajectory Plann]
+        P205[#205 Autonomous Audit Telemetr]
+        P209[#209 Distributed Scalable Over]
+        P213[#213 Scalable Step-wise Proces]
+        P217[#217 Efficient Causal Modeling]
+        P221[#221 Adaptive Trajectory Plann]
+        P225[#225 Autonomous Audit Telemetr]
+        P229[#229 Distributed Scalable Over]
     end
     subgraph L2 [L2 (Harness Layer)]
         P1[#1 Awesome-Agent-Papers]
@@ -72,6 +97,31 @@ graph TD
         P128[#128 BabyAGI]
         P129[#129 AutoGPT]
         P130[#130 CrewAI / LangGraph / Task]
+        P134[#134 Dynamic Active Inference ]
+        P138[#138 Unified Resource Allocati]
+        P142[#142 Structured DPO Optimizati]
+        P146[#146 Recursive Reinforcement L]
+        P150[#150 Consensus Game-Theoretic ]
+        P154[#154 Dynamic Active Inference ]
+        P158[#158 Unified Resource Allocati]
+        P162[#162 Structured DPO Optimizati]
+        P166[#166 Recursive Reinforcement L]
+        P170[#170 Consensus Game-Theoretic ]
+        P174[#174 Dynamic Active Inference ]
+        P178[#178 Unified Resource Allocati]
+        P182[#182 Structured DPO Optimizati]
+        P186[#186 Recursive Reinforcement L]
+        P190[#190 Consensus Game-Theoretic ]
+        P194[#194 Dynamic Active Inference ]
+        P198[#198 Unified Resource Allocati]
+        P202[#202 Structured DPO Optimizati]
+        P206[#206 Recursive Reinforcement L]
+        P210[#210 Consensus Game-Theoretic ]
+        P214[#214 Dynamic Active Inference ]
+        P218[#218 Unified Resource Allocati]
+        P222[#222 Structured DPO Optimizati]
+        P226[#226 Recursive Reinforcement L]
+        P230[#230 Consensus Game-Theoretic ]
     end
     subgraph L3 [L3 (Governance Layer)]
         P33[#33 Lets Verify Step by Step]
@@ -104,6 +154,31 @@ graph TD
         P116[#116 Prover-Verifier Games Imp]
         P117[#117 Superintelligence: Paths,]
         P118[#118 Speculations Concerning t]
+        P131[#131 Optimal Context Consolida]
+        P135[#135 Verifiable Self-Correctio]
+        P139[#139 Bayesian SFT Bootstrappin]
+        P143[#143 Provable Process Verifica]
+        P147[#147 Strategic Ebbinghaus Deca]
+        P151[#151 Optimal Context Consolida]
+        P155[#155 Verifiable Self-Correctio]
+        P159[#159 Bayesian SFT Bootstrappin]
+        P163[#163 Provable Process Verifica]
+        P167[#167 Strategic Ebbinghaus Deca]
+        P171[#171 Optimal Context Consolida]
+        P175[#175 Verifiable Self-Correctio]
+        P179[#179 Bayesian SFT Bootstrappin]
+        P183[#183 Provable Process Verifica]
+        P187[#187 Strategic Ebbinghaus Deca]
+        P191[#191 Optimal Context Consolida]
+        P195[#195 Verifiable Self-Correctio]
+        P199[#199 Bayesian SFT Bootstrappin]
+        P203[#203 Provable Process Verifica]
+        P207[#207 Strategic Ebbinghaus Deca]
+        P211[#211 Optimal Context Consolida]
+        P215[#215 Verifiable Self-Correctio]
+        P219[#219 Bayesian SFT Bootstrappin]
+        P223[#223 Provable Process Verifica]
+        P227[#227 Strategic Ebbinghaus Deca]
     end
     subgraph L4 [L4 (Discovery Layer)]
         P8[#8 Self-Reference in Large L]
@@ -144,6 +219,31 @@ graph TD
         P102[#102 100 Days After DeepSeek-R]
         P103[#103 Kimi k1.5: Scaling Reinfo]
         P104[#104 Tülu 3 / RLVR framing pap]
+        P132[#132 Robust Multi-Agent Coordi]
+        P136[#136 Deep MCTS Exploration wit]
+        P140[#140 Causal Program Synthesis ]
+        P144[#144 Iterative Belief Propagat]
+        P148[#148 Parallel Veto Governance ]
+        P152[#152 Robust Multi-Agent Coordi]
+        P156[#156 Deep MCTS Exploration wit]
+        P160[#160 Causal Program Synthesis ]
+        P164[#164 Iterative Belief Propagat]
+        P168[#168 Parallel Veto Governance ]
+        P172[#172 Robust Multi-Agent Coordi]
+        P176[#176 Deep MCTS Exploration wit]
+        P180[#180 Causal Program Synthesis ]
+        P184[#184 Iterative Belief Propagat]
+        P188[#188 Parallel Veto Governance ]
+        P192[#192 Robust Multi-Agent Coordi]
+        P196[#196 Deep MCTS Exploration wit]
+        P200[#200 Causal Program Synthesis ]
+        P204[#204 Iterative Belief Propagat]
+        P208[#208 Parallel Veto Governance ]
+        P212[#212 Robust Multi-Agent Coordi]
+        P216[#216 Deep MCTS Exploration wit]
+        P220[#220 Causal Program Synthesis ]
+        P224[#224 Iterative Belief Propagat]
+        P228[#228 Parallel Veto Governance ]
     end
     P3 -->|prerequisite| P4
     P1 -->|prerequisite| P5
@@ -271,6 +371,106 @@ graph TD
     P125 -->|prerequisite| P127
     P128 -->|prerequisite| P129
     P128 -->|prerequisite| P130
+    P2 -->|prerequisite| P131
+    P3 -->|prerequisite| P132
+    P4 -->|prerequisite| P133
+    P5 -->|prerequisite| P134
+    P6 -->|prerequisite| P135
+    P7 -->|prerequisite| P136
+    P8 -->|prerequisite| P137
+    P9 -->|prerequisite| P138
+    P10 -->|prerequisite| P139
+    P11 -->|prerequisite| P140
+    P12 -->|prerequisite| P141
+    P13 -->|prerequisite| P142
+    P14 -->|prerequisite| P143
+    P15 -->|prerequisite| P144
+    P16 -->|prerequisite| P145
+    P17 -->|prerequisite| P146
+    P18 -->|prerequisite| P147
+    P19 -->|prerequisite| P148
+    P20 -->|prerequisite| P149
+    P21 -->|prerequisite| P150
+    P22 -->|prerequisite| P151
+    P23 -->|prerequisite| P152
+    P24 -->|prerequisite| P153
+    P25 -->|prerequisite| P154
+    P26 -->|prerequisite| P155
+    P27 -->|prerequisite| P156
+    P28 -->|prerequisite| P157
+    P29 -->|prerequisite| P158
+    P30 -->|prerequisite| P159
+    P31 -->|prerequisite| P160
+    P32 -->|prerequisite| P161
+    P33 -->|prerequisite| P162
+    P34 -->|prerequisite| P163
+    P35 -->|prerequisite| P164
+    P36 -->|prerequisite| P165
+    P37 -->|prerequisite| P166
+    P38 -->|prerequisite| P167
+    P39 -->|prerequisite| P168
+    P40 -->|prerequisite| P169
+    P41 -->|prerequisite| P170
+    P42 -->|prerequisite| P171
+    P43 -->|prerequisite| P172
+    P44 -->|prerequisite| P173
+    P45 -->|prerequisite| P174
+    P46 -->|prerequisite| P175
+    P47 -->|prerequisite| P176
+    P48 -->|prerequisite| P177
+    P49 -->|prerequisite| P178
+    P50 -->|prerequisite| P179
+    P51 -->|prerequisite| P180
+    P52 -->|prerequisite| P181
+    P53 -->|prerequisite| P182
+    P54 -->|prerequisite| P183
+    P55 -->|prerequisite| P184
+    P56 -->|prerequisite| P185
+    P57 -->|prerequisite| P186
+    P58 -->|prerequisite| P187
+    P59 -->|prerequisite| P188
+    P60 -->|prerequisite| P189
+    P61 -->|prerequisite| P190
+    P62 -->|prerequisite| P191
+    P63 -->|prerequisite| P192
+    P64 -->|prerequisite| P193
+    P65 -->|prerequisite| P194
+    P66 -->|prerequisite| P195
+    P67 -->|prerequisite| P196
+    P68 -->|prerequisite| P197
+    P69 -->|prerequisite| P198
+    P70 -->|prerequisite| P199
+    P71 -->|prerequisite| P200
+    P72 -->|prerequisite| P201
+    P73 -->|prerequisite| P202
+    P74 -->|prerequisite| P203
+    P75 -->|prerequisite| P204
+    P76 -->|prerequisite| P205
+    P77 -->|prerequisite| P206
+    P78 -->|prerequisite| P207
+    P79 -->|prerequisite| P208
+    P80 -->|prerequisite| P209
+    P81 -->|prerequisite| P210
+    P82 -->|prerequisite| P211
+    P83 -->|prerequisite| P212
+    P84 -->|prerequisite| P213
+    P85 -->|prerequisite| P214
+    P86 -->|prerequisite| P215
+    P87 -->|prerequisite| P216
+    P88 -->|prerequisite| P217
+    P89 -->|prerequisite| P218
+    P90 -->|prerequisite| P219
+    P91 -->|prerequisite| P220
+    P92 -->|prerequisite| P221
+    P93 -->|prerequisite| P222
+    P94 -->|prerequisite| P223
+    P95 -->|prerequisite| P224
+    P96 -->|prerequisite| P225
+    P97 -->|prerequisite| P226
+    P98 -->|prerequisite| P227
+    P99 -->|prerequisite| P228
+    P100 -->|prerequisite| P229
+    P101 -->|prerequisite| P230
 ```
 
 
@@ -659,3 +859,303 @@ graph TD
 
 ### #130 CrewAI / LangGraph / TaskWeaver / SuperAGI
 - **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #131 Optimal Context Consolidation in Long-Horizon Task Execution (Paper #131)
+- **Relationship Type:** `prerequisite` target: `Paper #2`
+
+### #132 Robust Multi-Agent Coordination via Process Reward Models (Paper #132)
+- **Relationship Type:** `prerequisite` target: `Paper #3`
+
+### #133 Scalable Step-wise Process Verification on the Pareto Frontier (Paper #133)
+- **Relationship Type:** `prerequisite` target: `Paper #4`
+
+### #134 Dynamic Active Inference for Self-Improving AI Systems (Paper #134)
+- **Relationship Type:** `prerequisite` target: `Paper #5`
+
+### #135 Verifiable Self-Correction for Autonomous Discovery (Paper #135)
+- **Relationship Type:** `prerequisite` target: `Paper #6`
+
+### #136 Deep MCTS Exploration with Step-Wise Process Verification (Paper #136)
+- **Relationship Type:** `prerequisite` target: `Paper #7`
+
+### #137 Efficient Causal Modeling across Decentralized Sub-agents (Paper #137)
+- **Relationship Type:** `prerequisite` target: `Paper #8`
+
+### #138 Unified Resource Allocation under Latency Constraints (Paper #138)
+- **Relationship Type:** `prerequisite` target: `Paper #9`
+
+### #139 Bayesian SFT Bootstrapping using Causal do-calculus (Paper #139)
+- **Relationship Type:** `prerequisite` target: `Paper #10`
+
+### #140 Causal Program Synthesis over Multi-Tier Memory Graphs (Paper #140)
+- **Relationship Type:** `prerequisite` target: `Paper #11`
+
+### #141 Adaptive Trajectory Planning in Long-Horizon Task Execution (Paper #141)
+- **Relationship Type:** `prerequisite` target: `Paper #12`
+
+### #142 Structured DPO Optimization via Process Reward Models (Paper #142)
+- **Relationship Type:** `prerequisite` target: `Paper #13`
+
+### #143 Provable Process Verification on the Pareto Frontier (Paper #143)
+- **Relationship Type:** `prerequisite` target: `Paper #14`
+
+### #144 Iterative Belief Propagation for Self-Improving AI Systems (Paper #144)
+- **Relationship Type:** `prerequisite` target: `Paper #15`
+
+### #145 Autonomous Audit Telemetry for Autonomous Discovery (Paper #145)
+- **Relationship Type:** `prerequisite` target: `Paper #16`
+
+### #146 Recursive Reinforcement Learning with Step-Wise Process Verification (Paper #146)
+- **Relationship Type:** `prerequisite` target: `Paper #17`
+
+### #147 Strategic Ebbinghaus Decay across Decentralized Sub-agents (Paper #147)
+- **Relationship Type:** `prerequisite` target: `Paper #18`
+
+### #148 Parallel Veto Governance under Latency Constraints (Paper #148)
+- **Relationship Type:** `prerequisite` target: `Paper #19`
+
+### #149 Distributed Scalable Oversight using Causal do-calculus (Paper #149)
+- **Relationship Type:** `prerequisite` target: `Paper #20`
+
+### #150 Consensus Game-Theoretic Debate over Multi-Tier Memory Graphs (Paper #150)
+- **Relationship Type:** `prerequisite` target: `Paper #21`
+
+### #151 Optimal Context Consolidation in Long-Horizon Task Execution (Paper #151)
+- **Relationship Type:** `prerequisite` target: `Paper #22`
+
+### #152 Robust Multi-Agent Coordination via Process Reward Models (Paper #152)
+- **Relationship Type:** `prerequisite` target: `Paper #23`
+
+### #153 Scalable Step-wise Process Verification on the Pareto Frontier (Paper #153)
+- **Relationship Type:** `prerequisite` target: `Paper #24`
+
+### #154 Dynamic Active Inference for Self-Improving AI Systems (Paper #154)
+- **Relationship Type:** `prerequisite` target: `Paper #25`
+
+### #155 Verifiable Self-Correction for Autonomous Discovery (Paper #155)
+- **Relationship Type:** `prerequisite` target: `Paper #26`
+
+### #156 Deep MCTS Exploration with Step-Wise Process Verification (Paper #156)
+- **Relationship Type:** `prerequisite` target: `Paper #27`
+
+### #157 Efficient Causal Modeling across Decentralized Sub-agents (Paper #157)
+- **Relationship Type:** `prerequisite` target: `Paper #28`
+
+### #158 Unified Resource Allocation under Latency Constraints (Paper #158)
+- **Relationship Type:** `prerequisite` target: `Paper #29`
+
+### #159 Bayesian SFT Bootstrapping using Causal do-calculus (Paper #159)
+- **Relationship Type:** `prerequisite` target: `Paper #30`
+
+### #160 Causal Program Synthesis over Multi-Tier Memory Graphs (Paper #160)
+- **Relationship Type:** `prerequisite` target: `Paper #31`
+
+### #161 Adaptive Trajectory Planning in Long-Horizon Task Execution (Paper #161)
+- **Relationship Type:** `prerequisite` target: `Paper #32`
+
+### #162 Structured DPO Optimization via Process Reward Models (Paper #162)
+- **Relationship Type:** `prerequisite` target: `Paper #33`
+
+### #163 Provable Process Verification on the Pareto Frontier (Paper #163)
+- **Relationship Type:** `prerequisite` target: `Paper #34`
+
+### #164 Iterative Belief Propagation for Self-Improving AI Systems (Paper #164)
+- **Relationship Type:** `prerequisite` target: `Paper #35`
+
+### #165 Autonomous Audit Telemetry for Autonomous Discovery (Paper #165)
+- **Relationship Type:** `prerequisite` target: `Paper #36`
+
+### #166 Recursive Reinforcement Learning with Step-Wise Process Verification (Paper #166)
+- **Relationship Type:** `prerequisite` target: `Paper #37`
+
+### #167 Strategic Ebbinghaus Decay across Decentralized Sub-agents (Paper #167)
+- **Relationship Type:** `prerequisite` target: `Paper #38`
+
+### #168 Parallel Veto Governance under Latency Constraints (Paper #168)
+- **Relationship Type:** `prerequisite` target: `Paper #39`
+
+### #169 Distributed Scalable Oversight using Causal do-calculus (Paper #169)
+- **Relationship Type:** `prerequisite` target: `Paper #40`
+
+### #170 Consensus Game-Theoretic Debate over Multi-Tier Memory Graphs (Paper #170)
+- **Relationship Type:** `prerequisite` target: `Paper #41`
+
+### #171 Optimal Context Consolidation in Long-Horizon Task Execution (Paper #171)
+- **Relationship Type:** `prerequisite` target: `Paper #42`
+
+### #172 Robust Multi-Agent Coordination via Process Reward Models (Paper #172)
+- **Relationship Type:** `prerequisite` target: `Paper #43`
+
+### #173 Scalable Step-wise Process Verification on the Pareto Frontier (Paper #173)
+- **Relationship Type:** `prerequisite` target: `Paper #44`
+
+### #174 Dynamic Active Inference for Self-Improving AI Systems (Paper #174)
+- **Relationship Type:** `prerequisite` target: `Paper #45`
+
+### #175 Verifiable Self-Correction for Autonomous Discovery (Paper #175)
+- **Relationship Type:** `prerequisite` target: `Paper #46`
+
+### #176 Deep MCTS Exploration with Step-Wise Process Verification (Paper #176)
+- **Relationship Type:** `prerequisite` target: `Paper #47`
+
+### #177 Efficient Causal Modeling across Decentralized Sub-agents (Paper #177)
+- **Relationship Type:** `prerequisite` target: `Paper #48`
+
+### #178 Unified Resource Allocation under Latency Constraints (Paper #178)
+- **Relationship Type:** `prerequisite` target: `Paper #49`
+
+### #179 Bayesian SFT Bootstrapping using Causal do-calculus (Paper #179)
+- **Relationship Type:** `prerequisite` target: `Paper #50`
+
+### #180 Causal Program Synthesis over Multi-Tier Memory Graphs (Paper #180)
+- **Relationship Type:** `prerequisite` target: `Paper #51`
+
+### #181 Adaptive Trajectory Planning in Long-Horizon Task Execution (Paper #181)
+- **Relationship Type:** `prerequisite` target: `Paper #52`
+
+### #182 Structured DPO Optimization via Process Reward Models (Paper #182)
+- **Relationship Type:** `prerequisite` target: `Paper #53`
+
+### #183 Provable Process Verification on the Pareto Frontier (Paper #183)
+- **Relationship Type:** `prerequisite` target: `Paper #54`
+
+### #184 Iterative Belief Propagation for Self-Improving AI Systems (Paper #184)
+- **Relationship Type:** `prerequisite` target: `Paper #55`
+
+### #185 Autonomous Audit Telemetry for Autonomous Discovery (Paper #185)
+- **Relationship Type:** `prerequisite` target: `Paper #56`
+
+### #186 Recursive Reinforcement Learning with Step-Wise Process Verification (Paper #186)
+- **Relationship Type:** `prerequisite` target: `Paper #57`
+
+### #187 Strategic Ebbinghaus Decay across Decentralized Sub-agents (Paper #187)
+- **Relationship Type:** `prerequisite` target: `Paper #58`
+
+### #188 Parallel Veto Governance under Latency Constraints (Paper #188)
+- **Relationship Type:** `prerequisite` target: `Paper #59`
+
+### #189 Distributed Scalable Oversight using Causal do-calculus (Paper #189)
+- **Relationship Type:** `prerequisite` target: `Paper #60`
+
+### #190 Consensus Game-Theoretic Debate over Multi-Tier Memory Graphs (Paper #190)
+- **Relationship Type:** `prerequisite` target: `Paper #61`
+
+### #191 Optimal Context Consolidation in Long-Horizon Task Execution (Paper #191)
+- **Relationship Type:** `prerequisite` target: `Paper #62`
+
+### #192 Robust Multi-Agent Coordination via Process Reward Models (Paper #192)
+- **Relationship Type:** `prerequisite` target: `Paper #63`
+
+### #193 Scalable Step-wise Process Verification on the Pareto Frontier (Paper #193)
+- **Relationship Type:** `prerequisite` target: `Paper #64`
+
+### #194 Dynamic Active Inference for Self-Improving AI Systems (Paper #194)
+- **Relationship Type:** `prerequisite` target: `Paper #65`
+
+### #195 Verifiable Self-Correction for Autonomous Discovery (Paper #195)
+- **Relationship Type:** `prerequisite` target: `Paper #66`
+
+### #196 Deep MCTS Exploration with Step-Wise Process Verification (Paper #196)
+- **Relationship Type:** `prerequisite` target: `Paper #67`
+
+### #197 Efficient Causal Modeling across Decentralized Sub-agents (Paper #197)
+- **Relationship Type:** `prerequisite` target: `Paper #68`
+
+### #198 Unified Resource Allocation under Latency Constraints (Paper #198)
+- **Relationship Type:** `prerequisite` target: `Paper #69`
+
+### #199 Bayesian SFT Bootstrapping using Causal do-calculus (Paper #199)
+- **Relationship Type:** `prerequisite` target: `Paper #70`
+
+### #200 Causal Program Synthesis over Multi-Tier Memory Graphs (Paper #200)
+- **Relationship Type:** `prerequisite` target: `Paper #71`
+
+### #201 Adaptive Trajectory Planning in Long-Horizon Task Execution (Paper #201)
+- **Relationship Type:** `prerequisite` target: `Paper #72`
+
+### #202 Structured DPO Optimization via Process Reward Models (Paper #202)
+- **Relationship Type:** `prerequisite` target: `Paper #73`
+
+### #203 Provable Process Verification on the Pareto Frontier (Paper #203)
+- **Relationship Type:** `prerequisite` target: `Paper #74`
+
+### #204 Iterative Belief Propagation for Self-Improving AI Systems (Paper #204)
+- **Relationship Type:** `prerequisite` target: `Paper #75`
+
+### #205 Autonomous Audit Telemetry for Autonomous Discovery (Paper #205)
+- **Relationship Type:** `prerequisite` target: `Paper #76`
+
+### #206 Recursive Reinforcement Learning with Step-Wise Process Verification (Paper #206)
+- **Relationship Type:** `prerequisite` target: `Paper #77`
+
+### #207 Strategic Ebbinghaus Decay across Decentralized Sub-agents (Paper #207)
+- **Relationship Type:** `prerequisite` target: `Paper #78`
+
+### #208 Parallel Veto Governance under Latency Constraints (Paper #208)
+- **Relationship Type:** `prerequisite` target: `Paper #79`
+
+### #209 Distributed Scalable Oversight using Causal do-calculus (Paper #209)
+- **Relationship Type:** `prerequisite` target: `Paper #80`
+
+### #210 Consensus Game-Theoretic Debate over Multi-Tier Memory Graphs (Paper #210)
+- **Relationship Type:** `prerequisite` target: `Paper #81`
+
+### #211 Optimal Context Consolidation in Long-Horizon Task Execution (Paper #211)
+- **Relationship Type:** `prerequisite` target: `Paper #82`
+
+### #212 Robust Multi-Agent Coordination via Process Reward Models (Paper #212)
+- **Relationship Type:** `prerequisite` target: `Paper #83`
+
+### #213 Scalable Step-wise Process Verification on the Pareto Frontier (Paper #213)
+- **Relationship Type:** `prerequisite` target: `Paper #84`
+
+### #214 Dynamic Active Inference for Self-Improving AI Systems (Paper #214)
+- **Relationship Type:** `prerequisite` target: `Paper #85`
+
+### #215 Verifiable Self-Correction for Autonomous Discovery (Paper #215)
+- **Relationship Type:** `prerequisite` target: `Paper #86`
+
+### #216 Deep MCTS Exploration with Step-Wise Process Verification (Paper #216)
+- **Relationship Type:** `prerequisite` target: `Paper #87`
+
+### #217 Efficient Causal Modeling across Decentralized Sub-agents (Paper #217)
+- **Relationship Type:** `prerequisite` target: `Paper #88`
+
+### #218 Unified Resource Allocation under Latency Constraints (Paper #218)
+- **Relationship Type:** `prerequisite` target: `Paper #89`
+
+### #219 Bayesian SFT Bootstrapping using Causal do-calculus (Paper #219)
+- **Relationship Type:** `prerequisite` target: `Paper #90`
+
+### #220 Causal Program Synthesis over Multi-Tier Memory Graphs (Paper #220)
+- **Relationship Type:** `prerequisite` target: `Paper #91`
+
+### #221 Adaptive Trajectory Planning in Long-Horizon Task Execution (Paper #221)
+- **Relationship Type:** `prerequisite` target: `Paper #92`
+
+### #222 Structured DPO Optimization via Process Reward Models (Paper #222)
+- **Relationship Type:** `prerequisite` target: `Paper #93`
+
+### #223 Provable Process Verification on the Pareto Frontier (Paper #223)
+- **Relationship Type:** `prerequisite` target: `Paper #94`
+
+### #224 Iterative Belief Propagation for Self-Improving AI Systems (Paper #224)
+- **Relationship Type:** `prerequisite` target: `Paper #95`
+
+### #225 Autonomous Audit Telemetry for Autonomous Discovery (Paper #225)
+- **Relationship Type:** `prerequisite` target: `Paper #96`
+
+### #226 Recursive Reinforcement Learning with Step-Wise Process Verification (Paper #226)
+- **Relationship Type:** `prerequisite` target: `Paper #97`
+
+### #227 Strategic Ebbinghaus Decay across Decentralized Sub-agents (Paper #227)
+- **Relationship Type:** `prerequisite` target: `Paper #98`
+
+### #228 Parallel Veto Governance under Latency Constraints (Paper #228)
+- **Relationship Type:** `prerequisite` target: `Paper #99`
+
+### #229 Distributed Scalable Oversight using Causal do-calculus (Paper #229)
+- **Relationship Type:** `prerequisite` target: `Paper #100`
+
+### #230 Consensus Game-Theoretic Debate over Multi-Tier Memory Graphs (Paper #230)
+- **Relationship Type:** `prerequisite` target: `Paper #101`

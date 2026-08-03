@@ -2,6 +2,7 @@
 """
 compile_research_db.py: Validate and compile the AI-EOS Research Knowledge Graph YAML database
 into beautifully formatted Markdown documents.
+Upgraded to support 230-paper literature review database.
 """
 import os
 import sys
@@ -79,9 +80,8 @@ def render_bibliography(db):
     papers = db.get("papers", [])
     sections = {}
     for p in papers:
-        sect = p["id"]
-        # Find which section it belongs to based on categories
         p_id = p["id"]
+        # Map sections properly based on ID ranges
         if p_id in range(1, 8):
             s_name = "0. Meta-Resources (mine these first — each indexes 50–300 papers)"
         elif p_id in range(8, 16):
@@ -104,8 +104,11 @@ def render_bibliography(db):
             s_name = "9. Scalable Oversight, Debate, Constitutional AI & RSI Safety"
         elif p_id in range(119, 128):
             s_name = "10. Long-Horizon Agents, Memory, Planning & Benchmarks"
-        else:
+        elif p_id in range(128, 131):
             s_name = "11. Foundational Autonomous-Agent Frameworks (engineering references)"
+        else:
+            # Group the 100 new papers under an elite Literature Review section
+            s_name = "12. Comprehensive Literature Review on Cognitive OS Frontiers (100 New Papers)"
 
         sections.setdefault(s_name, []).append(p)
 
@@ -139,6 +142,21 @@ def render_bibliography(db):
             out.append(f"- **Computational Complexity:** `{facts['computational_complexity']}`")
             out.append(f"- **Limitations:** {facts['limitations']}")
 
+            if "evaluations" in p:
+                out.append("\n#### Exhaustive Paper Evaluations (11 Core Metrics)")
+                evals = p["evaluations"]
+                out.append(f"- **Engineering Contribution:** {evals['engineering_contribution']}")
+                out.append(f"- **Algorithmic Contribution:** {evals['algorithmic_contribution']}")
+                out.append(f"- **Architectural Contribution:** {evals['architectural_contribution']}")
+                out.append(f"- **Scalability Contribution:** {evals['scalability_contribution']}")
+                out.append(f"- **Reasoning Improvement:** {evals['reasoning_improvement']}")
+                out.append(f"- **Reliability Improvement:** {evals['reliability_improvement']}")
+                out.append(f"- **Efficiency Improvement:** {evals['efficiency_improvement']}")
+                out.append(f"- **Evaluation Methodology:** {evals['evaluation_methodology']}")
+                out.append(f"- **Limitations:** {evals['limitations']}")
+                out.append(f"- **Production Maturity:** {evals['production_maturity']}")
+                out.append(f"- **Implementation Complexity:** {evals['implementation_complexity']}")
+
             out.append("\n#### AI-EOS Engineering Analysis")
             out.append(f"- **Relevance to System:** {analysis['ai_eos_relevance']}")
             out.append(f"- **Implementation Notes:** {analysis['implementation_notes']}")
@@ -158,6 +176,16 @@ def render_bibliography(db):
                 out.append(f"    - {rat}")
 
             out.append(f"- **Open Questions:** *{analysis['open_questions']}*")
+
+            if "evaluation_verdict" in analysis:
+                out.append("\n#### Rejection / Accept Verdict Scorecard")
+                verd = analysis["evaluation_verdict"]
+                out.append(f"- **Status:** **{verd['status']}**")
+                out.append(f"- **Generalizability:** {verd['generalizability']}")
+                out.append(f"- **Excessive Complexity check:** {verd['excessive_complexity']}")
+                out.append(f"- **Non-duplication check:** {verd['duplication_check']}")
+                out.append(f"- **Architectural Alignment:** {verd['architectural_alignment']}")
+                out.append(f"- **Empirical Evidence:** {verd['empirical_evidence']}")
 
             out.append("\n#### Confidence & Provenance")
             out.append(f"- **Confidence Weights:** Implementation: {conf['implementation_notes']}, Fit: {conf['architectural_fit']}, Dependencies: {conf['dependency_mapping']}")
@@ -185,12 +213,12 @@ def render_matrix(db):
         analysis = p["analysis"]
         facts = p["technical_facts"]
 
-        # Mapping layers based on section
-        if p_id in range(16, 33) or p_id in range(119, 128):
+        # Mapping layers based on section/id
+        if p_id in range(16, 33) or p_id in range(119, 128) or (p_id >= 131 and p_id % 4 == 1):
             layer = "L1 (Recovery)"
-        elif p_id in range(33, 49) or p_id in range(105, 119):
+        elif p_id in range(33, 49) or p_id in range(105, 119) or (p_id >= 131 and p_id % 4 == 3):
             layer = "L3 (Governance)"
-        elif p_id in [8, 9, 10, 11, 12, 13, 14, 15] or p_id in range(75, 105):
+        elif p_id in [8, 9, 10, 11, 12, 13, 14, 15] or p_id in range(75, 105) or (p_id >= 131 and p_id % 4 == 0):
             layer = "L4 (Discovery)"
         else:
             layer = "L2 (Harness)"
@@ -227,11 +255,11 @@ def render_dependency_graph(db):
         clean_title = title.replace("[", "").replace("]", "").replace("\"", "").replace("'", "")[:25]
 
         # Determine Layer
-        if p_id in range(16, 33) or p_id in range(119, 128):
+        if p_id in range(16, 33) or p_id in range(119, 128) or (p_id >= 131 and p_id % 4 == 1):
             l_key = "L1 (Recovery Layer)"
-        elif p_id in range(33, 49) or p_id in range(105, 119):
+        elif p_id in range(33, 49) or p_id in range(105, 119) or (p_id >= 131 and p_id % 4 == 3):
             l_key = "L3 (Governance Layer)"
-        elif p_id in [8, 9, 10, 11, 12, 13, 14, 15] or p_id in range(75, 105):
+        elif p_id in [8, 9, 10, 11, 12, 13, 14, 15] or p_id in range(75, 105) or (p_id >= 131 and p_id % 4 == 0):
             l_key = "L4 (Discovery Layer)"
         else:
             l_key = "L2 (Harness Layer)"

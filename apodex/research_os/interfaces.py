@@ -83,6 +83,11 @@ class IExperimentRegistry(ABC):
         """Retrieve an experiment by its configuration SHA-256 hash."""
         ...
 
+    @abstractmethod
+    def list_experiments(self) -> List[Experiment]:
+        """List all tracked experiments."""
+        ...
+
 
 class IModelRegistry(ABC):
     """Interface for managing promoted, production-ready trading models."""

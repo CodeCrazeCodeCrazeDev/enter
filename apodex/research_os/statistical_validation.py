@@ -22,6 +22,11 @@ def adjust_p_values(p_values: List[float], method: str = "HOLM") -> List[float]:
     if n == 0:
         return []
 
+    # Validate p-values boundary constraints
+    for p in p_values:
+        if not (0.0 <= p <= 1.0):
+            raise ValueError(f"p-value {p} must be strictly between 0.0 and 1.0.")
+
     method = method.upper()
     if method == "BONFERRONI":
         return [min(1.0, p * n) for p in p_values]
@@ -101,6 +106,10 @@ def calculate_dsr(
         kurtosis: Kurtosis of returns (defaults to 3 for normal distribution).
         trials_variance: Variance of Sharpe Ratios across all executed trials.
     """
+    if returns_length <= 1:
+        # Cannot calculate DSR with 1 or fewer returns observations due to degrees of freedom limit
+        return 0.0
+
     if trials <= 1:
         return 1.0  # If only one trial was run, no deflation is needed
 
@@ -158,6 +167,11 @@ def walk_forward_split(
     Returns:
         List of tuples: ((train_start, train_end), (test_start, test_end))
     """
+    if total_length <= 0 or train_size <= 0 or test_size <= 0 or step_size <= 0:
+        raise ValueError("All window size parameters (total_length, train_size, test_size, step_size) must be positive integers.")
+    if train_size + test_size > total_length:
+        raise ValueError("The sum of train_size and test_size cannot exceed total_length.")
+
     splits = []
     current_test_start = train_size
 
@@ -185,7 +199,12 @@ def block_bootstrap(
     """
     rng = np.random.default_rng(seed)
     ret_arr = np.asarray(returns)
+    # Clean NaN and Inf values to prevent runtime metric degradation
+    ret_arr = ret_arr[np.isfinite(ret_arr)]
     n = len(ret_arr)
+    if n == 0:
+        return [0.0] * num_samples
+
     if n <= block_size:
         # Fallback to standard bootstrap if data is too short
         block_size = max(1, n // 2)

@@ -84,8 +84,9 @@ class ExperimentRegistry(IExperimentRegistry):
 
     def register_experiment(self, experiment: Experiment) -> None:
         with self._lock:
-            if experiment.experiment_id in self._store:
-                raise ValueError(f"Experiment with ID '{experiment.experiment_id}' already exists.")
+            existing = self._store.get(experiment.experiment_id)
+            if existing and existing.status != "FAILED":
+                raise ValueError(f"Experiment with ID '{experiment.experiment_id}' already exists and is immutable.")
 
             # Compute configuration hash if not already set
             if not experiment.config_hash:
@@ -101,6 +102,10 @@ class ExperimentRegistry(IExperimentRegistry):
     def get_experiment_by_hash(self, config_hash: str) -> Optional[Experiment]:
         with self._lock:
             return self._hash_store.get(config_hash)
+
+    def list_experiments(self) -> List[Experiment]:
+        with self._lock:
+            return list(self._store.values())
 
 
 class ModelRegistry(IModelRegistry):

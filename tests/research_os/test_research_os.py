@@ -284,3 +284,180 @@ def test_end_to_end_pipeline_rejection() -> None:
     assert decision.status == "REJECTED"
     assert len(decision.rejection_rationales) > 0
     assert model is None
+
+
+def test_mathematical_p_value_precision() -> None:
+    """Verify that p-values are calculated correctly using standard_normal_cdf (with erf)."""
+    # Simple cases
+    from apodex.research_os.statistical_validation import standard_normal_cdf
+    assert standard_normal_cdf(0.0) == pytest.approx(0.5)
+    assert standard_normal_cdf(1.96) == pytest.approx(0.975, abs=1e-3)
+    assert standard_normal_cdf(-1.96) == pytest.approx(0.025, abs=1e-3)
+
+
+def test_walk_forward_split_infinite_loop_prevention() -> None:
+    """Verify that walk_forward_split raises a ValueError for invalid parameters to prevent infinite loops."""
+    with pytest.raises(ValueError, match="positive integers"):
+        walk_forward_split(total_length=100, train_size=50, test_size=10, step_size=0)
+
+    with pytest.raises(ValueError, match="positive integers"):
+        walk_forward_split(total_length=100, train_size=50, test_size=10, step_size=-5)
+
+    with pytest.raises(ValueError, match="cannot exceed total_length"):
+        walk_forward_split(total_length=50, train_size=40, test_size=20, step_size=5)
+
+
+def test_dsr_division_by_zero_handling() -> None:
+    """Verify that calculate_dsr handles returns_length <= 1 gracefully without division by zero."""
+    dsr_val = calculate_dsr(sharpe=2.0, trials=10, returns_length=1)
+    assert dsr_val == 0.0
+
+    dsr_val_zero = calculate_dsr(sharpe=2.0, trials=10, returns_length=0)
+    assert dsr_val_zero == 0.0
+
+
+def test_failed_experiment_caching_bypass() -> None:
+    """Verify that the orchestrator does not reuse FAILED experiments from cache."""
+    hyp_reg = HypothesisRegistry()
+    ds_reg = DatasetRegistry()
+    feat_reg = FeatureRegistry()
+    exp_reg = ExperimentRegistry()
+    mod_reg = ModelRegistry()
+
+    h = Hypothesis(
+        hypothesis_id="H_01",
+        research_question_id="Q_01",
+        title="Momentum",
+        description="Exploits price trends",
+        economic_rationale="BEHAVIORAL",
+        null_hypothesis="Returns are zero",
+        target_variable="1_day_forward_ret",
+    )
+    hyp_reg.register_hypothesis(h)
+
+    ds = Dataset(
+        dataset_id="DS_01",
+        version="v1.0",
+        raw_source="s3://data",
+        ingestion_pipeline_hash="h123",
+    )
+    ds_reg.register_dataset(ds)
+
+    f = Feature(
+        feature_id="F_01",
+        name="SMA_10",
+        formula="mean(close, 10)",
+        lineage_dataset_id="DS_01",
+    )
+    feat_reg.register_feature(f)
+
+    # First run fails transiently
+    call_count = 0
+    def failing_then_success_trial(dataset, feature_ids, hyperparameters):
+        nonlocal call_count
+        call_count += 1
+        if call_count == 1:
+            raise RuntimeError("Transient DB connection issue")
+        return [0.01, 0.02, 0.03], {"sharpe": 2.1}
+
+    validator = StatisticalValidator(correction_method="HOLM")
+    gateway = GovernanceGateway()
+
+    orchestrator = ResearchPipelineOrchestrator(
+        hypotheses=hyp_reg,
+        datasets=ds_reg,
+        features=feat_reg,
+        experiments=exp_reg,
+        models=mod_reg,
+        validator=validator,
+        gateway=gateway,
+    )
+
+    reviewers = ["expert_human"]
+    approvals = {"expert_human": True}
+
+    # Run 1: Fails
+    exp1, r1, d1, m1 = orchestrator.execute_pipeline(
+        hypothesis_id="H_01",
+        dataset_id="DS_01",
+        feature_ids=["F_01"],
+        hyperparameters={"param": 1},
+        trial_runner_fn=failing_then_success_trial,
+        reviewers=reviewers,
+        approvals=approvals,
+    )
+    assert exp1.status == "FAILED"
+    assert call_count == 1
+
+    # Run 2: Orchestrator should bypass cache and re-run successfully
+    exp2, r2, d2, m2 = orchestrator.execute_pipeline(
+        hypothesis_id="H_01",
+        dataset_id="DS_01",
+        feature_ids=["F_01"],
+        hyperparameters={"param": 1},
+        trial_runner_fn=failing_then_success_trial,
+        reviewers=reviewers,
+        approvals=approvals,
+    )
+    assert exp2.status == "COMPLETED"
+    assert call_count == 2
+
+
+def test_list_experiments_encapsulation() -> None:
+    """Verify encapsulation of ExperimentRegistry list_experiments method."""
+    exp_reg = ExperimentRegistry()
+    assert len(exp_reg.list_experiments()) == 0
+
+    exp = Experiment(
+        experiment_id="exp_99",
+        hypothesis_id="H_01",
+        dataset_id="DS_01",
+        feature_ids=["F_01"],
+        hyperparameters={},
+        status="COMPLETED"
+    )
+    exp_reg.register_experiment(exp)
+    assert len(exp_reg.list_experiments()) == 1
+    assert exp_reg.list_experiments()[0].experiment_id == "exp_99"
+
+
+def test_comprehensive_reproducibility_verification() -> None:
+    """Verify that verify_reproducibility comprehensively checks all matching metrics."""
+    orig = Experiment(
+        experiment_id="exp_orig",
+        hypothesis_id="H_01",
+        dataset_id="DS_01",
+        feature_ids=["F_01"],
+        hyperparameters={},
+        status="COMPLETED",
+        returns_time_series=[0.01, 0.02],
+        metrics={"sharpe": 2.0, "max_drawdown": 0.05}
+    )
+
+    # Identical replay
+    assert verify_reproducibility(orig, [0.01, 0.02], {"sharpe": 2.0, "max_drawdown": 0.05}) is True
+
+    # Sharpe mismatch
+    assert verify_reproducibility(orig, [0.01, 0.02], {"sharpe": 2.1, "max_drawdown": 0.05}) is False
+
+    # Max Drawdown mismatch
+    assert verify_reproducibility(orig, [0.01, 0.02], {"sharpe": 2.0, "max_drawdown": 0.06}) is False
+
+
+def test_invalid_p_value_bounds() -> None:
+    """Verify that adjust_p_values raises a ValueError for out-of-bound p-values."""
+    with pytest.raises(ValueError, match="must be strictly between"):
+        adjust_p_values([0.05, 1.05])
+
+    with pytest.raises(ValueError, match="must be strictly between"):
+        adjust_p_values([-0.01, 0.5])
+
+
+def test_block_bootstrap_nan_inf_handling() -> None:
+    """Verify that block_bootstrap handles contaminated inputs with NaN/Inf gracefully."""
+    import numpy as np
+    returns = [0.01, np.nan, 0.02, np.inf, -0.01, -np.inf, 0.03]
+    boot = block_bootstrap(returns, block_size=2, num_samples=10, seed=42)
+    assert len(boot) == 10
+    # Values should be valid finite floats
+    assert all(np.isfinite(val) for val in boot)

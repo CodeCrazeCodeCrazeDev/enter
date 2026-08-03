@@ -21,8 +21,8 @@ class TurnContext(BaseModel):
     thinking: str = ""
     tool_calls: List[Dict[str, Any]] = Field(default_factory=list)
     messages: List[Dict[str, Any]] = Field(default_factory=list)
-    usage: Dict[str, Any] = Field(default_factory=dict)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    usage: Optional[Dict[str, Any]] = Field(default_factory=dict)
+    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
 
 
 class InterventionResponse(BaseModel):

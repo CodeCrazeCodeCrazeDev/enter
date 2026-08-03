@@ -59,7 +59,14 @@ def verify_reproducibility(
         if abs(orig_r - rep_r) > tolerance:
             return False
 
-    # Compare key metrics
+    # Compare key metrics and all other available matching metrics
+    for metric_name, orig_val in original.metrics.items():
+        if metric_name in replayed_metrics:
+            rep_val = replayed_metrics[metric_name]
+            if abs(orig_val - rep_val) > tolerance:
+                return False
+
+    # Ensure Sharpe specifically matches even if it was not in original.metrics
     orig_sharpe = original.metrics.get("sharpe", 0.0)
     rep_sharpe = replayed_metrics.get("sharpe", 0.0)
     if abs(orig_sharpe - rep_sharpe) > tolerance:

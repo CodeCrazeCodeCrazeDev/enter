@@ -36,6 +36,7 @@ from .statistical_validation import (
     calculate_dsr,
     walk_forward_split,
     block_bootstrap,
+    standard_normal_cdf,
 )
 from .reproducibility import (
     capture_environment_fingerprint,
@@ -72,6 +73,7 @@ __all__ = [
     "calculate_dsr",
     "walk_forward_split",
     "block_bootstrap",
+    "standard_normal_cdf",
     "capture_environment_fingerprint",
     "verify_reproducibility",
     "StatisticalValidator",

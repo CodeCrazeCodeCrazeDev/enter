@@ -14,7 +14,7 @@ from .models import (
     Model,
     compute_config_hash,
 )
-from .statistical_validation import adjust_p_values, calculate_dsr, block_bootstrap
+from .statistical_validation import adjust_p_values, calculate_dsr, block_bootstrap, standard_normal_cdf
 
 logger = logging.getLogger("research_os.pipeline")
 
@@ -44,8 +44,8 @@ class StatisticalValidator(IStatisticalValidator):
         std_ret = math_std = (var_ret ** 0.5) or 1e-12
 
         t_stat = (mean_ret / std_ret) * (n_obs ** 0.5) if std_ret > 0 else 0.0
-        # Single-sided p-value
-        raw_p = 1.0 - 0.5 * (1.0 + (t_stat / (2.0 ** 0.5)))  # normal approximation
+        # Single-sided p-value using exact standard normal cdf
+        raw_p = 1.0 - standard_normal_cdf(t_stat)
         raw_p = max(1e-15, min(1.0 - 1e-15, raw_p))
 
         # Perform multiple testing correction across all completed trials
@@ -57,7 +57,8 @@ class StatisticalValidator(IStatisticalValidator):
                 t_mean = sum(trial_returns) / len(trial_returns)
                 t_std = (sum((tr - t_mean) ** 2 for tr in trial_returns) / (len(trial_returns) - 1)) ** 0.5 or 1e-12
                 t_stat_trial = (t_mean / t_std) * (len(trial_returns) ** 0.5)
-                tp = 1.0 - 0.5 * (1.0 + (t_stat_trial / (2.0 ** 0.5)))
+                # Single-sided p-value using exact standard normal cdf
+                tp = 1.0 - standard_normal_cdf(t_stat_trial)
                 trial_p_values.append(max(1e-15, min(1.0, tp)))
             else:
                 trial_p_values.append(0.5)
@@ -235,7 +236,8 @@ class ResearchPipelineOrchestrator:
         config_hash = temp_exp.calculate_config_hash()
 
         cached_exp = self.experiments.get_experiment_by_hash(config_hash)
-        if cached_exp:
+        # Avoid caching failed runs to prevent persistent transient failure lock-in
+        if cached_exp and cached_exp.status == "COMPLETED":
             logger.info(f"Configuration match found in Experiment Registry. Reusing cached result {cached_exp.experiment_id}.")
             experiment = cached_exp
         else:
@@ -267,9 +269,14 @@ class ResearchPipelineOrchestrator:
 
         # 3. Statistical Validation
         # Get all completed trials in registry to adjust for multiple testing
-        all_trials = [
-            e for e in self.experiments._store.values() if e.status == "COMPLETED"
-        ] if hasattr(self.experiments, "_store") else [experiment]
+        if hasattr(self.experiments, "list_experiments"):
+            all_trials = [
+                e for e in self.experiments.list_experiments() if e.status == "COMPLETED"
+            ]
+        else:
+            all_trials = [
+                e for e in self.experiments._store.values() if e.status == "COMPLETED"
+            ] if hasattr(self.experiments, "_store") else [experiment]
 
         report = self.validator.validate_experiment(experiment, all_trials)
 

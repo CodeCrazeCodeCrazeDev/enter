@@ -281,6 +281,25 @@ class SemanticMemory:
 
         self.repo.save_evidence(card)
 
+    def retrieve_similar_evidence(self, query: str, limit: int = 5) -> List[EvidenceCard]:
+        """Retrieve similar evidence cards using Jaccard token-overlap matching."""
+        query_tokens = set(query.lower().split())
+        cards = self.repo.load_all_evidence()
+
+        matches = []
+        for card in cards:
+            content_tokens = set(card.content.lower().split())
+            if not query_tokens or not content_tokens:
+                similarity = 0.0
+            else:
+                intersection = query_tokens.intersection(content_tokens)
+                union = query_tokens.union(content_tokens)
+                similarity = len(intersection) / len(union)
+            matches.append((card, similarity))
+
+        matches.sort(key=lambda x: x[1], reverse=True)
+        return [item[0] for item in matches if item[1] > 0.0][:limit]
+
     def retrieve_evidence(self, evidence_id: str) -> Optional[EvidenceCard]:
         return self.repo.load_evidence(evidence_id)
 

@@ -3,10 +3,9 @@ from __future__ import annotations
 import os
 import time
 import pytest
-from agent_harness.core.cost_tier import CostTier
-from agent_harness.core.loop_types import LoopConfig, TurnContext
-from agent_harness.components.observers.meta_reasoner import MetaReasonerObserver
-from agent_harness.core.memory.semantic_memory import (
+from apodex.skills.models import CostTier
+from apodex.cognition.meta_reasoner import LoopConfig, TurnContext, MetaReasonerObserver
+from apodex.memory.semantic_memory import (
     Belief,
     EvidenceCard,
     Fact,
@@ -14,13 +13,13 @@ from agent_harness.core.memory.semantic_memory import (
     SQLiteMemoryRepository,
     UnresolvedQuestion,
 )
-from agent_harness.core.runtime.orchestration.hierarchical import (
+from apodex.orchestration.hierarchical import (
     CoordinatorAgent,
     HierarchicalOrchestrator,
     WorkerAgent,
 )
-from agent_harness.core.runtime.dataset_generator import (
-    TrajectoryDatasetCompiler,
+from apodex.cognition.dataset_generator import TrajectoryDatasetCompiler
+from apodex.cognition.trajectory_verification import (
     TwoLevelCreditAssignment,
     MultiDimensionalTrajectoryVerifier,
 )

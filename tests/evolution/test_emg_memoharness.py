@@ -10,8 +10,8 @@ import pytest
 import time
 from typing import Any, Dict, List
 
-from agent_harness.core.memory.emg_engine import EMGEngine, ActionDecisionGraph, EMGNode
-from agent_harness.core.memory.semantic_memory import SemanticMemory, SQLiteMemoryRepository, EvidenceCard
+from apodex.memory.emg_engine import EMGEngine, ActionDecisionGraph, EMGNode
+from apodex.memory.semantic_memory import SemanticMemory, SQLiteMemoryRepository, EvidenceCard
 from apodex.evolution.self_harness.trajectory_areal import AgentTrajectory, EvolutionControlPlane, AReaLDataProxy
 from apodex.evolution.self_harness.refiner import HarnessRefiner
 

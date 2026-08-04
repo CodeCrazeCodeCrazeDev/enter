@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import time
 import pytest
-from agent_harness.core.memory.semantic_memory import (
+from apodex.memory.semantic_memory import (
     Belief,
     EvidenceCard,
     Fact,

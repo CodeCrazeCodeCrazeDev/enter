@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import List, Dict, Any, Optional
+from apodex.skills.models import CostTier
 
 from apodex.common.text import is_balanced_brackets
 
@@ -36,8 +37,9 @@ class SyntaxVerifier:
 class MetaVerifier:
     """Asynchronously evaluates verification reports in parallel and resolves a consensus score."""
 
-    def __init__(self, verifiers: List[Any]) -> None:
+    def __init__(self, verifiers: List[Any], cost_tier: Optional[CostTier] = None) -> None:
         self.verifiers = verifiers
+        self.cost_tier = cost_tier
 
     async def verify_consensus(self, content: str) -> VerificationReport:
         import asyncio

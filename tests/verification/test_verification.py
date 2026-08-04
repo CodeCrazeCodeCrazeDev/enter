@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import pytest
-from agent_harness.core.cost_tier import CostTier
-from agent_harness.core.runtime.verification.parallel import (
+from apodex.skills.models import CostTier
+from apodex.governance.parallel_verification import (
     FactVerifier,
     MetaVerifier,
     SyntaxVerifier,

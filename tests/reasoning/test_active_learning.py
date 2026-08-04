@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import pytest
-from agent_harness.core.runtime.reasoning.active_learning import ActiveLearningEngine
+from apodex.reasoning.active_learning import ActiveLearningEngine
 
 
 def test_active_learning_loop():

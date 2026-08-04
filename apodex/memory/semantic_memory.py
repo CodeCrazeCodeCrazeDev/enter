@@ -308,6 +308,20 @@ class SemanticMemory:
         # Use length of text (characters) directly for token-like thresholds in tests
         return len(text)
 
+    def retrieve_similar_evidence(self, query: str, limit: int = 1) -> List[EvidenceCard]:
+        """Simple semantic/containment similarity search helper for Hermetic/offline mode."""
+        all_cards = self.repo.load_all_evidence()
+        query_words = set(query.lower().split())
+        scored_cards = []
+        for card in all_cards:
+            content_lower = card.content.lower()
+            score = sum(1 for word in query_words if word in content_lower)
+            if score > 0:
+                scored_cards.append((score, card))
+        # Sort by score descending, then by age
+        scored_cards.sort(key=lambda x: x[0], reverse=True)
+        return [card for score, card in scored_cards[:limit]]
+
     def _consolidate_and_prune(self) -> None:
         """E3 Semantic Memory Consolidation: prune low-confidence facts and beliefs to respect token budgets."""
         facts = self.repo.load_all_facts()

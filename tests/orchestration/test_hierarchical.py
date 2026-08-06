@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import pytest
-from agent_harness.core.runtime.orchestration.hierarchical import (
+from apodex.orchestration.hierarchical import (
     AgentState,
     CoordinatorAgent,
     HierarchicalOrchestrator,

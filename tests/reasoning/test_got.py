@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import pytest
-from agent_harness.core.runtime.reasoning.got import GraphOfThoughtEngine, ThoughtNode
+from apodex.reasoning.got import GraphOfThoughtEngine, ThoughtNode
 
 
 def test_got_exploration_and_pruning():

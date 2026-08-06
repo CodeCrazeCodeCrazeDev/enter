@@ -72,6 +72,76 @@ graph TD
         P128[#128 BabyAGI]
         P129[#129 AutoGPT]
         P130[#130 CrewAI / LangGraph / Task]
+        P131[#131 Active Inference and Expe]
+        P132[#132 Judea Pearls Structural C]
+        P133[#133 TextGrad: Automatic Textu]
+        P134[#134 Ebbinghaus Memory Decay a]
+        P135[#135 Conjugate Beta-Binomial U]
+        P136[#136 Lagrange Multiplier Dual ]
+        P137[#137 W3C PROV-O Queryable Prov]
+        P138[#138 Hendrycks Constitutional ]
+        P139[#139 Prompt Invisibility Audit]
+        P140[#140 Objective Constraint Audi]
+        P141[#141 Narrow Goal Enforcement a]
+        P142[#142 Operational Entanglement ]
+        P143[#143 Bayesian Belief Engine Ca]
+        P144[#144 Standard Normal CDF p-val]
+        P145[#145 Winitzki Inverse Error Fu]
+        P146[#146 Deflated Sharpe Ratio Saf]
+        P147[#147 Block Bootstrapping for N]
+        P148[#148 Walk-Forward Split Ingest]
+        P149[#149 Decentralized Aspect-Veri]
+        P150[#150 Surprise-Driven Regime Ch]
+        P151[#151 Vessel Depressurization P]
+        P152[#152 Expected Originality Scor]
+        P153[#153 ConsensAgent: Multi-Mind ]
+        P154[#154 WDL: Workflow Definition ]
+        P155[#155 Event-Sourced Event Bus f]
+        P156[#156 Immutable Typed Artifact ]
+        P157[#157 Relational Schema Verific]
+        P158[#158 Experience Memory Graph S]
+        P159[#159 One-Shot Sequential Graph]
+        P160[#160 Model-Collapse Guard: Aut]
+        P161[#161 MetaReasoner: Goal Drift ]
+        P162[#162 Sovereign Entrepreneurial]
+        P163[#163 Universal Decision Pipeli]
+        P164[#164 L0-L7 Layered Stack of En]
+        P165[#165 Proportional Capital Allo]
+        P166[#166 Dynamic Agent Lifecycle M]
+        P167[#167 Complexity Budget Enforce]
+        P168[#168 Continuous Sensing of Str]
+        P169[#169 Active Inference Strategi]
+        P170[#170 Immutable Safety Core Fra]
+        P171[#171 Memory Consolidator for N]
+        P172[#172 Meta-Evolutionary Rewriti]
+        P173[#173 Epistemic Observer for Sc]
+        P174[#174 Causal Graph Engine with ]
+        P175[#175 Autonomous Entrepreneuria]
+        P176[#176 Cognitive Operating Syste]
+        P177[#177 Multi-Board Governance Pr]
+        P178[#178 Theory Promotion Loops in]
+        P179[#179 Self-Correction Refinemen]
+        P180[#180 Canary Rollout Orchestrat]
+        P181[#181 Rollback Managers for Aut]
+        P182[#182 Moat Analysis and Competi]
+        P183[#183 Failure Prediction Engine]
+        P184[#184 Reinvention Engines for A]
+        P185[#185 Strategic Opportunity Gra]
+        P186[#186 Adaptive Business Simulat]
+        P187[#187 Hypothesis Generation Eng]
+        P188[#188 Thread-Safe Concurrent Tr]
+        P189[#189 Persistent SQLite Backend]
+        P190[#190 Jaccard Token-Overlap Sea]
+        P191[#191 Decentralized Aspect-Veri]
+        P192[#192 Sycophancy Mitigation Pro]
+        P193[#193 W3C PROV-O Tracking for C]
+        P194[#194 Ebbinghaus Memory Consoli]
+        P195[#195 Karl Fristons Expected Fr]
+        P196[#196 Stanford TextGrad Textual]
+        P197[#197 Judea Pearls do-calculus ]
+        P198[#198 Standard Normal CDF p-val]
+        P199[#199 Hendrycks arXiv:2303.1620]
+        P200[#200 Lagrange Multiplier Dual ]
     end
     subgraph L3 [L3 (Governance Layer)]
         P33[#33 Lets Verify Step by Step]
@@ -271,6 +341,76 @@ graph TD
     P125 -->|prerequisite| P127
     P128 -->|prerequisite| P129
     P128 -->|prerequisite| P130
+    P128 -->|prerequisite| P131
+    P128 -->|prerequisite| P132
+    P128 -->|prerequisite| P133
+    P128 -->|prerequisite| P134
+    P128 -->|prerequisite| P135
+    P128 -->|prerequisite| P136
+    P128 -->|prerequisite| P137
+    P128 -->|prerequisite| P138
+    P128 -->|prerequisite| P139
+    P128 -->|prerequisite| P140
+    P128 -->|prerequisite| P141
+    P128 -->|prerequisite| P142
+    P128 -->|prerequisite| P143
+    P128 -->|prerequisite| P144
+    P128 -->|prerequisite| P145
+    P128 -->|prerequisite| P146
+    P128 -->|prerequisite| P147
+    P128 -->|prerequisite| P148
+    P128 -->|prerequisite| P149
+    P128 -->|prerequisite| P150
+    P128 -->|prerequisite| P151
+    P128 -->|prerequisite| P152
+    P128 -->|prerequisite| P153
+    P128 -->|prerequisite| P154
+    P128 -->|prerequisite| P155
+    P128 -->|prerequisite| P156
+    P128 -->|prerequisite| P157
+    P128 -->|prerequisite| P158
+    P128 -->|prerequisite| P159
+    P128 -->|prerequisite| P160
+    P128 -->|prerequisite| P161
+    P128 -->|prerequisite| P162
+    P128 -->|prerequisite| P163
+    P128 -->|prerequisite| P164
+    P128 -->|prerequisite| P165
+    P128 -->|prerequisite| P166
+    P128 -->|prerequisite| P167
+    P128 -->|prerequisite| P168
+    P128 -->|prerequisite| P169
+    P128 -->|prerequisite| P170
+    P128 -->|prerequisite| P171
+    P128 -->|prerequisite| P172
+    P128 -->|prerequisite| P173
+    P128 -->|prerequisite| P174
+    P128 -->|prerequisite| P175
+    P128 -->|prerequisite| P176
+    P128 -->|prerequisite| P177
+    P128 -->|prerequisite| P178
+    P128 -->|prerequisite| P179
+    P128 -->|prerequisite| P180
+    P128 -->|prerequisite| P181
+    P128 -->|prerequisite| P182
+    P128 -->|prerequisite| P183
+    P128 -->|prerequisite| P184
+    P128 -->|prerequisite| P185
+    P128 -->|prerequisite| P186
+    P128 -->|prerequisite| P187
+    P128 -->|prerequisite| P188
+    P128 -->|prerequisite| P189
+    P128 -->|prerequisite| P190
+    P128 -->|prerequisite| P191
+    P128 -->|prerequisite| P192
+    P128 -->|prerequisite| P193
+    P128 -->|prerequisite| P194
+    P128 -->|prerequisite| P195
+    P128 -->|prerequisite| P196
+    P128 -->|prerequisite| P197
+    P128 -->|prerequisite| P198
+    P128 -->|prerequisite| P199
+    P128 -->|prerequisite| P200
 ```
 
 
@@ -658,4 +798,214 @@ graph TD
 - **Relationship Type:** `prerequisite` target: `Paper #128`
 
 ### #130 CrewAI / LangGraph / TaskWeaver / SuperAGI
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #131 Active Inference and Expected Free Energy in Autonomous Agents
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #132 Judea Pearl's Structural Causal Models (SCMs) for Agent Actions
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #133 TextGrad: Automatic Textual Backpropagation for Prompt Tuning
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #134 Ebbinghaus Memory Decay and Consolidation in Long-Term Storage
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #135 Conjugate Beta-Binomial Updating for Non-Stationary Belief Engines
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #136 Lagrange Multiplier Dual Shadow Price Rate-Limiting Bottlenecks
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #137 W3C PROV-O Queryable Provenance Tracking in Scientific Repositories
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #138 Hendrycks Constitutional Audits and Policy Filtering
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #139 Prompt Invisibility Auditing for Unbiased Agent Decision Making
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #140 Objective Constraint Auditing for Venture Mandate Compliance
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #141 Narrow Goal Enforcement and Autonomy Escalation Failbacks
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #142 Operational Entanglement Verification for Complex Systems
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #143 Bayesian Belief Engine Calibration Auditing
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #144 Standard Normal CDF p-value Calculations in Ingestion Pipelines
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #145 Winitzki Inverse Error Function Approximations
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #146 Deflated Sharpe Ratio Safeguards under High-Frequency Search
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #147 Block Bootstrapping for Non-IID Series Validation
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #148 Walk-Forward Split Ingestion for Model Training Calibration
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #149 Decentralized Aspect-Verifiers in Multi-Agent Consensus
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #150 Surprise-Driven Regime Change Detection in Bayesian Tracking
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #151 Vessel Depressurization Protocol under Extreme Hazard Rates
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #152 Expected Originality Scoring in Autonomous Scientific Discovery
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #153 ConsensAgent: Multi-Mind Consensus Deliberation with Sycophancy Mitigation
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #154 WDL: Workflow Definition Language for Scientific Multi-Agent Task Orchestration
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #155 Event-Sourced Event Bus for Automated Institutional Health Tracking
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #156 Immutable Typed Artifact Repositories in Quantitative Workflows
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #157 Relational Schema Verification for Relational Trajectory Logs
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #158 Experience Memory Graph Sequence-Pattern Mining for Agent Error Recovery
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #159 One-Shot Sequential Graph Edit Paths for Traceback Repair
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #160 Model-Collapse Guard: Automated Dataset Compilation Strategies
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #161 MetaReasoner: Goal Drift and Echo Trap Mitigation in Agent Execution
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #162 Sovereign Entrepreneurial Research Organization (SERO) Framework
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #163 Universal Decision Pipeline for Specialized ActorOS Subsystems
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #164 L0-L7 Layered Stack of Entrepreneurial Intelligence
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #165 Proportional Capital Allocation: Venture vs Research Portfolio Management
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #166 Dynamic Agent Lifecycle Management: Spawn, Split, Merge, and Retire
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #167 Complexity Budget Enforcer for GRC Architectural Coupling Limits
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #168 Continuous Sensing of Strategic Opportunities in Dynamic Markets
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #169 Active Inference Strategic Planner for Multidimensional Uncertainty
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #170 Immutable Safety Core Frameworks for Agent Autonomy Escalation
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #171 Memory Consolidator for Non-Divergent Strategic Knowledge Retention
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #172 Meta-Evolutionary Rewriting for Autonomous Agent Prompts
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #173 Epistemic Observer for Scientific Inference over Knowledge Graphs
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #174 Causal Graph Engine with do-calculus Interventions
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #175 Autonomous Entrepreneurial Research and Execution Operating System Spec
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #176 Cognitive Operating System Capability Decomposition Standards
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #177 Multi-Board Governance Protocols for Quality and Ethics Auditing
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #178 Theory Promotion Loops in Active Scientific Knowledge Graphs
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #179 Self-Correction Refinement Proposals via EMG Paths
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #180 Canary Rollout Orchestration for Software Configuration Changes
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #181 Rollback Managers for Automated Incident Recovery in Agent Workspaces
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #182 Moat Analysis and Competitive Intelligence in Automated Ventures
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #183 Failure Prediction Engines for Early Warning Operational Detection
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #184 Reinvention Engines for Agent Self-Disruption in Dynamic Environments
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #185 Strategic Opportunity Graphs for Venture Opportunity Discovery
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #186 Adaptive Business Simulators for Continuous Narrative Evaluation
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #187 Hypothesis Generation Engines for Research-to-Venture Pipelines
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #188 Thread-Safe Concurrent Transaction Locks for Relational Memory Stores
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #189 Persistent SQLite Backend schemas for Agent Trajectory Databases
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #190 Jaccard Token-Overlap Search for Instantaneous Context Match
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #191 Decentralized Aspect-Verifier Frameworks for Strategic Policy Audits
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #192 Sycophancy Mitigation Protocols in Collaborative Multi-Mind Consensus
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #193 W3C PROV-O Tracking for Computational Reproducibility Verification
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #194 Ebbinghaus Memory Consolidators for Non-Stationary Environments
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #195 Karl Friston's Expected Free Energy for Curiosity-Driven Agents
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #196 Stanford TextGrad Textual Backpropagation for Prompt Optimizations
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #197 Judea Pearl's do-calculus Structural Causal Model Interventions
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #198 Standard Normal CDF p-value and Winitzki Inverse Error Approximations
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #199 Hendrycks arXiv:2303.16200 Programmatic Selection Audits for Policy Filters
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #200 Lagrange Multiplier Dual Shadow Price Rate-Limiting Bottleneck Detection
 - **Relationship Type:** `prerequisite` target: `Paper #128`

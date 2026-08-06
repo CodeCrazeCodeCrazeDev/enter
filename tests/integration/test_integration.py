@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import pytest
-from agent_harness.components.observers.meta_reasoner import MetaReasonerObserver
-from agent_harness.core.loop_types import LoopConfig, TurnContext
-from agent_harness.core.runtime.orchestration.hierarchical import (
+from apodex.cognition.meta_reasoner import (
+    MetaReasonerObserver,
+    LoopConfig,
+    TurnContext,
+)
+from apodex.orchestration.hierarchical import (
     CoordinatorAgent,
     HierarchicalOrchestrator,
     WorkerAgent,

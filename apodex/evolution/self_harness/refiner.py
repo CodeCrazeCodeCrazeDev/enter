@@ -13,8 +13,8 @@ from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
 from apodex.evolution.self_harness.trajectory_areal import AgentTrajectory, EvolutionControlPlane
-from agent_harness.core.memory.semantic_memory import SemanticMemory
-from agent_harness.core.memory.emg_engine import EMGEngine
+from apodex.memory.semantic_memory import SemanticMemory
+from apodex.memory.emg_engine import EMGEngine
 
 
 class HarnessProposal(BaseModel):

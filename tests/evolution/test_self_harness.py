@@ -17,9 +17,8 @@ from uuid import uuid4
 
 # Import AgentHarness structures
 from agent_harness.core.loop_types import LoopConfig, TurnContext, ToolResult, AgentLoopResult
-from agent_harness.components.harness_observer import HarnessObserver
-from agent_harness.components.selective_rollout import SelectiveRollout
-from agent_harness.components.rollback_manager import RollbackManager
+from apodex.evolution.self_harness.harness_observer import HarnessObserver
+from apodex.evolution.production.rollout import SelectiveRollout, RollbackManager
 
 # Import generic self-improvement logic
 from apodex.evolution.self_harness.trajectory_areal import AReaLDataProxy, EvolutionControlPlane

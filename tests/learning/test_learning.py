@@ -5,8 +5,8 @@ from __future__ import annotations
 import json
 import os
 import pytest
-from agent_harness.core.memory.learning_memory import LongTermLearningMemory, TrajectoryRecord
-from agent_harness.core.runtime.dataset_generator import TrajectoryDatasetCompiler
+from apodex.memory.learning_memory import LongTermLearningMemory, TrajectoryRecord
+from apodex.cognition.dataset_generator import TrajectoryDatasetCompiler
 
 
 def test_long_term_learning_query(tmp_path):

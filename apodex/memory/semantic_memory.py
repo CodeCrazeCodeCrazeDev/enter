@@ -338,3 +338,31 @@ class SemanticMemory:
                 valid_belief_ids.append(belief.belief_id)
             else:
                 self.repo.delete_belief(belief.belief_id)
+
+    def retrieve_similar_evidence(self, query: str, limit: int = 5) -> List[EvidenceCard]:
+        """Retrieve similar evidence cards using keyword-matching Jaccard overlap on tokenized text."""
+        cards = self.repo.load_all_evidence()
+
+        # Tokenize function
+        def tokenize(text: str) -> set[str]:
+            import re
+            words = re.findall(r'\w+', text.lower())
+            return set(words)
+
+        query_tokens = tokenize(query)
+        if not query_tokens:
+            return []
+
+        scored_cards = []
+        for card in cards:
+            card_tokens = tokenize(card.content)
+            intersection = query_tokens.intersection(card_tokens)
+            union = query_tokens.union(card_tokens)
+
+            jaccard = len(intersection) / len(union) if union else 0.0
+            if jaccard > 0:
+                scored_cards.append((jaccard, card))
+
+        # Sort by Jaccard score descending, and take top limit
+        scored_cards.sort(key=lambda x: x[0], reverse=True)
+        return [card for _, card in scored_cards[:limit]]

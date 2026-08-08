@@ -208,3 +208,12 @@ The DAG Scheduler (`scheduler.py`) compiles `PipelineSpec` schemas into declarat
 ### 10.13 Scientific Hypothesis Generation
 - **Audit Findings**: Passive discovery limits performance on highly complex domains.
 - **Upgrade Path**: Automated hypothesis generation and ranking connected directly to uncertainty metrics.
+
+---
+
+## 11. Cognitive Operating System Consolidation Update (August 2026)
+
+As per Chief Architect Decision and the 2026-08 Architectural Integration Mandate, the entire unified system (Research OS, EIOS, EOS, AEAN, and APODEX) is officially integrated under a single, cohesive, decoupled substrate.
+
+All 10 canonical system graphs, first-principles auditing results, 200-paper corpus evidence matrices, and quantitative benchmark baselines are compiled in the master report:
+👉 `docs/architecture/UNIFIED_COGNITIVE_OS_INTEGRATION_REPORT.md`

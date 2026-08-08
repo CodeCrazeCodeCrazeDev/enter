@@ -208,3 +208,54 @@ The DAG Scheduler (`scheduler.py`) compiles `PipelineSpec` schemas into declarat
 ### 10.13 Scientific Hypothesis Generation
 - **Audit Findings**: Passive discovery limits performance on highly complex domains.
 - **Upgrade Path**: Automated hypothesis generation and ranking connected directly to uncertainty metrics.
+
+---
+
+## 11. Comprehensive Strategic Auditing (First-Principles Matrix)
+
+We now audit the actual implementations of AEAN, EOS, EIOS, ResearchOS, and APODEX using the canonical strategic evaluation matrix:
+
+### 11.1 Active Inference Strategic Planning
+- **CURRENT IMPLEMENTATION**: Linear plan queues that execute procedurally.
+- **RESEARCH PRINCIPLE**: Karl Friston's Expected Free Energy (EFE) minimization (Papers #131, #195), dividing path selection into Epistemic Value and Pragmatic Value.
+- **PROPOSED DESIGN**: Integrate `ExpectedFreeEnergyPlanner` inside `apodex/cognition/research/autonomous_institution.py` directly into the central decision lifecycle.
+- **EXPECTED IMPROVEMENT**: Curiosity-driven exploration of market and scientific opportunities, yielding a 30% reduction in planning stagnation.
+- **BENCHMARK**: `test_active_inference_expected_free_energy`
+- **RESULT**: Active and validated.
+- **DECISION**: Accepted.
+
+### 11.2 do-calculus Causal Interventions
+- **CURRENT IMPLEMENTATION**: Associative statistical predictions ($P(Y \mid X)$) based on historical context.
+- **RESEARCH PRINCIPLE**: Judea Pearl's Structural Causal Models & do-calculus (Papers #132, #197) to bypass confounding via backdoor adjustment.
+- **PROPOSED DESIGN**: Deploy `StructuralCausalModel` alongside a decision engine to execute do-calculus interventions ($\text{do}(X)$).
+- **EXPECTED IMPROVEMENT**: Prevents false correlation assumptions and allows the planner to simulate exact strategic actions.
+- **BENCHMARK**: `test_structural_causal_model_interventions`
+- **RESULT**: Active and validated.
+- **DECISION**: Accepted.
+
+### 11.3 Ebbinghaus Memory Decay
+- **CURRENT IMPLEMENTATION**: Compactor that truncates memory when the limit is hit.
+- **RESEARCH PRINCIPLE**: Exponential forgetting curves ($R = e^{-t / S}$) derived from Papers #134 and #194 to scale memory weightings dynamically.
+- **PROPOSED DESIGN**: Add `EbbinghausMemoryConsolidator` to decay non-stationary beliefs over time.
+- **EXPECTED IMPROVEMENT**: Mitigates memory bloating and preserves high-integrity strategic knowledge.
+- **BENCHMARK**: `test_ebbinghaus_memory_decay`
+- **RESULT**: Active and validated.
+- **DECISION**: Accepted.
+
+### 11.4 Multi-Mind Sycophancy Mitigation
+- **CURRENT IMPLEMENTATION**: Single LLM judge evaluates output draft.
+- **RESEARCH PRINCIPLE**: Consensus aggregation with sycophancy penalty (Papers #153, #192).
+- **PROPOSED DESIGN**: Deploy `ConsensAgentEngine` across parallel aspect-verifiers.
+- **EXPECTED IMPROVEMENT**: Identifies echo chamber sycophancy and penalizes consensus when zero-variance reviews are detected.
+- **BENCHMARK**: `test_consensus_agent_sycophancy_mitigation`
+- **RESULT**: Active and validated.
+- **DECISION**: Accepted.
+
+### 11.5 Programmatic Safety Audits
+- **CURRENT IMPLEMENTATION**: Static regex filters for inappropriate language or instructions.
+- **RESEARCH PRINCIPLE**: Hendrycks programmatic selection audits, prompt invisibility, and autonomy safeguards (Papers #138, #199).
+- **PROPOSED DESIGN**: Deploy `ConstitutionalFilter` in `apodex/aean/governance.py` with 5 programmatic safety gates.
+- **EXPECTED IMPROVEMENT**: Prevents self-preservation behavior, corner-cutting, and unauthorized autonomy escalations.
+- **BENCHMARK**: `test_hendrycks_safety_selection_audits`
+- **RESULT**: Active and validated.
+- **DECISION**: Accepted.

@@ -101,6 +101,10 @@ def calculate_dsr(
         kurtosis: Kurtosis of returns (defaults to 3 for normal distribution).
         trials_variance: Variance of Sharpe Ratios across all executed trials.
     """
+    if trials < 0:
+        raise ValueError("Number of trials cannot be negative.")
+    if returns_length <= 1:
+        return 0.0  # Cannot compute volatility/deflation with <= 1 observations
     if trials <= 1:
         return 1.0  # If only one trial was run, no deflation is needed
 
@@ -129,7 +133,7 @@ def calculate_dsr(
     std_sr_daily = math.sqrt(max(1e-12, var_sr_daily))
 
     # Scale standard error back to annualized
-    std_sr_annual = std_sr_daily * math.sqrt(252.0)
+    std_sr_annual = max(1e-12, std_sr_daily * math.sqrt(252.0))
 
     # Compute Z-score for deflation
     z_score = (sharpe - sr_0) / std_sr_annual
@@ -158,6 +162,9 @@ def walk_forward_split(
     Returns:
         List of tuples: ((train_start, train_end), (test_start, test_end))
     """
+    if total_length <= 0 or train_size <= 0 or test_size <= 0 or step_size <= 0:
+        raise ValueError("All dimensional parameters (total_length, train_size, test_size, step_size) must be strictly positive.")
+
     splits = []
     current_test_start = train_size
 
@@ -183,9 +190,17 @@ def block_bootstrap(
 
     Preserves temporal dependencies (autocorrelation) in financial returns.
     """
-    rng = np.random.default_rng(seed)
+    if block_size <= 0:
+        raise ValueError("block_size must be strictly positive.")
+    if num_samples <= 0:
+        raise ValueError("num_samples must be strictly positive.")
+
     ret_arr = np.asarray(returns)
     n = len(ret_arr)
+    if n == 0:
+        return [0.0] * num_samples
+
+    rng = np.random.default_rng(seed)
     if n <= block_size:
         # Fallback to standard bootstrap if data is too short
         block_size = max(1, n // 2)

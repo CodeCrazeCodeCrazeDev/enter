@@ -54,9 +54,13 @@ class StatisticalValidator(IStatisticalValidator):
         for trial in all_trials:
             trial_returns = trial.returns_time_series
             if trial_returns:
-                t_mean = sum(trial_returns) / len(trial_returns)
-                t_std = (sum((tr - t_mean) ** 2 for tr in trial_returns) / (len(trial_returns) - 1)) ** 0.5 or 1e-12
-                t_stat_trial = (t_mean / t_std) * (len(trial_returns) ** 0.5)
+                t_len = len(trial_returns)
+                t_mean = sum(trial_returns) / t_len
+                if t_len > 1:
+                    t_std = (sum((tr - t_mean) ** 2 for tr in trial_returns) / (t_len - 1)) ** 0.5 or 1e-12
+                else:
+                    t_std = 1e-12
+                t_stat_trial = (t_mean / t_std) * (t_len ** 0.5)
                 tp = 1.0 - 0.5 * (1.0 + (t_stat_trial / (2.0 ** 0.5)))
                 trial_p_values.append(max(1e-15, min(1.0, tp)))
             else:
@@ -66,9 +70,9 @@ class StatisticalValidator(IStatisticalValidator):
         adjusted_p_values = adjust_p_values(trial_p_values, self.correction_method)
         # Find index of this experiment in all_trials to locate its adjusted p-value
         try:
-            exp_idx = all_trials.index(experiment)
+            exp_idx = next(i for i, t in enumerate(all_trials) if t.experiment_id == experiment.experiment_id)
             adjusted_p = adjusted_p_values[exp_idx]
-        except ValueError:
+        except StopIteration:
             # If not found, run adjustment on its individual p-value
             adjusted_p = adjust_p_values([raw_p], self.correction_method)[0]
 
@@ -83,9 +87,14 @@ class StatisticalValidator(IStatisticalValidator):
 
         # Calculate skewness & kurtosis of returns
         mean_r = sum(returns) / n_obs
-        std_r = (sum((r - mean_r)**2 for r in returns) / (n_obs - 1))**0.5 or 1e-12
-        skew = sum((r - mean_r)**3 for r in returns) / (n_obs * (std_r**3)) if n_obs > 2 else 0.0
-        kurt = sum((r - mean_r)**4 for r in returns) / (n_obs * (std_r**4)) if n_obs > 3 else 3.0
+        if n_obs > 1:
+            std_r = (sum((r - mean_r)**2 for r in returns) / (n_obs - 1))**0.5 or 1e-12
+            skew = sum((r - mean_r)**3 for r in returns) / (n_obs * (std_r**3)) if n_obs > 2 else 0.0
+            kurt = sum((r - mean_r)**4 for r in returns) / (n_obs * (std_r**4)) if n_obs > 3 else 3.0
+        else:
+            std_r = 1e-12
+            skew = 0.0
+            kurt = 3.0
 
         dsr = calculate_dsr(
             sharpe=raw_sharpe,

@@ -1,286 +1,53 @@
 # Apodex Next-Generation Cognitive Architecture: Autonomous Economic Agent Network (AEAN)
 
-This document describes the comprehensive architectural blueprint for the **Apodex Cognitive Architecture**, extending the platform into an enterprise-grade **Autonomous Economic Agent Network (AEAN)**.
+> ### ⚠️ DOCUMENT STATUS: CONSOLIDATED & UNIFIED
+> This architecture specification has been fully consolidated into the authoritative, single-source-of-truth **Unified Cognitive Operating System Architecture Specification**.
+>
+> All development, capability mappings, and system designs are governed by the unified 4-layer taxonomy defined at:
+> **[docs/architecture/UNIFIED_COGNITIVE_OS_ARCHITECTURE.md](docs/architecture/UNIFIED_COGNITIVE_OS_ARCHITECTURE.md)**
 
 ---
 
-## 1. Unified Cognitive Topology & System Interaction
+## 1. The Unified 4-Layer Cognitive Operating System
 
-The Apodex Cognitive Architecture is designed around three foundational anchors:
-1. **Shared Multi-Tier Memory**: Working, Episodic, Semantic, and Procedural memory blocks.
-2. **Persistent Multi-Graph World Model**: Structuring entities, causal paths, temporal transitions, and Bayesian uncertainties.
-3. **Adaptive Self-Improving Planner**: Selecting, generating, simulating, and optimizing strategic paths.
+To eliminate architectural duplication, simplify systemic maintenance, and enforce clean domain boundaries, the five legacy systems (Research OS, EIOS, EOS, AEAN, APODEX) have been unified into a single layered stack:
+
+1.  **Layer 1: Research OS (The Research Layer)**: Hypothesis generation, literature review, theory validation, and academic/arXiv indexing.
+2.  **Layer 2: AEAN (The Cognitive Intelligence Layer)**: Multi-graph continuous world modeling (E-K-C-T-U), Active Inference planning under uncertainty, expected free energy evaluation, and 6-paradigm collective intelligence.
+3.  **Layer 3: EIOS / EOS (The Execution & Orchestration Layer)**: 14-Layer Computational Architecture of Entrepreneurship, 13 multi-timescale business loops, customer discovery, GTM strategy, brand and pricing models.
+4.  **Layer 4: APODEX (The Decision & Execution Layer)**: ReAct execution loops, isolated sandbox python runners, SLA telemetry monitoring, staged canary rollouts, and automated transparent rollbacks.
 
 ```
-                  +------------------------------------------+
-                  |               User / Event               |
-                  +---------------------+--------------------+
-                                        |
-                                        v
-                  +---------------------+--------------------+
-                  |       Adaptive Self-Improving Planner    |
-                  +---+-------------+-------------+-------+--+
-                      |             |             |       |
-                      v             |             v       |
-         +------------+---------+   |   +---------+-------+----+
-         |   Strategy Generator |   |   | Economic Reasoning   |
-         +----------------------+   |   +----------------------+
-                                    v
-                  +-----------------+------------------------+
-                  |  Multi-Graph World Model (E-K-C-T-U)      |
-                  +---+-------------+-------------+-------+--+
-                      |             |             |       |
-                      v             |             v       |
-         +------------+---------+   |   +---------+-------+----+
-         | Memory Consolidation |   |   |   Causal Inference   |
-         +----------------------+   |   +----------------------+
-                                    v
-                  +-----------------+------------------------+
-                  |            Market Simulator              |
-                  +------------------------------------------+
++-----------------------------------------------------------------------------------+
+| 1. RESEARCH OS (The Research Layer)                                               |
+|    - Hypothesis Generation · Literature Indexing · Theory Promotion · arXiv      |
++-----------------------------------------------------------------------------------+
+                                      │
+                                      ▼
++-----------------------------------------------------------------------------------+
+| 2. AEAN (The Cognitive Intelligence Layer)                                        |
+|    - Active Inference · World Modeling (E-K-C-T-U) · 6-Paradigm Reasoning         |
++-----------------------------------------------------------------------------------+
+                                      │
+                                      ▼
++-----------------------------------------------------------------------------------+
+| 3. EIOS / EOS (The Execution & Orchestration Layer)                               |
+|    - 14-Layer Computational Architecture · 13 Multi-Timescale Business Loops     |
++-----------------------------------------------------------------------------------+
+                                      │
+                                      ▼
++-----------------------------------------------------------------------------------+
+| 4. APODEX (The Decision & Execution Layer)                                        |
+|    - ReAct Loops · Sandbox Tool Execution · SLA Telemetry · Canary Rollbacks      |
++-----------------------------------------------------------------------------------+
 ```
 
 ---
 
-## 2. Interactive Data Flow & Subsystem Integration
+## 2. Core Integration Rules & API Contracts
 
-### 2.1 Continuous World Modeling (E-K-C-T-U)
-The **Continuous World Model** integrates five distinct sub-graphs:
-- **Entity Graph ($G_E$)**: Represents physical or digital actors, resources, and systems.
-- **Knowledge Graph ($G_K$)**: Semantic facts, beliefs, and observations.
-- **Causal Graph ($G_C$)**: Directed causal connections modeling state transitions ($A \xrightarrow{\text{causes}} B$).
-- **Temporal Graph ($G_T$)**: Tracks time-series data and sequence occurrences.
-- **Uncertainty Graph ($G_U$)**: Maps Bayesian probability intervals over beliefs and links.
+*   **Explicit Interface Boundaries**: All communications between layers must traverse the official event bus or use the unified Python API interfaces. Dual-maintenance and split-brain model state copy are strictly prohibited.
+*   **Decoupled Memory Tiering**: Memory is structured from short-term Working memory (Layer 4 ReAct context) up to persistent Semantic and Procedural memory blocks (Layers 1 and 2), maintained asynchronously.
+*   **SLA-Driven Self-Improvement**: Low-level execution failures in Layer 4 trigger automatic rollback of configurations, while persisting discrepancy logs back to Layer 1 to spawn targeted research and parameter optimization.
 
-### 2.2 Shared Memory Tiering
-Memory is cleanly partitioned to maximize retrieve-and-write efficiency:
-1. **Working Memory**: Transient, local context of the current turn (ReAct loop state, raw tool buffer).
-2. **Episodic Memory**: Sequence of execution trajectories, specific events, and historical attempts.
-3. **Semantic Memory**: Persistent factual schemas, entity relations, and world graph snapshots.
-4. **Procedural Memory**: Skills, optimized code patterns, and registered tool actions.
-
----
-
-## 3. Subsystem Detailed Specifications
-
-### 3.1 Continuous World Modeling
-- **Role**: Serves as the central state-of-truth.
-- **Data Flow**: Consumes observation events from the loop, performs entity resolution, updates relations, and estimates structural changes.
-- **Interface**:
-  ```python
-  class IWorldModelService(ABC):
-      @abstractmethod
-      async def observe_entity(self, entity_id: str, attributes: dict) -> None: ...
-      @abstractmethod
-      async def assert_causal_link(self, cause_id: str, effect_id: str, metadata: dict) -> None: ...
-      @abstractmethod
-      async def get_active_context(self) -> dict: ...
-  ```
-
-### 3.2 Economic Reasoning Engine
-- **Role**: Formulates trade-offs, computes opportunity costs, calculates expected value (EV), and models game-theoretic payouts.
-- **Data Flow**: Evaluates a list of alternative candidate strategies generated by the planner, returning utility values.
-- **Interface**:
-  ```python
-  class IEconomicReasoningEngine(ABC):
-      @abstractmethod
-      def evaluate_expected_utility(self, strategy: Strategy, market_conditions: dict) -> float: ...
-      @abstractmethod
-      def compute_opportunity_cost(self, chosen: Strategy, alternatives: List[Strategy]) -> float: ...
-  ```
-
-### 3.3 Market Simulation Engine
-- **Role**: Sandbox testing strategies against synthetic competitive agents, negotiating prices, testing bidding rules, and modeling auctions.
-- **Data Flow**: Receives planning trajectories, runs agent-based simulations (Monte Carlo), and returns forecasted success ratios to the planner.
-- **Interface**:
-  ```python
-  class IMarketSimulator(ABC):
-      @abstractmethod
-      async def simulate_market_run(self, strategy: Strategy, agent_count: int) -> SimulationReport: ...
-  ```
-
-### 3.4 Autonomous Experimentation
-- **Role**: Active learning probe that identifies high-entropy areas in the World Model, formulates hypotheses, executes experiments, and updates beliefs.
-- **Data Flow**: Pulls from the Uncertainty Graph, designs probe tasks, and triggers isolated worker agents.
-- **Interface**:
-  ```python
-  class IAutonomousExperimenter(ABC):
-      @abstractmethod
-      async def design_experiment(self, hypothesis: Hypothesis) -> ExperimentPlan: ...
-      @abstractmethod
-      async def evaluate_results(self, outcome: dict) -> HypothesisStatus: ...
-  ```
-
-### 3.5 Multi-Agent Negotiation
-- **Role**: Protocol coordinator enabling peer-to-peer competition, contract agreement, resource trade, and conflict resolution.
-- **Data Flow**: Exchanges structured proposal events over the communication bus.
-- **Interface**:
-  ```python
-  class INegotiationProtocol(ABC):
-      @abstractmethod
-      async def propose(self, counterparty_id: str, offer: Proposal) -> Response: ...
-      @abstractmethod
-      async def arbitrate(self, dispute: Dispute) -> Contract: ...
-  ```
-
-### 3.6 Causal Inference Engine
-- **Role**: Performs structural causal modelling (SCM), counterfactual query resolution, and identifies direct intervention paths.
-- **Data Flow**: Reads historical Episodic records and performs causal link estimation using structural equations.
-- **Interface**:
-  ```python
-  class ICausalInferenceEngine(ABC):
-      @abstractmethod
-      def estimate_causation(self, cause_id: str, effect_id: str) -> float: ...
-      @abstractmethod
-      def evaluate_counterfactual(self, scenario: CounterfactualScenario) -> dict: ...
-  ```
-
-### 3.7 Bayesian Uncertainty Estimation
-- **Role**: Estimates epistemic (knowledge lack) and aleatoric (system noise) uncertainty, calculating expected information gain.
-- **Data Flow**: Injected into the Planner to scale exploration temp.
-- **Interface**:
-  ```python
-  class IBayesianUncertaintyEstimator(ABC):
-      @abstractmethod
-      def estimate_uncertainty(self, belief: Belief) -> UncertaintyReport: ...
-  ```
-
-### 3.8 Self-Improving Planning
-- **Role**: Background optimization agent tracking planning errors, time efficiency, and formatting errors to refine future strategy weights.
-- **Data Flow**: Consumes final run metrics, analyzes discrepancies, and writes heuristic optimizations.
-- **Interface**:
-  ```python
-  class ISelfImprovingPlanner(ABC):
-      @abstractmethod
-      async def evaluate_run_performance(self, task_id: str, plan: Plan, actual: dict) -> None: ...
-  ```
-
-### 3.9 Memory Consolidation
-- **Role**: Runs background cron loops transferring short-term memory experiences, distilling insights, and indexing them into Semantic/Procedural stores.
-- **Data Flow**: Runs asynchronous sweep routines on SQLite database checkpoints.
-- **Interface**:
-  ```python
-  class IMemoryConsolidationService(ABC):
-      @abstractmethod
-      async def consolidate_episodes(self) -> ConsolidationReport: ...
-  ```
-
-### 3.10 Tool Invention
-- **Role**: Synthesizes and isolates successful multi-step python routines or sequential workflow scripts into reusable, validated skills.
-- **Data Flow**: Gathers repetitive successful sequences and packages them as dynamic schema definitions.
-- **Interface**:
-  ```python
-  class IToolInventor(ABC):
-      @abstractmethod
-      async def discover_reusable_workflow(self, trajectory: List[dict]) -> Optional[ToolSchema]: ...
-  ```
-
-### 3.11 Strategy Generation
-- **Role**: Generates alternative execution trees using parallel reasoning nodes.
-- **Data Flow**: Evaluates trade-offs using Bayesian metrics.
-- **Interface**:
-  ```python
-  class IStrategyGenerator(ABC):
-      @abstractmethod
-      async def generate_strategies(self, goal: str) -> List[Strategy]: ...
-  ```
-
-### 3.12 Reflection and Self-Debugging
-- **Role**: Post-task analytical auditor identifying hallucinations, code bottlenecks, or parsing failures.
-- **Data Flow**: Executed immediately after loop-completion to write corrective actions.
-- **Interface**:
-  ```python
-  class IReflectionService(ABC):
-      @abstractmethod
-      async def audit_reasoning(self, run_id: str) -> AuditReport: ...
-  ```
-
-### 3.13 Scientific Hypothesis Generation
-- **Role**: Synthesizes complex scientific propositions, rankings, and designs experiments to update advanced world models.
-- **Data Flow**: Maps gaps in the Knowledge Graph and provides targeted research probes.
-- **Interface**:
-  ```python
-  class ISyntheticResearcher(ABC):
-      @abstractmethod
-      def generate_scientific_hypotheses(self, domain_context: dict) -> List[Hypothesis]: ...
-  ```
-
----
-
-## 4. Lifecycle, Scalability, and Fault Tolerance
-
-### 4.1 Event-Driven Coordination
-Subsystems do not maintain direct hardcoded references to one another. Instead, a lightweight **Event Bus** manages messaging via publishers and subscribers.
-- When an observation is completed by a `WorkerAgent`, it publishes an `ObservationEvent`.
-- The `MemoryConsolidationService` and `WorldModel` subscribe to this event and update asynchronously, preventing thread blocks.
-
-### 4.2 Horizontal Scalability
-By enforcing **Subprocess Isolation** and persistent SQLite DB stores:
-- Multiple agents run on separate physical containers.
-- Shared databases and remote event relays (e.g. Redis/WebSockets) scale horizontally without central bottlenecks.
-
-### 4.3 Fault Tolerance & Resiliency
-If a single subsystem suffers a validation failure:
-- The Planner falls back to simpler non-causal heuristics.
-- High-level orchestrators run transaction-like rollbacks using `ReflectionService` checkpoints.
-
----
-
-## 5. Future Evolutionary Roadmap
-
-- **Phase 1: Cognitive Foundation**: Complete abstract interfaces, database storage layers, and baseline testing.
-- **Phase 2: Market Integration**: Implement peer-to-peer negotiation protocol schemas, simulation engines, and contract resolution mechanisms.
-- **Phase 3: Fully Autonomous Economy (AEAN)**: Agents initiate self-monetized transactions, lease specialized skills (from Tool Invention), and arbitrate market contracts with zero human intervention.
-
----
-
-## 6. Apodex Meta-System & Dual-Loop Self-Improvement
-
-The entire AEAN architecture described above is supervised, evaluated, and iteratively optimized by the **Apodex Meta-System**. Apodex adds two continuous adaptation layers to the cognitive topology:
-
-1. **Short-Term Harness Loop (Prompts, Scaffolding, Workflows)**: Evaluates trace logs, errors, and user feedback in real-time. It uses TextGrad/EvoPrompt patterns to hot-swap prompt templates, system instructions, and routing parameters.
-2. **Long-Term Research Loop (Weights, Algorithms, Data Curation)**: Aggregates high-quality traces across multiple sessions to compile custom supervised fine-tuning (SFT) datasets, running bounded experiments in isolated sandboxes to train and promote superior model weights.
-
-Both loops query and write lessons learned to the unified **Experience Database & Cognition Base**, which is integrated with the `ContinuousWorldModelService` and `MemoryConsolidationService` to maintain system-wide factual and heuristic memory.
-
----
-
-## 7. Advanced Evolution & Control Governance
-
-The Apodex self-evolution meta-system is hardened and personalized via six core architectural subsystems:
-
-### 7.1 Personal Evolution Layer (PEP)
-Each user owns a persistent, versioned **Personal Evolution Profile (PEP)** database object. The PEP represents style guidelines, typical task frequency distributions, vocabulary mappings, and preferred cost profiles (`max_quality`, `balanced`, or `fast_cheap`). PEP is initialized at session start and dynamically updated post-task to adjust evolution aggressiveness.
-
-### 7.2 Transparent Control & One-Click Rollback
-- **Changelog**: Holds structured entries (e.g., success rate before/after, token count, timestamp) to visualize evolution events.
-- **Control Panel**: Enables users to set caps, pin specific workflows, and modify evolution parameters.
-- **Rollback**: Invoked via CLI or GUI. Restores previous stable config configurations and adds failed prompt variants to a blacklist, preventing them from being re-proposed.
-
-### 7.3 Multi-Objective Cost-Aware Scoring
-Evolutionary updates are filtered by a multi-objective suitability score:
-
-$$S(M) = w_q \cdot Q(M) - w_t \cdot T(M) - w_l \cdot L(M) + w_s \cdot Sat(M)$$
-
-Where $Q$ is task quality, $T$ is token volume, $L$ is latency, and $Sat$ is user satisfaction. The weights dynamically adapt according to the selected PEP profile (e.g., highly penalizing tokens under `fast_cheap`).
-
-### 7.4 Immutable Safety Core & Tiered Approval Table
-- **Safety Core**: Security guidelines, data access filters, and tenancy isolation rules are marked as immutable and protected from automated modifications.
-- **Tiered Approval System**:
-  - **Tier 1**: Small prompt text changes (Auto-Approved).
-  - **Tier 2**: Routing and tool rewrites (Shadow Mode validation required).
-  - **Tier 3**: Model weights and post-training algorithms (Git PR + human sign-off).
-  - **Tier 4**: Tenancy and security policies (Cryptographically signed, multi-party manual governance only).
-
-### 7.5 Structured Loop Feedback Link
-The loops cooperate as engineers using:
-- **Research Tickets**: Escales persistent failures from the harness loop to the research loop when prompt adjustments are insufficient.
-- **Capability Deltas**: Publishes model capability enhancements and recommended harness changes back to the harness loop upon candidate model promotion.
-
-### 7.6 Autonomous Verifier & Critic Layer
-To systematically prevent behavioral drift during self-evolution, Apodex embeds an expert **Verifier Layer** containing:
-1. **LLM-as-a-Judge**: Employs step-by-step chain-of-thought (CoT) internal reasoning trajectory evaluations and Chatbot Arena-style pairwise quality matches to score and rank candidate outputs.
-2. **Introspective Critics**: Employs generate-critique-revise loops (CRITIC / RISE style) integrating live tool outcomes (such as compiler exceptions).
-3. **Dense Reward Models**: Compiles step-level reward densities over multi-step execution paths to drive reinforcement learning (SPIN/Agent Q) without manual labeling.
-4. **Grounded Fact-Checkers**: Factuality grounding engines (MiniCheck/FIRE style) performing document-based verification of execution claims.
-5. **Runtime Multi-Agent V&V**: Monitors execution plans, ensuring formal correctness, and safety-checking verification logic.
+For the exhaustive specification including typed interfaces, interactive data flow diagrams, and continuous evolution policies, refer to the master contract at **[docs/architecture/UNIFIED_COGNITIVE_OS_ARCHITECTURE.md](docs/architecture/UNIFIED_COGNITIVE_OS_ARCHITECTURE.md)**.

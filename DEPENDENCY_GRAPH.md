@@ -1,65 +1,63 @@
 # AgentHarness Architectural Dependency Graph (Phase 1) - Enhanced
 
-This document maps the absolute structural dependencies, package import structures, and external dependency constraints of the AgentHarness orchestration framework.
+> ### ⚠️ DOCUMENT STATUS: CONSOLIDATED & UNIFIED
+> This dependency specification has been fully consolidated into the authoritative, single-source-of-truth **Unified Cognitive Operating System Architecture Specification**.
+>
+> All component-level dependencies, class-level imports, and system interfaces are mapped under the 4-layer taxonomy defined at:
+> **[docs/architecture/UNIFIED_COGNITIVE_OS_ARCHITECTURE.md](docs/architecture/UNIFIED_COGNITIVE_OS_ARCHITECTURE.md)**
 
 ---
 
-## 1. Class & File Level Topology Graph
+## 1. System Interface Dependency Diagram
 
-```
-==========================================================================================
-                               [ scheduler.py ]
-                                      |
-                                      | (compiles & runs)
-                                      v
-                             [ graph_builder.py ]
-                                      |
-                                      | (creates runners)
-                                      v
-                               [ minidag.py ]
-                                      |
-                     +----------------+----------------+
-                     | (executes)                      | (manages state)
-                     v                                 v
-             [ main_agent.py ]                  [ sqlite.py ] (EventStore)
-                     |
-                     | (runs ReAct turns)
-                     v
-             [ agent_loop.py ]
-                     |
-         +-----------+-----------+---------------------+
-         |                       |                     |
-         v                       v                     v
-   [ compact.py ]          [ llm_client.py ]    [ tool_exec.py ]
-   - MessageCompactor      - LLM Call Interf.   - execute_tools
-                           - Token Estimator
-==========================================================================================
+The Mermaid diagram below defines how components from Research OS, EIOS, EOS, AEAN, and APODEX interact as cohesive layers without duplicated capabilities:
+
+```mermaid
+graph TD
+    classDef research fill:#ffccff,stroke:#333,stroke-width:2px;
+    classDef intelligence fill:#cce6ff,stroke:#333,stroke-width:2px;
+    classDef execution fill:#ffffcc,stroke:#333,stroke-width:2px;
+    classDef decision fill:#d9ffcc,stroke:#333,stroke-width:2px;
+
+    subgraph Layer1 [Layer 1: Research OS (Research Layer)]
+        ROS[Research OS Engine]:::research
+        LitIndex[Literature Index]:::research
+    end
+
+    subgraph Layer2 [Layer 2: AEAN (Cognitive Intelligence Layer)]
+        Planner[Strategic Planner]:::intelligence
+        WorldModel[Continuous World Model]:::intelligence
+    end
+
+    subgraph Layer3 [Layer 3: EIOS / EOS (Execution & Orchestration Layer)]
+        CompArch[14-Layer Computational Arch]:::execution
+        BizLoops[13 Business Loops]:::execution
+    end
+
+    subgraph Layer4 [Layer 4: APODEX (Decision & Execution Layer)]
+        ReAct[ReAct Loop Engine]:::decision
+        SLA[SLA Observability Monitor]:::decision
+        Sandbox[Sandbox Execution]:::decision
+    end
+
+    %% Input/Output Flow Contracts
+    ROS -->|1. Promoted Theories & Evidence| WorldModel
+    Planner -->|2. Active Inference Scenarios| BizLoops
+    BizLoops -->|3. Playbooks & Workflows| ReAct
+    ReAct -->|4. Execution Traces & Telemetry| SLA
+    SLA -->|5. Rollback Controls| ReAct
+    ReAct -->|6. Discrepancy Logs / Lessons| ROS
 ```
 
 ---
 
 ## 2. Directory & Namespace Structure Mapping
 
-The repository is structured neatly to isolate infrastructural mechanisms from runtime nodes:
+The repository is structured to isolate infrastructural mechanisms from runtime nodes:
 
-- `agent_harness/core/`
-  - `runtime/dag/`: Structures `MiniDAG` compilers and transitions (`minidag.py`, `graph_builder.py`).
-  - `runtime/loop/`: The core engine driving sequential step-by-step model predictions and tool evaluations (`agent_loop.py`, `compact.py`, `llm_client.py`, `tool_exec.py`).
-  - `messages.py`: Clean abstract definitions for System, User, Assistant, and Tool message protocols.
-  - `tool.py`: Base wrappers encapsulating custom developer execution schemas.
+*   `apodex/research_os/`: Houses the scientific hypothesis, literature review, and claim ingestion pipelines (Layer 1).
+*   `apodex/world_model/` & `apodex/planning/`: Drives multi-graph state, causal do-calculus, and Active Inference strategic planners (Layer 2).
+*   `apodex/ai_eos/` & `apodex/skills/`: Holds business model canvas generators, 14-layer computational layers, and strategic skills (Layer 3).
+*   `apodex/execution/` & `apodex/evolution/`: Manages ReAct loops, live SLA telemetry, staged rollouts, and automatic canary rollback operations (Layer 4).
 
-- `agent_harness/scheduling/`
-  - `scheduler.py`: Drives compilation of declarative pipeline profiles into executable subprocess threads.
-  - `process_manager.py`: OS-level task status manager.
-
-- `agent_harness/models/`
-  - `pipeline_spec.py`: Highly pluggable schema configurations using Pydantic.
-
----
-
-## 3. Strict Module Decoupling Boundary Constraints
-
-To preserve standard backward compatibility and benchmark isolation during architectural evolution:
-1. **The DAG Engine (`minidag.py`)** is entirely decoupled from execution context, runtime loops, and local databases. It must *never* reference `agent_loop.py` or `sqlite.py`.
-2. **The ReAct Loop Engine (`agent_loop.py`)** remains a lightweight, domain-agnostic controller. No business logic, benchmark metrics, or task-specific fields (like chem structures, math values, web queries) are allowed within its boundaries. Custom behavior is cleanly injected via observers.
-3. **The Scheduler (`scheduler.py`)** delegates task state tracking to the thread-level database without directly evaluating or manipulating the conversational payload.
+For typed interfaces and strict package boundary rules, refer to **[docs/architecture/UNIFIED_COGNITIVE_OS_ARCHITECTURE.md](docs/architecture/UNIFIED_COGNITIVE_OS_ARCHITECTURE.md)**.

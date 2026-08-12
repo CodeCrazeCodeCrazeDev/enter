@@ -1,191 +1,41 @@
 # AgentHarness Architectural Upgrade Implementation Roadmap - Enhanced
 
-> ### ⚠️ DOCUMENT STATUS: HISTORICAL ROADMAP
-> This document is **Historical** and has been superseded by the dependency-driven implementation phases established in the authoritative blueprint [AI_EOS_ARCHITECTURE.md](docs/architecture/AI_EOS_ARCHITECTURE.md).
-
-This roadmap outlines the safe, step-by-step sequence of independently mergeable and reversible pull requests required to evolve the AgentHarness platform into a next-generation Multi-Agent Cognitive Architecture supporting an Autonomous Economic Agent Network (AEAN).
+> ### ⚠️ DOCUMENT STATUS: CONSOLIDATED & UNIFIED
+> This implementation roadmap has been fully consolidated into the authoritative, single-source-of-truth **Unified Cognitive Operating System Architecture Specification**.
+>
+> All development milestones, quantitative targets, and phased release schedules conform to the plan defined at:
+> **[docs/architecture/UNIFIED_COGNITIVE_OS_ARCHITECTURE.md](docs/architecture/UNIFIED_COGNITIVE_OS_ARCHITECTURE.md)**
 
 ---
 
 ## 1. Safety Rules & Merge Criteria for Every Pull Request
 
 To ensure that no regressions are introduced and that the framework remains production-grade throughout implementation:
-- **Rule 1**: Every PR must compile and run successfully.
-- **Rule 2**: Every PR must preserve $100\%$ backward compatibility with legacy flat ReAct workflows.
-- **Rule 3**: Every PR must include comprehensive Unit and Integration tests.
-- **Rule 4**: Every PR must be independently reversible without impacting baseline system dependencies.
+*   **Rule 1**: Every PR must compile and run successfully.
+*   **Rule 2**: Every PR must preserve $100\%$ backward compatibility with legacy flat ReAct workflows.
+*   **Rule 3**: Every PR must include comprehensive Unit and Integration tests.
+*   **Rule 4**: Every PR must be independently reversible without impacting baseline system dependencies.
 
 ---
 
-## 2. Comprehensive Phased Pull Request Schedule
+## 2. High-ROI Phased Implementation Plan
 
-### PR 1: Hierarchical Multi-Agent Orchestration
-- **Deliverables**:
-  - `HierarchicalOrchestrator` base router class.
-  - `CoordinatorAgent` state compiler.
-  - `WorkerAgent` isolated task executors.
-- **New Files**: `agent_harness/core/runtime/orchestration/hierarchical.py`
-- **Verification**: Mock multi-agent routing tests and verification.
+Development is prioritized and rolled out across four distinct phases:
 
-### PR 2: Planner / Executor separation
-- **Deliverables**:
-  - `StrategicPlanner` interface node.
-  - `TaskExecutor` execution layer.
-  - `PlanVerifier` safety check layer.
-- **New Files**: `agent_harness/core/runtime/orchestration/planner_executor.py`
-- **Verification**: Validate that the strategic planner roadmap feeds the executor without polluting the planner's context history.
+### Phase 1: Substrate Hardening & Core Reliability (Immediate)
+*   **Milestones**: Consolidate the central `SkillRegistry` as a single source of truth; restore backward compatibility with legacy `agent_harness` test consumers.
+*   **Quantitative Targets**: 100% test pass rate on existing 361 unit/integration tests; core loop execution reliability $> 99.8\%$; zero import cycles.
 
-### PR 3: Persistent Semantic Memory
-- **Deliverables**:
-  - `SemanticMemory` class.
-  - Models for Beliefs, Facts, Evidence Cards, and Unresolved Questions.
-- **New Files**: `agent_harness/core/memory/semantic_memory.py`
-- **Verification**: Serialization and recovery tests writing and loading context cards.
+### Phase 2: Cognitive Integration (Months 1-2)
+*   **Milestones**: Wire the `StrategicPlanner` hierarchical task decomposer (LADDER) and ToT search into the EIOS/EOS business loops.
+*   **Quantitative Targets**: Planning accuracy improvement $\ge 35\%$; context window usage reduced by $\ge 40\%$ under HLE benchmarks.
 
-### PR 4: World Model
-- **Deliverables**:
-  - Entity-Relationship, Causal, and Temporal uncertainty graphs.
-- **New Files**: `agent_harness/core/memory/world_model.py`
-- **Verification**: Graph query execution and link assertion validations.
+### Phase 3: Research & World Model Optimization (Months 3-4)
+*   **Milestones**: Connect the arXiv scraper under Layer 1 and deploy the E-K-C-T-U multi-graph world model under SQLite.
+*   **Quantitative Targets**: Information gain per query increased by $\ge 50\%$; prediction error variance reduced below $0.05$.
 
-### PR 5: Parallel Verification
-- **Deliverables**:
-  - Domain-specific parallel verifiers (`asyncio.gather`).
-  - `MetaVerifier` consensus node.
-- **New Files**: `agent_harness/core/runtime/verification/parallel.py`
-- **Verification**: Latency benchmarks testing concurrent vs. sequential verification runs.
+### Phase 4: Autonomous Closed-Loop Self-Improvement (Months 5-6)
+*   **Milestones**: Build the background SFT LoRA fine-tuning orchestrator, training specialized local agent weights on high-purity trace datasets.
+*   **Quantitative Targets**: Multi-aspect win-rate against baseline models $\ge 72\%$; task completion time reduced by $\ge 30\%$.
 
-### PR 6: Meta-Reasoner
-- **Deliverables**:
-  - Live token utilization monitors.
-  - Repetitive execution detection observers.
-- **New Files**: `agent_harness/components/observers/meta_reasoner.py`
-- **Verification**: Injecting synthetic loops to confirm active intervention and autocorrection.
-
-### PR 7: Long-Term Learning Memory
-- **Deliverables**:
-  - Cross-session strategy file storage database wrappers.
-- **New Files**: `agent_harness/core/memory/learning_memory.py`
-- **Verification**: Save and fetch strategies across distinct task execution contexts.
-
-### PR 8: Self-Improvement Flywheel
-- **Deliverables**:
-  - Fine-tuning dataset compiler (JSONL trace generator).
-- **New Files**: `agent_harness/core/runtime/dataset_generator.py`
-- **Verification**: Asserting structural schema correctness of compiled JSONL records against standard fine-tuning spec formats.
-
-### PR 9: Graph-of-Thought Reasoning
-- **Deliverables**:
-  - `GraphOfThoughtEngine` thought tree compiler.
-- **New Files**: `agent_harness/core/runtime/reasoning/got.py`
-- **Verification**: Trace complex branching thought path resolutions.
-
-### PR 10: Active Learning
-- **Deliverables**:
-  - Uncertainty estimation logic.
-  - Target query generator.
-- **New Files**: `agent_harness/core/runtime/reasoning/active_learning.py`
-- **Verification**: Asserting target probe generation on high-entropy scenarios.
-
----
-
-## 3. Autonomous Economic Agent Network (AEAN) Phased Schedule
-
-### PR 11: Continuous World Modeling (E-K-C-T-U Graph Integration)
-- **Deliverables**: Multi-graph storage managers and link predictors.
-- **New Files**: `agent_harness/core/memory/continuous_world_model.py`
-- **Verification**: Add entities, temporal events, and trace path connectivity under SQLite.
-
-### PR 12: Economic Reasoning Engine
-- **Deliverables**: Expected utility calculation and game-theoretic payoff matrix.
-- **New Files**: `agent_harness/core/economic/reasoning_engine.py`
-- **Verification**: Validate EV calculations and resource opportunity cost estimation.
-
-### PR 13: Market Simulation Engine
-- **Deliverables**: Agent-based Monte Carlo market price simulator and competitive bidding.
-- **New Files**: `agent_harness/core/simulation/market_simulator.py`
-- **Verification**: Simulate scenarios and ensure results feed back into strategic planning.
-
-### PR 14: Autonomous Experimentation
-- **Deliverables**: Active research probe generator and experimental outcome evaluator.
-- **New Files**: `agent_harness/core/experiment/experimenter.py`
-- **Verification**: Track hypothesis confidence refinement and status transition logic.
-
-### PR 15: Multi-Agent Negotiation
-- **Deliverables**: Peer-to-peer negotiation protocol bus and digital contract arbiters.
-- **New Files**: `agent_harness/core/economic/negotiation.py`
-- **Verification**: Resolve structured proposal bids and verify consensus outcomes.
-
-### PR 16: Causal Inference Engine
-- **Deliverables**: Structural Causal Model (SCM) evaluator and counterfactual path solver.
-- **New Files**: `agent_harness/core/reasoning/causal_inference.py`
-- **Verification**: Resolve causal vs. correlative associations and verify counterfactual inputs.
-
-### PR 17: Bayesian Uncertainty Estimation
-- **Deliverables**: Epistemic and aleatoric uncertainty estimators.
-- **New Files**: `agent_harness/core/reasoning/uncertainty_estimator.py`
-- **Verification**: Compute expected information gain and scale exploration temperatures.
-
-### PR 18: Self-Improving Planning
-- **Deliverables**: Plan heuristic tuner and path performance tracker.
-- **New Files**: `agent_harness/core/runtime/self_improving_planner.py`
-- **Verification**: Confirm self-correction on historical trajectory data.
-
-### PR 19: Memory Consolidation
-- **Deliverables**: Background episodic distillation cron routines.
-- **New Files**: `agent_harness/core/memory/consolidation_service.py`
-- **Verification**: Distill working memory transactions into long-term semantic graphs.
-
-### PR 20: Tool Invention
-- **Deliverables**: Repetitive script packager and validated skill dynamic compiler.
-- **New Files**: `agent_harness/core/runtime/tool_inventor.py`
-- **Verification**: Parse execution sequences and compile schema-conformant tool skill classes.
-
-### PR 21: Strategy Generation
-- **Deliverables**: Non-linear candidate alternative strategy tree branchers.
-- **New Files**: `agent_harness/core/runtime/strategy_generator.py`
-- **Verification**: Evaluate expected utilities and complexity across alternative plans.
-
-### PR 22: Reflection and Self-Debugging
-- **Deliverables**: Post-task analytical auditor and hallucination/error corrector.
-- **New Files**: `agent_harness/core/runtime/reflection_service.py`
-- **Verification**: Parse logs and execute corrective action suggestions.
-
-### PR 23: Scientific Hypothesis Generation
-- **Deliverables**: Domain gaps parser and synthetic proposition rankings.
-- **New Files**: `agent_harness/core/reasoning/scientific_hypothesis.py`
-- **Verification**: Validate hypothesis ranking against entropy scores in the knowledge base.
-
----
-
-## 4. Apodex Meta-System Integration Schedule
-
-To overlay self-improvement on the AEAN, the following meta-phases are executed concurrently with the core subsystem rollouts:
-
-### Phase 1: Personalization Foundation & CoT Judges (Aligned with PR 1 - PR 3)
-- **Deliverables**:
-  - Implement `PersonalEvolutionProfile` (PEP) storage database schemas and session initialization loader hooks.
-  - Establish basic telemetry and experience database recording user task frequencies.
-  - Build `LLMAsAJudgeNode` with Chain-of-Thought (CoT) internal reasoning evaluation.
-- **Verification**: Confirm automated PEP loading and verify that judge nodes correctly output step-by-step `<thinking>` logs during test runs.
-
-### Phase 2: User Control, Cost Profiles & Introspective Critics (Aligned with PR 4 - PR 10)
-- **Deliverables**:
-  - Build the Evolution Changelog, Control Panel, and automated CLI/GUI `/evolution rollback` utilities.
-  - Implement the `SelfCritiqueCritic` supporting compiler-interactive code critiques (CRITIC/RISE style).
-  - Wire cost mode preferences (`max_quality`, `balanced`, `fast_cheap`) into active harness decisions.
-- **Verification**: Simulate prompt hot-swapping and rollback executions; assert rejected prompt patterns are blacklisted.
-
-### Phase 3: Cost-Aware Scoring, Fact-Checking & Hardened Safety (Aligned with PR 11 - PR 19)
-- **Deliverables**:
-  - Deploy the `SafetyGuardrailManager` with immutable configuration checks.
-  - Implement the `GroundedFactChecker` (FIRE/MiniCheck grounding check) and `DenseRewardModel` trajectory calculator.
-  - Implement the Multi-Objective Cost-Aware Scoring formula ($S(M)$) and the Tiered Approval pipeline (Tier 1 to Tier 3 gates).
-- **Verification**: Ensure any attempt to modify security policies is rejected. Measure that token increases trigger negative scoring penalties under the `fast_cheap` profile.
-
-### Phase 4: Runtime Multi-Agent V&V & Closed-Loop Integration (Aligned with PR 20 - PR 23)
-- **Deliverables**:
-  - Implement `RuntimeAgentVerifier` featuring temporal logic safety rules and self-verifying code compilation validation.
-  - Establish automated escalation of `ResearchTicket`s and consumption of `CapabilityDelta` update payloads.
-  - Connect the fast harness adaptation loop and slow research sandbox trials in a unified feedback loop.
-- **Verification**: Execute a full round-trip trial from failure detection and ticket creation to model SFT training, delta generation, and final workflow adjustments.
+For details on Knowledge ROI formulas, effort/impact metrics, and continuous evolution safety guidelines, refer to **[docs/architecture/UNIFIED_COGNITIVE_OS_ARCHITECTURE.md](docs/architecture/UNIFIED_COGNITIVE_OS_ARCHITECTURE.md)**.

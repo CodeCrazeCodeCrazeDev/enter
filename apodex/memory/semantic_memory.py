@@ -338,3 +338,25 @@ class SemanticMemory:
                 valid_belief_ids.append(belief.belief_id)
             else:
                 self.repo.delete_belief(belief.belief_id)
+
+    def retrieve_similar_evidence(self, query: str, limit: int = 10) -> List[EvidenceCard]:
+        """MemoHarness keyword matching: Jaccard overlap on tokenized evidence cards."""
+        query_tokens = set(query.lower().split())
+        if not query_tokens:
+            return []
+
+        all_evidence = self.repo.load_all_evidence()
+        scored_cards = []
+
+        for card in all_evidence:
+            card_tokens = set(card.content.lower().split())
+            if not card_tokens:
+                continue
+            intersection = query_tokens.intersection(card_tokens)
+            union = query_tokens.union(card_tokens)
+            score = len(intersection) / len(union) if union else 0.0
+            if score > 0:
+                scored_cards.append((score, card))
+
+        scored_cards.sort(key=lambda x: x[0], reverse=True)
+        return [card for score, card in scored_cards[:limit]]

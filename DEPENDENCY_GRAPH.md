@@ -1,65 +1,55 @@
-# AgentHarness Architectural Dependency Graph (Phase 1) - Enhanced
+# Unified Cognitive OS: Subsystem Dependency Graph
 
-This document maps the absolute structural dependencies, package import structures, and external dependency constraints of the AgentHarness orchestration framework.
+This document maps the structural boundaries, layer interactions, and directory-level dependency constraints of the **Unified Cognitive Operating System (Cognitive OS)** substrate.
 
 ---
 
-## 1. Class & File Level Topology Graph
+## 1. Directory-Level & Layered Interaction Graph
 
 ```
-==========================================================================================
-                               [ scheduler.py ]
-                                      |
-                                      | (compiles & runs)
-                                      v
-                             [ graph_builder.py ]
-                                      |
-                                      | (creates runners)
-                                      v
-                               [ minidag.py ]
-                                      |
-                     +----------------+----------------+
-                     | (executes)                      | (manages state)
-                     v                                 v
-             [ main_agent.py ]                  [ sqlite.py ] (EventStore)
-                     |
-                     | (runs ReAct turns)
-                     v
-             [ agent_loop.py ]
-                     |
-         +-----------+-----------+---------------------+
-         |                       |                     |
-         v                       v                     v
-   [ compact.py ]          [ llm_client.py ]    [ tool_exec.py ]
-   - MessageCompactor      - LLM Call Interf.   - execute_tools
-                           - Token Estimator
-==========================================================================================
+========================================================================================
+                                 [ Research OS ] (L4)
+                                 - apodex/research_os/
+                                 - apodex/ai_eos/research/
+                                        │
+                                        │ (References EKG & Updates Beliefs)
+                                        ▼
+                                    [ AEAN ] (L3)
+                                    - apodex/aean/
+                                    - apodex/world_model/
+                                        │
+                                        │ (Dispatches Plans to State Machines)
+                                        ▼
+                                  [ EIOS / EOS ] (L2)
+                                  - apodex/ai_eos/
+                                  - agent_harness/components/
+                                        │
+                                        │ (Launches Local Runs)
+                                        ▼
+                                   [ APODEX ] (L1)
+                                   - apodex/skills/
+                                   - agent_harness/core/
+========================================================================================
 ```
 
 ---
 
-## 2. Directory & Namespace Structure Mapping
+## 2. Unidirectional Dependency Constraints
 
-The repository is structured neatly to isolate infrastructural mechanisms from runtime nodes:
+To prevent circular imports and architectural coupling as the platform evolves, the following constraints are programmatically and statically enforced:
 
-- `agent_harness/core/`
-  - `runtime/dag/`: Structures `MiniDAG` compilers and transitions (`minidag.py`, `graph_builder.py`).
-  - `runtime/loop/`: The core engine driving sequential step-by-step model predictions and tool evaluations (`agent_loop.py`, `compact.py`, `llm_client.py`, `tool_exec.py`).
-  - `messages.py`: Clean abstract definitions for System, User, Assistant, and Tool message protocols.
-  - `tool.py`: Base wrappers encapsulating custom developer execution schemas.
-
-- `agent_harness/scheduling/`
-  - `scheduler.py`: Drives compilation of declarative pipeline profiles into executable subprocess threads.
-  - `process_manager.py`: OS-level task status manager.
-
-- `agent_harness/models/`
-  - `pipeline_spec.py`: Highly pluggable schema configurations using Pydantic.
+1. **Upward Dependency Prohibition**: Lower layers must *never* import modules or access states defined in higher layers.
+   - For example, `agent_harness/core/` (Layer 1) cannot import anything from `apodex/aean/` (Layer 3) or `apodex/research_os/` (Layer 4).
+2. **Strict Subsystem Boundaries**: Overlapping capabilities are consolidated into canonical owners:
+   - **Research & Hypothesis Validation**: Owned exclusively by Layer 4 (`apodex/research_os/`).
+   - **World State & Causal Modeling**: Owned exclusively by Layer 3 (`apodex/world_model/`).
+   - **Workflow & Lifecycle Gating**: Owned exclusively by Layer 2 (`apodex/ai_eos/`).
+   - **Low-level Tool & Skill Execution**: Owned exclusively by Layer 1 (`apodex/skills/`).
 
 ---
 
-## 3. Strict Module Decoupling Boundary Constraints
+## 3. Reference Specification
 
-To preserve standard backward compatibility and benchmark isolation during architectural evolution:
-1. **The DAG Engine (`minidag.py`)** is entirely decoupled from execution context, runtime loops, and local databases. It must *never* reference `agent_loop.py` or `sqlite.py`.
-2. **The ReAct Loop Engine (`agent_loop.py`)** remains a lightweight, domain-agnostic controller. No business logic, benchmark metrics, or task-specific fields (like chem structures, math values, web queries) are allowed within its boundaries. Custom behavior is cleanly injected via observers.
-3. **The Scheduler (`scheduler.py`)** delegates task state tracking to the thread-level database without directly evaluating or manipulating the conversational payload.
+For detailed class-level signatures, interface definitions, SOTA gap comparisons, and the engineering implementation plan, refer to the master architecture document:
+
+👉 **[docs/architecture/UNIFIED_COGNITIVE_OS_ARCHITECTURE.md](docs/architecture/UNIFIED_COGNITIVE_OS_ARCHITECTURE.md)**

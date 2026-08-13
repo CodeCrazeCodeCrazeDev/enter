@@ -2,9 +2,19 @@ from __future__ import annotations
 import uuid
 import logging
 from enum import Enum
-from datetime import datetime, UTC
+from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 from pydantic import BaseModel, Field
+
+# Import EOS First-Principles reconstruction models
+from ...ai_eos.intelligence import (
+    IntegratedEOSEngine,
+    Hypothesis,
+    CheapTest,
+    ChannelType,
+    GrowthStageType,
+    MasterLoopNode
+)
 
 logger = logging.getLogger("arcs.kernel")
 
@@ -57,12 +67,63 @@ class ExecutionDAG(BaseModel):
 class EIOSKernel:
     """The central core of the Entrepreneurial Intelligence Operating System.
 
-    Manages task scheduling, failure recovery (retries), and model routing.
+    Manages task scheduling, failure recovery (retries), model routing,
+    and integrates first-principles strategic reasoning capabilities.
     """
 
     def __init__(self) -> None:
         self.active_processes: Dict[str, ExecutionDAG] = {}
         self.metrics_history: List[Dict[str, Any]] = []
+        # Native integration of the first-principles EOS Engine
+        self.eos_engine = IntegratedEOSEngine()
+
+    # ------------------------------------------------------------------
+    # Native Strategic Reasoning & Cognitive Capabilities
+    # ------------------------------------------------------------------
+
+    def sense_opportunity_anomalies(self, data: List[float], baseline: float) -> bool:
+        """Sense anomalous patterns using the EOS Sensing Agent."""
+        return self.eos_engine.sensing_agent.detect_anomalies(data, baseline)
+
+    def generate_falsifiable_hypothesis(self, description: str) -> Hypothesis:
+        """Generate a falsifiable strategic hypothesis with kill criteria."""
+        return self.eos_engine.hypothesis_engine.generate_hypothesis(description)
+
+    def validate_opportunity_economics(self, test: CheapTest) -> float:
+        """Validate an opportunity's viability based on empirical cheap tests."""
+        return self.eos_engine.validation_agent.score_viability(test)
+
+    def allocate_capital_opportunity(self, initiatives: List[Dict[str, Any]], total_budget_cents: int) -> Dict[str, int]:
+        """Enforces opportunity-cost discipline over active capital allocation projects."""
+        return self.eos_engine.capital_allocator.allocate(initiatives, total_budget_cents)
+
+    def reason_gtm_channel(self, pricing_cents: int, complexity: float) -> ChannelType:
+        """Determines the optimal GTM motion (PLG, SLG, or CLG)."""
+        self.eos_engine.master_loop.transition_to(MasterLoopNode.GTM_SYSTEM, "Analyzing distribution channels")
+        from ...ai_eos.intelligence import GTMSystem
+        gtm = GTMSystem(pricing_arpu_cents=pricing_cents, product_complexity=complexity)
+        return gtm.select_optimal_distribution_channel()
+
+    def analyze_moat_durability(self, moat_scores: Dict[str, float]) -> float:
+        """Evaluates Porter/Helmer moat parameters and returns normalized advantage index."""
+        self.eos_engine.moat_auditor.moat_scores = moat_scores
+        return self.eos_engine.moat_auditor.calculate_total_moat_index()
+
+    def evaluate_lifecycle_stage(self, scores: Dict[str, float]) -> GrowthStageType:
+        """Evaluates company scores and progression to classify growth lifecycle stage."""
+        self.eos_engine.growth_tracker.scores = scores
+        return self.eos_engine.growth_tracker.evaluate_transition()
+
+    def trigger_reinvention_review(self) -> MasterLoopNode:
+        """Enforces continuous reinvention loop to mitigate disruption risk."""
+        return self.eos_engine.master_loop.transition_to(
+            MasterLoopNode.CONTINUOUS_REINVENTION,
+            "Elite founder self-disruption trigger"
+        )
+
+    # ------------------------------------------------------------------
+    # DAG Execution Core
+    # ------------------------------------------------------------------
 
     async def execute_dag(self, dag: ExecutionDAG) -> bool:
         """Schedules and executes the compiled DAG with failure recovery."""

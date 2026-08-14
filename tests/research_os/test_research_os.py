@@ -284,3 +284,63 @@ def test_end_to_end_pipeline_rejection() -> None:
     assert decision.status == "REJECTED"
     assert len(decision.rejection_rationales) > 0
     assert model is None
+
+
+def test_calculate_dsr_edge_cases() -> None:
+    """Verify that calculate_dsr handles invalid/edge cases correctly without crashing."""
+    # Returns length <= 1 should return 0.0
+    assert calculate_dsr(sharpe=1.5, trials=10, returns_length=1) == 0.0
+    assert calculate_dsr(sharpe=1.5, trials=10, returns_length=0) == 0.0
+
+    # Negative trials should raise ValueError
+    with pytest.raises(ValueError, match="trials cannot be negative"):
+        calculate_dsr(sharpe=1.5, trials=-5, returns_length=100)
+
+
+def test_walk_forward_split_invalid_parameters() -> None:
+    """Verify walk_forward_split raises ValueErrors for non-positive dimensions."""
+    with pytest.raises(ValueError, match="must be strictly positive"):
+        walk_forward_split(total_length=0, train_size=50, test_size=10, step_size=10)
+
+    with pytest.raises(ValueError, match="must be strictly positive"):
+        walk_forward_split(total_length=100, train_size=-10, test_size=10, step_size=10)
+
+    with pytest.raises(ValueError, match="must be strictly positive"):
+        walk_forward_split(total_length=100, train_size=50, test_size=0, step_size=10)
+
+    with pytest.raises(ValueError, match="must be strictly positive"):
+        walk_forward_split(total_length=100, train_size=50, test_size=10, step_size=-5)
+
+
+def test_block_bootstrap_invalid_parameters() -> None:
+    """Verify block_bootstrap raises ValueErrors for invalid block sizes or sample numbers."""
+    returns = [0.01, -0.02, 0.015]
+    with pytest.raises(ValueError, match="block_size must be strictly positive"):
+        block_bootstrap(returns, block_size=0, num_samples=100)
+
+    with pytest.raises(ValueError, match="num_samples must be strictly positive"):
+        block_bootstrap(returns, block_size=2, num_samples=-10)
+
+    # Empty returns should return zeros safely
+    assert block_bootstrap([], block_size=2, num_samples=5) == [0.0] * 5
+
+
+def test_single_observation_trial_validation() -> None:
+    """Verify that StatisticalValidator handles trials with only 1 observation without ZeroDivisionError."""
+    # We construct a trial with returns of length 1
+    exp_single = Experiment(
+        experiment_id="exp_single_1",
+        hypothesis_id="H_01",
+        dataset_id="DS_01",
+        feature_ids=["F_01"],
+        hyperparameters={"learning_rate": 0.01},
+        status="COMPLETED",
+        metrics={"sharpe": 1.0},
+        returns_time_series=[0.02],  # exactly 1 observation
+    )
+
+    validator = StatisticalValidator(correction_method="HOLM")
+    # This should not raise ZeroDivisionError
+    report = validator.validate_experiment(exp_single, [exp_single])
+    assert report is not None
+    assert report.is_statistically_significant is False

@@ -6,6 +6,13 @@ from datetime import datetime, UTC
 from typing import Any, Dict, List, Optional, Tuple
 from pydantic import BaseModel, Field
 
+from apodex.ai_eos.intelligence.eos_first_principles import (
+    AIEOSAutonomousModules,
+    RiskType,
+    CustomerStage,
+    GrowthStage
+)
+
 logger = logging.getLogger("arcs.kernel")
 
 
@@ -57,12 +64,14 @@ class ExecutionDAG(BaseModel):
 class EIOSKernel:
     """The central core of the Entrepreneurial Intelligence Operating System.
 
-    Manages task scheduling, failure recovery (retries), and model routing.
+    Manages task scheduling, failure recovery (retries), model routing,
+    and native first-principles EOS cognitive capabilities.
     """
 
     def __init__(self) -> None:
         self.active_processes: Dict[str, ExecutionDAG] = {}
         self.metrics_history: List[Dict[str, Any]] = []
+        self.eos_modules = AIEOSAutonomousModules()
 
     async def execute_dag(self, dag: ExecutionDAG) -> bool:
         """Schedules and executes the compiled DAG with failure recovery."""
@@ -111,6 +120,79 @@ class EIOSKernel:
 
             loop_count += 1
 
+        return False
+
+    # Native First-Principles EOS Cognitive Capabilities
+
+    def sense_opportunity_anomalies(self, description: str, observed: float, expected: float) -> Dict[str, Any]:
+        """Detects anomalies and evaluates Kuhn paradigm threshold."""
+        anomaly, is_structural = self.eos_modules.signal_engine.detect_anomaly(description, observed, expected)
+        return {
+            "anomaly_id": anomaly.anomaly_id,
+            "surprise_score": anomaly.kuhn_surprise_score,
+            "is_structural": is_structural
+        }
+
+    def generate_falsifiable_hypothesis(self, claim: str, risk_type: str, test_cost: float, info_val: float) -> Dict[str, Any]:
+        """Formulates a mathematically falsifiable hypothesis with risk classification."""
+        rt = RiskType.TYPE_I if risk_type.upper() == "TYPE_I" else RiskType.TYPE_II
+        hyp = self.eos_modules.signal_engine.form_hypothesis(claim, rt, test_cost, info_val)
+        return {
+            "hypothesis_id": hyp.hypothesis_id,
+            "claim": hyp.claim,
+            "risk_type": hyp.risk_type.value,
+            "prior_prob": hyp.prior_probability
+        }
+
+    def validate_opportunity_economics(self, hypothesis_claim: str, likelihood_true: float, likelihood_false: float) -> Dict[str, Any]:
+        """Executes Bayesian belief updates and checks for falsification."""
+        hyp = self.eos_modules.signal_engine.form_hypothesis(hypothesis_claim, RiskType.TYPE_II, 100.0, 1000.0)
+        hyp = self.eos_modules.signal_engine.update_bayesian_belief(hyp, likelihood_true, likelihood_false)
+        return {
+            "hypothesis_id": hyp.hypothesis_id,
+            "posterior_probability": hyp.posterior_probability,
+            "is_falsified": hyp.is_falsified
+        }
+
+    def allocate_capital_opportunity(self, telemetry: Dict[str, Any], claim: str) -> Dict[str, Any]:
+        """Runs the full 10-module autonomous cycle from sensing to capital allocation."""
+        return self.eos_modules.run_full_sensing_to_allocation_cycle(telemetry, claim)
+
+    def reason_gtm_channel(self, price_usd: float, complexity: str) -> str:
+        """Determines channel motion based on positioning and price point."""
+        if price_usd >= 25000.0 or complexity.lower() == "high":
+            return "ENTERPRISE_SALES_LED"
+        elif price_usd <= 1000.0 and complexity.lower() == "low":
+            return "PRODUCT_LED_GROWTH_PLG"
+        else:
+            return "HYBRID_CONTENT_SALES"
+
+    def analyze_moat_durability(self, power_type: str) -> float:
+        """Scores moat durability based on Helmer's 7 Powers framework."""
+        powers_durability = {
+            "NETWORK_EFFECTS": 0.95,
+            "CORNERED_RESOURCE": 0.90,
+            "SWITCHING_COSTS": 0.85,
+            "SCALE_ECONOMIES": 0.80,
+            "COUNTER_POSITIONING": 0.80,
+            "PROCESS_POWER": 0.75,
+            "BRAND": 0.70
+        }
+        return powers_durability.get(power_type.upper(), 0.50)
+
+    def evaluate_lifecycle_stage(self, metrics: Dict[str, Any]) -> Dict[str, Any]:
+        """Evaluates company growth stage and binding constraint."""
+        stage, constraint = self.eos_modules.stage_classifier.classify_stage(metrics)
+        return {
+            "growth_stage": stage.value,
+            "binding_constraint": constraint
+        }
+
+    def trigger_reinvention_review(self, current_stage: str, market_share: float) -> bool:
+        """Triggers self-disruption/reinvention review during market leadership."""
+        if current_stage == GrowthStage.MARKET_LEADERSHIP.value and market_share >= 0.35:
+            logger.info("[Kernel] Continuous Reinvention review triggered for market leader.")
+            return True
         return False
 
 

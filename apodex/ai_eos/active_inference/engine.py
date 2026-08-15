@@ -197,3 +197,56 @@ class ExecutiveOptimizer(IExecutiveOptimizer):
                 deviations[b_name] = {"realized_rate": None, "deviation": 0.0}
 
         return deviations
+
+    # ------------------------------------------------------------------
+    # EIOS Strategic Mathematical Proof Implementations (Section 8)
+    # ------------------------------------------------------------------
+    def calculate_ebbinghaus_memory_decay(self, initial_confidence: float, time_elapsed_days: float, decay_constant: float = 0.05) -> float:
+        """Calculate confidence retention parameter using Ebbinghaus exponential forgetting curve (Section 8.3).
+
+        Formula: confidence_t = confidence_0 * exp(-lambda * t)
+        """
+        decayed = initial_confidence * math.exp(-decay_constant * time_elapsed_days)
+        logger.info(f"Ebbinghaus memory decay: Initial={initial_confidence:.4f}, Days={time_elapsed_days}, Decayed={decayed:.4f}")
+        return max(0.0, min(1.0, decayed))
+
+    def detect_regime_change(self, prior_entropy: float, observed_entropy: float, threshold: float = 0.5) -> Dict[str, Any]:
+        """Differentiate local parameter offset from a structural regime change using Bayesian Surprise (Section 8.4).
+
+        Calculates simple divergence: Surprise = abs(observed_entropy - prior_entropy)
+        """
+        surprise = abs(observed_entropy - prior_entropy)
+        is_regime_change = surprise >= threshold
+        action_directive = "STRUCTURE_RE_SYNTHESIS" if is_regime_change else "PARAMETER_TUNING"
+
+        logger.info(f"Regime detection: surprise={surprise:.4f}, threshold={threshold}, directive={action_directive}")
+        return {
+            "surprise": surprise,
+            "is_regime_change": is_regime_change,
+            "action_directive": action_directive
+        }
+
+    def vessel_depressurization_protocol(self, hazard_rate: float, threshold: float = 0.8) -> Dict[str, Any]:
+        """Stochastic hazard protocol for organizational death prevention (Section 8.15).
+
+        If hazard rate crosses safety threshold, locks down assets and scales back burn to zero.
+        """
+        is_critical = hazard_rate >= threshold
+        state = "VESSEL_DEPRESSURIZED_ASSETS_SECURED" if is_critical else "NOMINAL_EXPLORATION"
+        allocation_factor = 0.0 if is_critical else 1.0
+
+        logger.warning(f"Vessel depressurization audit: hazard={hazard_rate:.2%}, state={state}, allocation_factor={allocation_factor:.2%}")
+        return {
+            "is_critical": is_critical,
+            "state": state,
+            "allocation_factor": allocation_factor
+        }
+
+    def score_originality(self, novelty_kl_divergence: float, expected_utility: float) -> float:
+        """Score proposal originality as the product of structural novelty and expected utility (Section 8.12).
+
+        Formula: Originality = Novelty_KL * Utility
+        """
+        originality = novelty_kl_divergence * max(0.0, expected_utility)
+        logger.info(f"Originality score: Novelty={novelty_kl_divergence:.4f}, Utility={expected_utility:.4f}, Score={originality:.4f}")
+        return max(0.0, originality)

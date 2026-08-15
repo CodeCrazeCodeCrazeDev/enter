@@ -1,7 +1,7 @@
 from __future__ import annotations
 import uuid
 import pytest
-from datetime import datetime, timedelta
+from datetime import timezone, datetime, timedelta
 
 from pydantic import ValidationError
 
@@ -59,7 +59,7 @@ def test_registry_loading_and_filtering():
 # =====================================================================
 
 def test_exponential_confidence_decay():
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
 
     # No decay if queried at observation time
     conf_0 = decay_confidence(base_confidence=0.8, observed_time=now, current_time=now, half_life_days=7.0)
@@ -317,7 +317,7 @@ def test_decayed_signals_filtering_in_graph():
     edge = decayed_edges[0]
 
     # Backdate to 7 days ago
-    seven_days_ago = (datetime.utcnow() - timedelta(days=7)).isoformat()
+    seven_days_ago = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
     edge.properties["observed_at"] = seven_days_ago
     edge.weight = 0.8
 
@@ -443,7 +443,7 @@ def test_stage_6_7_attribution_and_feedback():
 
     # Stage 7: Feed Back with forced re-validation decay
     # Backdate playbook last revalidation to 15 days ago
-    p1.last_revalidated = datetime.utcnow() - timedelta(days=15)
+    p1.last_revalidated = datetime.now(timezone.utc) - timedelta(days=15)
     p1.confidence = 0.8
 
     engine.stage_7_feed_back()

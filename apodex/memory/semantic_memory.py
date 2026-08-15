@@ -2,6 +2,7 @@ from __future__ import annotations
 import os
 import sqlite3
 import time
+import threading
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
 
@@ -52,202 +53,225 @@ class SQLiteMemoryRepository:
 
     def __init__(self, db_path: str = ":memory:") -> None:
         self.db_path = db_path
+        self._lock = threading.RLock()
         self._conn = None
         if db_path == ":memory:":
-            self._conn = sqlite3.connect(db_path)
+            self._conn = sqlite3.connect(db_path, check_same_thread=False)
         self._init_db()
 
     def _get_conn(self) -> sqlite3.Connection:
-        if self._conn:
-            return self._conn
-        return sqlite3.connect(self.db_path)
+        with self._lock:
+            if self._conn:
+                return self._conn
+            # Create thread-safe file connection
+            return sqlite3.connect(self.db_path, check_same_thread=False)
 
     def _init_db(self) -> None:
-        conn = self._get_conn()
-        try:
-            conn.execute("""
-                CREATE TABLE IF NOT EXISTS evidence_cards (
-                    evidence_id TEXT PRIMARY KEY,
-                    source_url TEXT,
-                    content TEXT,
-                    extracted_at REAL
-                )
-            """)
-            conn.execute("""
-                CREATE TABLE IF NOT EXISTS facts (
-                    fact_id TEXT PRIMARY KEY,
-                    assertion TEXT,
-                    confidence REAL
-                )
-            """)
-            conn.execute("""
-                CREATE TABLE IF NOT EXISTS fact_evidence (
-                    fact_id TEXT,
-                    evidence_id TEXT,
-                    PRIMARY KEY (fact_id, evidence_id)
-                )
-            """)
-            conn.execute("""
-                CREATE TABLE IF NOT EXISTS beliefs (
-                    belief_id TEXT PRIMARY KEY,
-                    hypothesis TEXT,
-                    strength REAL,
-                    last_updated REAL
-                )
-            """)
-            conn.execute("""
-                CREATE TABLE IF NOT EXISTS unresolved_questions (
-                    question_id TEXT PRIMARY KEY,
-                    query TEXT,
-                    priority INTEGER,
-                    status TEXT
-                )
-            """)
-            conn.commit()
-        finally:
-            if not self._conn:
-                conn.close()
+        with self._lock:
+            conn = self._get_conn()
+            try:
+                # Enable WAL mode and NORMAL synchronous commits for performance and concurrency
+                if self.db_path != ":memory:":
+                    try:
+                        conn.execute("PRAGMA journal_mode=WAL;")
+                        conn.execute("PRAGMA synchronous=NORMAL;")
+                    except sqlite3.OperationalError:
+                        pass
+                conn.execute("""
+                    CREATE TABLE IF NOT EXISTS evidence_cards (
+                        evidence_id TEXT PRIMARY KEY,
+                        source_url TEXT,
+                        content TEXT,
+                        extracted_at REAL
+                    )
+                """)
+                conn.execute("""
+                    CREATE TABLE IF NOT EXISTS facts (
+                        fact_id TEXT PRIMARY KEY,
+                        assertion TEXT,
+                        confidence REAL
+                    )
+                """)
+                conn.execute("""
+                    CREATE TABLE IF NOT EXISTS fact_evidence (
+                        fact_id TEXT,
+                        evidence_id TEXT,
+                        PRIMARY KEY (fact_id, evidence_id)
+                    )
+                """)
+                conn.execute("""
+                    CREATE TABLE IF NOT EXISTS beliefs (
+                        belief_id TEXT PRIMARY KEY,
+                        hypothesis TEXT,
+                        strength REAL,
+                        last_updated REAL
+                    )
+                """)
+                conn.execute("""
+                    CREATE TABLE IF NOT EXISTS unresolved_questions (
+                        question_id TEXT PRIMARY KEY,
+                        query TEXT,
+                        priority INTEGER,
+                        status TEXT
+                    )
+                """)
+                conn.commit()
+            finally:
+                if not self._conn:
+                    conn.close()
 
     def save_evidence(self, card: EvidenceCard) -> None:
-        conn = self._get_conn()
-        try:
-            conn.execute(
-                "INSERT OR REPLACE INTO evidence_cards (evidence_id, source_url, content, extracted_at) VALUES (?, ?, ?, ?)",
-                (card.evidence_id, card.source_url, card.content, card.extracted_at)
-            )
-            conn.commit()
-        finally:
-            if not self._conn:
-                conn.close()
+        with self._lock:
+            conn = self._get_conn()
+            try:
+                conn.execute(
+                    "INSERT OR REPLACE INTO evidence_cards (evidence_id, source_url, content, extracted_at) VALUES (?, ?, ?, ?)",
+                    (card.evidence_id, card.source_url, card.content, card.extracted_at)
+                )
+                conn.commit()
+            finally:
+                if not self._conn:
+                    conn.close()
 
     def load_evidence(self, evidence_id: str) -> Optional[EvidenceCard]:
-        conn = self._get_conn()
-        try:
-            row = conn.execute(
-                "SELECT evidence_id, source_url, content, extracted_at FROM evidence_cards WHERE evidence_id = ?",
-                (evidence_id,)
-            ).fetchone()
-            if row:
-                return EvidenceCard(evidence_id=row[0], source_url=row[1], content=row[2], extracted_at=row[3])
-        finally:
-            if not self._conn:
-                conn.close()
-        return None
+        with self._lock:
+            conn = self._get_conn()
+            try:
+                row = conn.execute(
+                    "SELECT evidence_id, source_url, content, extracted_at FROM evidence_cards WHERE evidence_id = ?",
+                    (evidence_id,)
+                ).fetchone()
+                if row:
+                    return EvidenceCard(evidence_id=row[0], source_url=row[1], content=row[2], extracted_at=row[3])
+            finally:
+                if not self._conn:
+                    conn.close()
+            return None
 
     def load_all_evidence(self) -> List[EvidenceCard]:
-        conn = self._get_conn()
-        try:
-            rows = conn.execute("SELECT evidence_id, source_url, content, extracted_at FROM evidence_cards ORDER BY extracted_at DESC").fetchall()
-            return [EvidenceCard(evidence_id=row[0], source_url=row[1], content=row[2], extracted_at=row[3]) for row in rows]
-        finally:
-            if not self._conn:
-                conn.close()
+        with self._lock:
+            conn = self._get_conn()
+            try:
+                rows = conn.execute("SELECT evidence_id, source_url, content, extracted_at FROM evidence_cards ORDER BY extracted_at DESC").fetchall()
+                return [EvidenceCard(evidence_id=row[0], source_url=row[1], content=row[2], extracted_at=row[3]) for row in rows]
+            finally:
+                if not self._conn:
+                    conn.close()
 
     def delete_evidence(self, evidence_id: str) -> None:
-        conn = self._get_conn()
-        try:
-            conn.execute("DELETE FROM evidence_cards WHERE evidence_id = ?", (evidence_id,))
-            conn.commit()
-        finally:
-            if not self._conn:
-                conn.close()
+        with self._lock:
+            conn = self._get_conn()
+            try:
+                conn.execute("DELETE FROM evidence_cards WHERE evidence_id = ?", (evidence_id,))
+                conn.commit()
+            finally:
+                if not self._conn:
+                    conn.close()
 
     def save_fact(self, fact: Fact) -> None:
-        conn = self._get_conn()
-        try:
-            conn.execute(
-                "INSERT OR REPLACE INTO facts (fact_id, assertion, confidence) VALUES (?, ?, ?)",
-                (fact.fact_id, fact.assertion, fact.confidence)
-            )
-            conn.execute("DELETE FROM fact_evidence WHERE fact_id = ?", (fact.fact_id,))
-            for ev_id in fact.evidence_ids:
+        with self._lock:
+            conn = self._get_conn()
+            try:
                 conn.execute(
-                    "INSERT INTO fact_evidence (fact_id, evidence_id) VALUES (?, ?)",
-                    (fact.fact_id, ev_id)
+                    "INSERT OR REPLACE INTO facts (fact_id, assertion, confidence) VALUES (?, ?, ?)",
+                    (fact.fact_id, fact.assertion, fact.confidence)
                 )
-            conn.commit()
-        finally:
-            if not self._conn:
-                conn.close()
+                conn.execute("DELETE FROM fact_evidence WHERE fact_id = ?", (fact.fact_id,))
+                for ev_id in fact.evidence_ids:
+                    conn.execute(
+                        "INSERT INTO fact_evidence (fact_id, evidence_id) VALUES (?, ?)",
+                        (fact.fact_id, ev_id)
+                    )
+                    conn.commit()
+            finally:
+                if not self._conn:
+                    conn.close()
 
     def load_all_facts(self) -> List[Fact]:
-        facts = []
-        conn = self._get_conn()
-        try:
-            rows = conn.execute("SELECT fact_id, assertion, confidence FROM facts ORDER BY confidence DESC").fetchall()
-            for row in rows:
-                f_id = row[0]
-                ev_rows = conn.execute("SELECT evidence_id FROM fact_evidence WHERE fact_id = ?", (f_id,)).fetchall()
-                ev_ids = [r[0] for r in ev_rows]
-                facts.append(Fact(fact_id=f_id, assertion=row[1], confidence=row[2], evidence_ids=ev_ids))
-        finally:
-            if not self._conn:
-                conn.close()
-        return facts
+        with self._lock:
+            facts = []
+            conn = self._get_conn()
+            try:
+                rows = conn.execute("SELECT fact_id, assertion, confidence FROM facts ORDER BY confidence DESC").fetchall()
+                for row in rows:
+                    f_id = row[0]
+                    ev_rows = conn.execute("SELECT evidence_id FROM fact_evidence WHERE fact_id = ?", (f_id,)).fetchall()
+                    ev_ids = [r[0] for r in ev_rows]
+                    facts.append(Fact(fact_id=f_id, assertion=row[1], confidence=row[2], evidence_ids=ev_ids))
+            finally:
+                if not self._conn:
+                    conn.close()
+            return facts
 
     def delete_fact(self, fact_id: str) -> None:
-        conn = self._get_conn()
-        try:
-            conn.execute("DELETE FROM facts WHERE fact_id = ?", (fact_id,))
-            conn.execute("DELETE FROM fact_evidence WHERE fact_id = ?", (fact_id,))
-            conn.commit()
-        finally:
-            if not self._conn:
-                conn.close()
+        with self._lock:
+            conn = self._get_conn()
+            try:
+                conn.execute("DELETE FROM facts WHERE fact_id = ?", (fact_id,))
+                conn.execute("DELETE FROM fact_evidence WHERE fact_id = ?", (fact_id,))
+                conn.commit()
+            finally:
+                if not self._conn:
+                    conn.close()
 
     def save_belief(self, belief: Belief) -> None:
-        conn = self._get_conn()
-        try:
-            conn.execute(
-                "INSERT OR REPLACE INTO beliefs (belief_id, hypothesis, strength, last_updated) VALUES (?, ?, ?, ?)",
-                (belief.belief_id, belief.hypothesis, belief.strength, belief.last_updated)
-            )
-            conn.commit()
-        finally:
-            if not self._conn:
-                conn.close()
+        with self._lock:
+            conn = self._get_conn()
+            try:
+                conn.execute(
+                    "INSERT OR REPLACE INTO beliefs (belief_id, hypothesis, strength, last_updated) VALUES (?, ?, ?, ?)",
+                    (belief.belief_id, belief.hypothesis, belief.strength, belief.last_updated)
+                )
+                conn.commit()
+            finally:
+                if not self._conn:
+                    conn.close()
 
     def load_all_beliefs(self) -> List[Belief]:
-        conn = self._get_conn()
-        try:
-            rows = conn.execute("SELECT belief_id, hypothesis, strength, last_updated FROM beliefs ORDER BY strength DESC").fetchall()
-            return [Belief(belief_id=row[0], hypothesis=row[1], strength=row[2], last_updated=row[3]) for row in rows]
-        finally:
-            if not self._conn:
-                conn.close()
+        with self._lock:
+            conn = self._get_conn()
+            try:
+                rows = conn.execute("SELECT belief_id, hypothesis, strength, last_updated FROM beliefs ORDER BY strength DESC").fetchall()
+                return [Belief(belief_id=row[0], hypothesis=row[1], strength=row[2], last_updated=row[3]) for row in rows]
+            finally:
+                if not self._conn:
+                    conn.close()
 
     def delete_belief(self, belief_id: str) -> None:
-        conn = self._get_conn()
-        try:
-            conn.execute("DELETE FROM beliefs WHERE belief_id = ?", (belief_id,))
-            conn.commit()
-        finally:
-            if not self._conn:
-                conn.close()
+        with self._lock:
+            conn = self._get_conn()
+            try:
+                conn.execute("DELETE FROM beliefs WHERE belief_id = ?", (belief_id,))
+                conn.commit()
+            finally:
+                if not self._conn:
+                    conn.close()
 
     def save_question(self, question: UnresolvedQuestion) -> None:
-        conn = self._get_conn()
-        try:
-            conn.execute(
-                "INSERT OR REPLACE INTO unresolved_questions (question_id, query, priority, status) VALUES (?, ?, ?, ?)",
-                (question.question_id, question.query, question.priority, question.status)
-            )
-            conn.commit()
-        finally:
-            if not self._conn:
-                conn.close()
+        with self._lock:
+            conn = self._get_conn()
+            try:
+                conn.execute(
+                    "INSERT OR REPLACE INTO unresolved_questions (question_id, query, priority, status) VALUES (?, ?, ?, ?)",
+                    (question.question_id, question.query, question.priority, question.status)
+                )
+                conn.commit()
+            finally:
+                if not self._conn:
+                    conn.close()
 
     def load_questions_by_status(self, status: str) -> List[UnresolvedQuestion]:
-        conn = self._get_conn()
-        try:
-            rows = conn.execute(
-                "SELECT question_id, query, priority, status FROM unresolved_questions WHERE status = ? ORDER BY priority DESC",
-                (status,)
-            ).fetchall()
-            return [UnresolvedQuestion(question_id=row[0], query=row[1], priority=row[2], status=row[3]) for row in rows]
-        finally:
-            if not self._conn:
-                conn.close()
+        with self._lock:
+            conn = self._get_conn()
+            try:
+                rows = conn.execute(
+                    "SELECT question_id, query, priority, status FROM unresolved_questions WHERE status = ? ORDER BY priority DESC",
+                    (status,)
+                ).fetchall()
+                return [UnresolvedQuestion(question_id=row[0], query=row[1], priority=row[2], status=row[3]) for row in rows]
+            finally:
+                if not self._conn:
+                    conn.close()
 
 
 # =====================================================================
@@ -338,3 +362,25 @@ class SemanticMemory:
                 valid_belief_ids.append(belief.belief_id)
             else:
                 self.repo.delete_belief(belief.belief_id)
+
+    def retrieve_similar_evidence(self, query: str, limit: int = 10) -> List[EvidenceCard]:
+        """MemoHarness keyword matching: Jaccard overlap on tokenized evidence cards."""
+        query_tokens = set(query.lower().split())
+        if not query_tokens:
+            return []
+
+        all_evidence = self.repo.load_all_evidence()
+        scored_cards = []
+
+        for card in all_evidence:
+            card_tokens = set(card.content.lower().split())
+            if not card_tokens:
+                continue
+            intersection = query_tokens.intersection(card_tokens)
+            union = query_tokens.union(card_tokens)
+            score = len(intersection) / len(union) if union else 0.0
+            if score > 0:
+                scored_cards.append((score, card))
+
+        scored_cards.sort(key=lambda x: x[0], reverse=True)
+        return [card for score, card in scored_cards[:limit]]

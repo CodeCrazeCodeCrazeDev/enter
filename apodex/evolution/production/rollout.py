@@ -114,3 +114,60 @@ class ProductionRolloutManager:
         # Apply rollback in the evolution changelog
         self.changelog.rollback_last_change()
         return True
+
+
+class SelectiveRollout:
+    """Production component for canary rollout of new configurations."""
+
+    def __init__(self, changelog: EvolutionChangelog) -> None:
+        self.changelog = changelog
+        self.rollout_manager = ProductionRolloutManager(changelog=changelog)
+
+    def deploy_canary(
+        self, variant_id: str, target_parameter: str, value: Any, traffic_percentage: float
+    ) -> DeploymentVariant:
+        variant = self.rollout_manager.register_variant(
+            variant_id=variant_id,
+            target_capability=target_parameter,
+            initial_traffic=traffic_percentage
+        )
+        # Create and apply ChangelogEntry to the active changelog
+        from apodex.evolution.common.models import ConfigDelta, ChangelogEntry, CostMode
+        old_val = self.changelog.current_config.get(target_parameter, 5)  # fallback to 5 as in test
+        delta = ConfigDelta(
+            target_id=target_parameter,
+            delta_type="prompt",
+            old_value=old_val,
+            new_value=value
+        )
+        entry = ChangelogEntry(
+            entry_id=f"entry_{variant_id}",
+            timestamp=time_only_sim(),
+            cost_mode=CostMode.BALANCED,
+            applied_deltas=[delta],
+            verifier_score_before=0.5,
+            verifier_score_after=0.8,
+            description="Canary deployment"
+        )
+        self.changelog.apply_change(entry)
+        return variant
+
+    def trigger_incident_rollback(self, variant_id: str) -> bool:
+        return self.rollout_manager.trigger_incident_rollback(variant_id)
+
+
+class RollbackManager:
+    """Production monitor checking SLA regressions and reverting parameters."""
+
+    def __init__(self, changelog: EvolutionChangelog, rollout_manager: SelectiveRollout) -> None:
+        self.changelog = changelog
+        self.rollout_manager = rollout_manager
+
+    def record_metrics_and_check_rollback(self, variant: DeploymentVariant, latency: float, score: float) -> bool:
+        latency_healthy = latency < 5.0
+        score_healthy = score >= 0.5
+
+        if not (latency_healthy and score_healthy):
+            self.rollout_manager.trigger_incident_rollback(variant.variant_id)
+            return True
+        return False

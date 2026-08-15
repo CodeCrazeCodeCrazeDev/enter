@@ -46,8 +46,22 @@ from .pipeline import (
     GovernanceGateway,
     ResearchPipelineOrchestrator,
 )
+from .research_ingestion import (
+    ResearchIngestionPipeline,
+)
+
+from ..ai_eos.research.integration import (
+    CodeRewriteEngine,
+    GeneticWorkflowOptimizer,
+    SFTPreferenceCollector,
+    LearnableRoutingGateDispatcher,
+)
 
 __all__ = [
+    "CodeRewriteEngine",
+    "GeneticWorkflowOptimizer",
+    "SFTPreferenceCollector",
+    "LearnableRoutingGateDispatcher",
     "IHypothesisRegistry",
     "IDatasetRegistry",
     "IFeatureRegistry",
@@ -77,4 +91,5 @@ __all__ = [
     "StatisticalValidator",
     "GovernanceGateway",
     "ResearchPipelineOrchestrator",
+    "ResearchIngestionPipeline",
 ]

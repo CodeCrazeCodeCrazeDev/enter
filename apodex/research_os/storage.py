@@ -2,10 +2,8 @@ from __future__ import annotations
 import collections
 from uuid import UUID
 from typing import Any, Dict, List, Optional, Type, TypeVar
-from pydantic import BaseModel
 from .models import (
     BaseArtifact,
-    ResearchProject,
     Publication,
     LiteratureCorpus,
     ExperimentResult,

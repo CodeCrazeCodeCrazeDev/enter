@@ -46,6 +46,9 @@ from .pipeline import (
     GovernanceGateway,
     ResearchPipelineOrchestrator,
 )
+from .research_ingestion import (
+    ResearchIngestionPipeline,
+)
 
 from ..ai_eos.research.integration import (
     CodeRewriteEngine,
@@ -88,4 +91,5 @@ __all__ = [
     "StatisticalValidator",
     "GovernanceGateway",
     "ResearchPipelineOrchestrator",
+    "ResearchIngestionPipeline",
 ]

@@ -1,7 +1,8 @@
 """Entrepreneurial Intelligence System (EIS) implementation for SERO v2.
 
 Resolves structural meta-economic decisions (venture, license, open-source, publish)
-and executes recursive scientific organizational modifications.
+and executes recursive scientific organizational modifications. Includes Pearl's do-calculus SCM
+interventions and Lagrange multiplier dual shadow price rate-limiting bottleneck detection.
 """
 
 from __future__ import annotations

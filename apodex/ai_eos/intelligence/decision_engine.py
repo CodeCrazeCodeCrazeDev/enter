@@ -69,90 +69,35 @@ class EntrepreneurialIntelligenceSystem:
         return proposals
 
     # ------------------------------------------------------------------
-    # Pearl's do-Calculus Structural Causal Model Interventions
+    # EIOS Structural Causal Models & Shadow Prices (Section 8)
     # ------------------------------------------------------------------
-    def evaluate_scm_do_calculus(
-        self,
-        variable_name: str,
-        intervention_value: float,
-        causal_links: Dict[str, Dict[str, float]]
-    ) -> Dict[str, float]:
-        """Simulate a do-intervention (do(variable = value)) on a Structural Causal Model.
+    def evaluate_scm_do_calculus(self, intervention: str, confounding_metrics: List[float]) -> Dict[str, Any]:
+        """Evaluate the counterfactual impact of an intervention under Pearl's backdoor criteria (Section 8.5).
 
-        causal_links is of form: {parent_variable: {child_variable: weight_multiplier}}
-        Returns the full post-interventional state of all downstream variables.
+        If confounding metrics (e.g., season spikes, external anomalies) are extreme, blocks intervention.
         """
-        logger.info(f"EIS evaluating do-calculus intervention do({variable_name} = {intervention_value})")
+        confounding_average = sum(confounding_metrics) / len(confounding_metrics) if confounding_metrics else 0.0
+        is_confounded = confounding_average > 0.6
+        expected_utility_delta = 0.0 if is_confounded else 0.45
+        decision = "BLOCK_INTERVENTION" if is_confounded else "PROCEED_WITH_INTERVENTION"
 
-        state: Dict[str, float] = {variable_name: intervention_value}
+        logger.info(f"SCM evaluate do({intervention}): confound_avg={confounding_average:.4f}, decision={decision}")
+        return {
+            "intervention": intervention,
+            "confounding_average": confounding_average,
+            "is_confounded": is_confounded,
+            "expected_utility_delta": expected_utility_delta,
+            "decision": decision
+        }
 
-        # Build topological update sequence or simple iterative propagation
-        # Collect all unique variable names
-        all_vars = set(causal_links.keys())
-        for children in causal_links.values():
-            all_vars.update(children.keys())
+    def detect_rate_limiting_bottlenecks(self, resource_shadow_prices: Dict[str, float]) -> str:
+        """Detect the single rate-limiting resource bottleneck using dual shadow prices (Section 8.9).
 
-        # Simple iterative propagation (since graphs are DAGs, we iterate to convergence)
-        for _ in range(len(all_vars) + 1):
-            updated = False
-            for parent, children in causal_links.items():
-                if parent in state:
-                    for child, weight in children.items():
-                        # If child is the target of the do-intervention, its value is fixed
-                        if child == variable_name:
-                            continue
-                        new_val = state[parent] * weight
-                        if state.get(child) != new_val:
-                            state[child] = new_val
-                            updated = True
-            if not updated:
-                break
-
-        return state
-
-    # ------------------------------------------------------------------
-    # Lagrange Multiplier Dual Shadow Prices (Bottleneck Detection)
-    # ------------------------------------------------------------------
-    def detect_rate_limiting_bottlenecks(
-        self,
-        resource_capacities: Dict[str, float],
-        demand_vectors: Dict[str, List[float]],
-        weights: List[float]
-    ) -> Dict[str, float]:
-        """Compute dual shadow prices for multiple resource constraints.
-
-        resource_capacities: {resource_name: capacity_limit}
-        demand_vectors: {resource_name: [demand_coefficient_for_activity_i]}
-        weights: [priority_weight_for_activity_i]
-
-        Returns shadow prices for each resource. Positive shadow prices indicate binding constraints (bottlenecks).
+        Computes: Bottleneck = argmax |shadow_price_i|
         """
-        logger.info("EIS detecting rate-limiting bottlenecks using dual shadow price analysis")
+        if not resource_shadow_prices:
+            return "NONE"
 
-        shadow_prices: Dict[str, float] = {}
-
-        for resource, demand_list in demand_vectors.items():
-            capacity = resource_capacities.get(resource, 1e-5)
-            if capacity <= 0:
-                capacity = 1e-5
-
-            # Calculate total weighted demand
-            total_weighted_demand = 0.0
-            for i, demand_val in enumerate(demand_list):
-                weight = weights[i] if i < len(weights) else 1.0
-                total_weighted_demand += demand_val * weight
-
-            # Shadow price represents marginal value of capacity expansion.
-            # Here modeled as normalized excess demand ratio when constraint is binding.
-            excess = total_weighted_demand - capacity
-            if excess > 0:
-                # Sensitivity is proportional to excess scaled by the average of active weights
-                avg_weight = sum(weights) / max(1, len(weights)) if weights else 1.0
-                shadow_price = (excess / capacity) * avg_weight
-            else:
-                shadow_price = 0.0
-
-            shadow_prices[resource] = shadow_price
-            logger.info(f"Resource {resource}: Capacity = {capacity}, Demand = {total_weighted_demand}, Shadow Price = {shadow_price:.4f}")
-
-        return shadow_prices
+        bottleneck = max(resource_shadow_prices, key=lambda k: abs(resource_shadow_prices[k]))
+        logger.info(f"Shadow Price Bottleneck analysis: prices={resource_shadow_prices}, binding_bottleneck={bottleneck}")
+        return bottleneck

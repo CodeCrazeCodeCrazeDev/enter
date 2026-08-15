@@ -1,6 +1,6 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Type
+from typing import Dict, List, Optional
 from uuid import UUID
 from .models import (
     BaseArtifact,

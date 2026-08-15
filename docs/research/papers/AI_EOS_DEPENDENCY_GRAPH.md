@@ -72,6 +72,76 @@ graph TD
         P128[#128 BabyAGI]
         P129[#129 AutoGPT]
         P130[#130 CrewAI / LangGraph / Task]
+        P131[#131 Empirical Principles of R]
+        P132[#132 Empirical Principles of R]
+        P133[#133 Empirical Principles of T]
+        P134[#134 Empirical Principles of S]
+        P135[#135 Empirical Principles of M]
+        P136[#136 Empirical Principles of P]
+        P137[#137 Empirical Principles of G]
+        P138[#138 Empirical Principles of S]
+        P139[#139 Empirical Principles of A]
+        P140[#140 Empirical Principles of T]
+        P141[#141 Empirical Principles of A]
+        P142[#142 Empirical Principles of D]
+        P143[#143 Empirical Principles of P]
+        P144[#144 Empirical Principles of E]
+        P145[#145 Empirical Principles of R]
+        P146[#146 Empirical Principles of R]
+        P147[#147 Empirical Principles of S]
+        P148[#148 Empirical Principles of S]
+        P149[#149 Empirical Principles of M]
+        P150[#150 Empirical Principles of A]
+        P151[#151 Empirical Principles of O]
+        P152[#152 Empirical Principles of M]
+        P153[#153 Empirical Principles of R]
+        P154[#154 Empirical Principles of R]
+        P155[#155 Empirical Principles of T]
+        P156[#156 Empirical Principles of S]
+        P157[#157 Empirical Principles of M]
+        P158[#158 Empirical Principles of P]
+        P159[#159 Empirical Principles of G]
+        P160[#160 Empirical Principles of S]
+        P161[#161 Empirical Principles of A]
+        P162[#162 Empirical Principles of T]
+        P163[#163 Empirical Principles of A]
+        P164[#164 Empirical Principles of D]
+        P165[#165 Empirical Principles of P]
+        P166[#166 Empirical Principles of E]
+        P167[#167 Empirical Principles of R]
+        P168[#168 Empirical Principles of R]
+        P169[#169 Empirical Principles of S]
+        P170[#170 Empirical Principles of S]
+        P171[#171 Empirical Principles of M]
+        P172[#172 Empirical Principles of A]
+        P173[#173 Empirical Principles of O]
+        P174[#174 Empirical Principles of M]
+        P175[#175 Empirical Principles of R]
+        P176[#176 Empirical Principles of R]
+        P177[#177 Empirical Principles of T]
+        P178[#178 Empirical Principles of S]
+        P179[#179 Empirical Principles of M]
+        P180[#180 Empirical Principles of P]
+        P181[#181 Empirical Principles of G]
+        P182[#182 Empirical Principles of S]
+        P183[#183 Empirical Principles of A]
+        P184[#184 Empirical Principles of T]
+        P185[#185 Empirical Principles of A]
+        P186[#186 Empirical Principles of D]
+        P187[#187 Empirical Principles of P]
+        P188[#188 Empirical Principles of E]
+        P189[#189 Empirical Principles of R]
+        P190[#190 Empirical Principles of R]
+        P191[#191 Empirical Principles of S]
+        P192[#192 Empirical Principles of S]
+        P193[#193 Empirical Principles of M]
+        P194[#194 Empirical Principles of A]
+        P195[#195 Empirical Principles of O]
+        P196[#196 Empirical Principles of M]
+        P197[#197 Empirical Principles of R]
+        P198[#198 Empirical Principles of R]
+        P199[#199 Empirical Principles of T]
+        P200[#200 Empirical Principles of S]
     end
     subgraph L3 [L3 (Governance Layer)]
         P33[#33 Lets Verify Step by Step]
@@ -271,6 +341,76 @@ graph TD
     P125 -->|prerequisite| P127
     P128 -->|prerequisite| P129
     P128 -->|prerequisite| P130
+    P128 -->|prerequisite| P131
+    P128 -->|prerequisite| P132
+    P128 -->|prerequisite| P133
+    P128 -->|prerequisite| P134
+    P128 -->|prerequisite| P135
+    P128 -->|prerequisite| P136
+    P128 -->|prerequisite| P137
+    P128 -->|prerequisite| P138
+    P128 -->|prerequisite| P139
+    P128 -->|prerequisite| P140
+    P128 -->|prerequisite| P141
+    P128 -->|prerequisite| P142
+    P128 -->|prerequisite| P143
+    P128 -->|prerequisite| P144
+    P128 -->|prerequisite| P145
+    P128 -->|prerequisite| P146
+    P128 -->|prerequisite| P147
+    P128 -->|prerequisite| P148
+    P128 -->|prerequisite| P149
+    P128 -->|prerequisite| P150
+    P128 -->|prerequisite| P151
+    P128 -->|prerequisite| P152
+    P128 -->|prerequisite| P153
+    P128 -->|prerequisite| P154
+    P128 -->|prerequisite| P155
+    P128 -->|prerequisite| P156
+    P128 -->|prerequisite| P157
+    P128 -->|prerequisite| P158
+    P128 -->|prerequisite| P159
+    P128 -->|prerequisite| P160
+    P128 -->|prerequisite| P161
+    P128 -->|prerequisite| P162
+    P128 -->|prerequisite| P163
+    P128 -->|prerequisite| P164
+    P128 -->|prerequisite| P165
+    P128 -->|prerequisite| P166
+    P128 -->|prerequisite| P167
+    P128 -->|prerequisite| P168
+    P128 -->|prerequisite| P169
+    P128 -->|prerequisite| P170
+    P128 -->|prerequisite| P171
+    P128 -->|prerequisite| P172
+    P128 -->|prerequisite| P173
+    P128 -->|prerequisite| P174
+    P128 -->|prerequisite| P175
+    P128 -->|prerequisite| P176
+    P128 -->|prerequisite| P177
+    P128 -->|prerequisite| P178
+    P128 -->|prerequisite| P179
+    P128 -->|prerequisite| P180
+    P128 -->|prerequisite| P181
+    P128 -->|prerequisite| P182
+    P128 -->|prerequisite| P183
+    P128 -->|prerequisite| P184
+    P128 -->|prerequisite| P185
+    P128 -->|prerequisite| P186
+    P128 -->|prerequisite| P187
+    P128 -->|prerequisite| P188
+    P128 -->|prerequisite| P189
+    P128 -->|prerequisite| P190
+    P128 -->|prerequisite| P191
+    P128 -->|prerequisite| P192
+    P128 -->|prerequisite| P193
+    P128 -->|prerequisite| P194
+    P128 -->|prerequisite| P195
+    P128 -->|prerequisite| P196
+    P128 -->|prerequisite| P197
+    P128 -->|prerequisite| P198
+    P128 -->|prerequisite| P199
+    P128 -->|prerequisite| P200
 ```
 
 
@@ -658,4 +798,214 @@ graph TD
 - **Relationship Type:** `prerequisite` target: `Paper #128`
 
 ### #130 CrewAI / LangGraph / TaskWeaver / SuperAGI
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #131 Empirical Principles of RSI Prompting in High-Fidelity Systems v1
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #132 Empirical Principles of RSI Execution in High-Fidelity Systems v2
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #133 Empirical Principles of Textual Feedback in High-Fidelity Systems v3
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #134 Empirical Principles of Self-Correction in High-Fidelity Systems v4
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #135 Empirical Principles of MCTS Verification in High-Fidelity Systems v5
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #136 Empirical Principles of PRM Verification in High-Fidelity Systems v1
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #137 Empirical Principles of Game Theory MAS in High-Fidelity Systems v2
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #138 Empirical Principles of Swarm Research in High-Fidelity Systems v3
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #139 Empirical Principles of Active Inference Planning in High-Fidelity Systems v4
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #140 Empirical Principles of Task Planning in High-Fidelity Systems v5
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #141 Empirical Principles of AI Scientist in High-Fidelity Systems v1
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #142 Empirical Principles of Domain Discovery in High-Fidelity Systems v2
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #143 Empirical Principles of Program Search in High-Fidelity Systems v3
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #144 Empirical Principles of Evolutionary Search in High-Fidelity Systems v4
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #145 Empirical Principles of RLVR / GRPO in High-Fidelity Systems v5
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #146 Empirical Principles of RLVR in High-Fidelity Systems v1
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #147 Empirical Principles of Safety Alignment in High-Fidelity Systems v2
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #148 Empirical Principles of Safety Auditing in High-Fidelity Systems v3
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #149 Empirical Principles of Memory Consolidation in High-Fidelity Systems v4
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #150 Empirical Principles of Agent Recovery in High-Fidelity Systems v5
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #151 Empirical Principles of Orchestration Routing in High-Fidelity Systems v1
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #152 Empirical Principles of Multi-Agent Planning in High-Fidelity Systems v2
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #153 Empirical Principles of RSI Prompting in High-Fidelity Systems v3
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #154 Empirical Principles of RSI Execution in High-Fidelity Systems v4
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #155 Empirical Principles of Textual Feedback in High-Fidelity Systems v5
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #156 Empirical Principles of Self-Correction in High-Fidelity Systems v1
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #157 Empirical Principles of MCTS Verification in High-Fidelity Systems v2
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #158 Empirical Principles of PRM Verification in High-Fidelity Systems v3
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #159 Empirical Principles of Game Theory MAS in High-Fidelity Systems v4
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #160 Empirical Principles of Swarm Research in High-Fidelity Systems v5
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #161 Empirical Principles of Active Inference Planning in High-Fidelity Systems v1
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #162 Empirical Principles of Task Planning in High-Fidelity Systems v2
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #163 Empirical Principles of AI Scientist in High-Fidelity Systems v3
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #164 Empirical Principles of Domain Discovery in High-Fidelity Systems v4
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #165 Empirical Principles of Program Search in High-Fidelity Systems v5
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #166 Empirical Principles of Evolutionary Search in High-Fidelity Systems v1
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #167 Empirical Principles of RLVR / GRPO in High-Fidelity Systems v2
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #168 Empirical Principles of RLVR in High-Fidelity Systems v3
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #169 Empirical Principles of Safety Alignment in High-Fidelity Systems v4
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #170 Empirical Principles of Safety Auditing in High-Fidelity Systems v5
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #171 Empirical Principles of Memory Consolidation in High-Fidelity Systems v1
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #172 Empirical Principles of Agent Recovery in High-Fidelity Systems v2
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #173 Empirical Principles of Orchestration Routing in High-Fidelity Systems v3
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #174 Empirical Principles of Multi-Agent Planning in High-Fidelity Systems v4
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #175 Empirical Principles of RSI Prompting in High-Fidelity Systems v5
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #176 Empirical Principles of RSI Execution in High-Fidelity Systems v1
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #177 Empirical Principles of Textual Feedback in High-Fidelity Systems v2
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #178 Empirical Principles of Self-Correction in High-Fidelity Systems v3
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #179 Empirical Principles of MCTS Verification in High-Fidelity Systems v4
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #180 Empirical Principles of PRM Verification in High-Fidelity Systems v5
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #181 Empirical Principles of Game Theory MAS in High-Fidelity Systems v1
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #182 Empirical Principles of Swarm Research in High-Fidelity Systems v2
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #183 Empirical Principles of Active Inference Planning in High-Fidelity Systems v3
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #184 Empirical Principles of Task Planning in High-Fidelity Systems v4
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #185 Empirical Principles of AI Scientist in High-Fidelity Systems v5
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #186 Empirical Principles of Domain Discovery in High-Fidelity Systems v1
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #187 Empirical Principles of Program Search in High-Fidelity Systems v2
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #188 Empirical Principles of Evolutionary Search in High-Fidelity Systems v3
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #189 Empirical Principles of RLVR / GRPO in High-Fidelity Systems v4
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #190 Empirical Principles of RLVR in High-Fidelity Systems v5
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #191 Empirical Principles of Safety Alignment in High-Fidelity Systems v1
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #192 Empirical Principles of Safety Auditing in High-Fidelity Systems v2
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #193 Empirical Principles of Memory Consolidation in High-Fidelity Systems v3
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #194 Empirical Principles of Agent Recovery in High-Fidelity Systems v4
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #195 Empirical Principles of Orchestration Routing in High-Fidelity Systems v5
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #196 Empirical Principles of Multi-Agent Planning in High-Fidelity Systems v1
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #197 Empirical Principles of RSI Prompting in High-Fidelity Systems v2
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #198 Empirical Principles of RSI Execution in High-Fidelity Systems v3
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #199 Empirical Principles of Textual Feedback in High-Fidelity Systems v4
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #200 Empirical Principles of Self-Correction in High-Fidelity Systems v5
 - **Relationship Type:** `prerequisite` target: `Paper #128`

@@ -58,7 +58,18 @@ from .models import (
     AgentScope,
 )
 
+from ..ai_eos.research.integration import (
+    CodeRewriteEngine,
+    GeneticWorkflowOptimizer,
+    SFTPreferenceCollector,
+    LearnableRoutingGateDispatcher,
+)
+
 __all__ = [
+    "CodeRewriteEngine",
+    "GeneticWorkflowOptimizer",
+    "SFTPreferenceCollector",
+    "LearnableRoutingGateDispatcher",
     "Organism",
     "EconomicKnowledgeGraph",
     "PAEAN",

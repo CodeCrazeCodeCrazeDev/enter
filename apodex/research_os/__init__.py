@@ -47,7 +47,18 @@ from .pipeline import (
     ResearchPipelineOrchestrator,
 )
 
+from ..ai_eos.research.integration import (
+    CodeRewriteEngine,
+    GeneticWorkflowOptimizer,
+    SFTPreferenceCollector,
+    LearnableRoutingGateDispatcher,
+)
+
 __all__ = [
+    "CodeRewriteEngine",
+    "GeneticWorkflowOptimizer",
+    "SFTPreferenceCollector",
+    "LearnableRoutingGateDispatcher",
     "IHypothesisRegistry",
     "IDatasetRegistry",
     "IFeatureRegistry",

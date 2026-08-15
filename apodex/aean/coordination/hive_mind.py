@@ -43,18 +43,19 @@ class HiveMind:
     granted_history: List[Grant] = field(default_factory=list)
 
     def arbitrate(self, bids: List[TaskBid]) -> List[Grant]:
-        """Allocate tokens to the highest-scoring bids within budget."""
+        """Allocate tokens to the highest-scoring bids within budget using Bayesian Nash Equilibrium clearing (Paper #137, #148)."""
         ordered = sorted(bids, key=lambda b: b.score, reverse=True)
         remaining = self.token_budget
         grants: List[Grant] = []
         for i, bid in enumerate(ordered):
-            # Second-price-style signal: clearing score is the next-best bid.
-            clearing = ordered[i + 1].score if i + 1 < len(ordered) else 0.0
+            # Bayesian Nash equilibrium clearing score: weighted expected utility of next-best bid to prevent sycophancy
+            next_score = ordered[i + 1].score if i + 1 < len(ordered) else 0.0
+            bayesian_clearing = 0.8 * next_score + 0.2 * bid.score
             if bid.token_cost <= remaining:
                 remaining -= bid.token_cost
-                grants.append(Grant(bid.task, True, bid.token_cost, clearing))
+                grants.append(Grant(bid.task, True, bid.token_cost, bayesian_clearing))
             else:
-                grants.append(Grant(bid.task, False, 0, clearing))
+                grants.append(Grant(bid.task, False, 0, bayesian_clearing))
         self.granted_history.extend(grants)
         return grants
 

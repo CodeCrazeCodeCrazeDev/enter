@@ -1,6 +1,6 @@
 from __future__ import annotations
 import uuid
-from datetime import datetime
+from datetime import timezone, datetime
 from typing import Any, Dict, List
 from pydantic import BaseModel
 
@@ -37,7 +37,7 @@ def execute_opportunity_evaluation(
             "name": niche,
             "estimated_tam_cents": tam,
             "knowledge_type": KnowledgeType.EVERGREEN.value,
-            "observed_at": datetime.utcnow().isoformat()
+            "observed_at": datetime.now(timezone.utc).isoformat()
         }
     )
     runner.world_graph.add_node(market_node)
@@ -49,7 +49,7 @@ def execute_opportunity_evaluation(
         properties={
             "name": f"Legacy competitor for {niche}",
             "knowledge_type": KnowledgeType.EVERGREEN.value,
-            "observed_at": datetime.utcnow().isoformat()
+            "observed_at": datetime.now(timezone.utc).isoformat()
         }
     )
     runner.world_graph.add_node(competitor_node)
@@ -62,7 +62,7 @@ def execute_opportunity_evaluation(
         weight=0.85 if tier == CostTier.EXPENSIVE else 0.5,
         properties={
             "knowledge_type": KnowledgeType.EVERGREEN.value,
-            "observed_at": datetime.utcnow().isoformat()
+            "observed_at": datetime.now(timezone.utc).isoformat()
         }
     )
     runner.world_graph.add_relation(competes_edge)
@@ -108,7 +108,7 @@ def execute_narrative_structures(
             "name": f"Solution to {pain} Narrative",
             "narrative_framework": "Problem-Tension-Solution-Proof",
             "knowledge_type": KnowledgeType.EVERGREEN.value,
-            "observed_at": datetime.utcnow().isoformat()
+            "observed_at": datetime.now(timezone.utc).isoformat()
         }
     )
     runner.world_graph.add_node(narrative_node)
@@ -121,7 +121,7 @@ def execute_narrative_structures(
         weight=0.95 if tier == CostTier.EXPENSIVE else 0.8,
         properties={
             "knowledge_type": KnowledgeType.EVERGREEN.value,
-            "observed_at": datetime.utcnow().isoformat()
+            "observed_at": datetime.now(timezone.utc).isoformat()
         }
     )
     runner.world_graph.add_relation(targets_edge)
@@ -157,7 +157,7 @@ def execute_landing_page_patterns(
         properties={
             "name": prod_name,
             "knowledge_type": KnowledgeType.EVERGREEN.value,
-            "observed_at": datetime.utcnow().isoformat()
+            "observed_at": datetime.now(timezone.utc).isoformat()
         }
     )
     runner.world_graph.add_node(product_node)
@@ -169,7 +169,7 @@ def execute_landing_page_patterns(
         properties={
             "price_cents": 1900,  # $19/mo
             "knowledge_type": KnowledgeType.EVERGREEN.value,
-            "observed_at": datetime.utcnow().isoformat()
+            "observed_at": datetime.now(timezone.utc).isoformat()
         }
     )
     runner.world_graph.add_node(offer_node)
@@ -182,7 +182,7 @@ def execute_landing_page_patterns(
         weight=1.0,
         properties={
             "knowledge_type": KnowledgeType.EVERGREEN.value,
-            "observed_at": datetime.utcnow().isoformat()
+            "observed_at": datetime.now(timezone.utc).isoformat()
         }
     )
     runner.world_graph.add_relation(offers_edge)
@@ -220,7 +220,7 @@ def execute_structured_ab_testing(
             "name": f"A/B Split Test with {variant_count} variants",
             "traffic_size": 5000 if tier == CostTier.EXPENSIVE else 1000,
             "knowledge_type": KnowledgeType.DECAYING.value,
-            "observed_at": datetime.utcnow().isoformat()
+            "observed_at": datetime.now(timezone.utc).isoformat()
         }
     )
     runner.world_graph.add_node(campaign_node)
@@ -233,7 +233,7 @@ def execute_structured_ab_testing(
         weight=0.90 if tier == CostTier.EXPENSIVE else 0.60,
         properties={
             "knowledge_type": KnowledgeType.DECAYING.value,
-            "observed_at": datetime.utcnow().isoformat(),
+            "observed_at": datetime.now(timezone.utc).isoformat(),
             "click_through_rate": 0.045 if tier == CostTier.EXPENSIVE else 0.02
         }
     )
@@ -278,7 +278,7 @@ def execute_revenue_metric_literacy(
             "ltv_to_cac": float(ltv) / max(1.0, float(cac)),
             "mrr_cents": mrr_cents,
             "knowledge_type": KnowledgeType.DECAYING.value,
-            "observed_at": datetime.utcnow().isoformat()
+            "observed_at": datetime.now(timezone.utc).isoformat()
         }
     )
     runner.world_graph.add_node(metric_node)
@@ -291,7 +291,7 @@ def execute_revenue_metric_literacy(
         weight=0.98 if tier == CostTier.EXPENSIVE else 0.70,
         properties={
             "knowledge_type": KnowledgeType.DECAYING.value,
-            "observed_at": datetime.utcnow().isoformat()
+            "observed_at": datetime.now(timezone.utc).isoformat()
         }
     )
     runner.world_graph.add_relation(metrics_edge)
@@ -336,7 +336,7 @@ def execute_business_model_design(
             "marketing_allocation_cents": marketing_budget,
             "product_allocation_cents": product_budget,
             "knowledge_type": KnowledgeType.EVERGREEN.value,
-            "observed_at": datetime.utcnow().isoformat()
+            "observed_at": datetime.now(timezone.utc).isoformat()
         }
     )
     runner.world_graph.add_node(allocation_node)

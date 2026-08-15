@@ -72,6 +72,76 @@ graph TD
         P128[#128 BabyAGI]
         P129[#129 AutoGPT]
         P130[#130 CrewAI / LangGraph / Task]
+        P131[#131 In-Context Abstraction fo]
+        P132[#132 Active Inference and Free]
+        P133[#133 Causal Reasoning and Do-C]
+        P134[#134 Ebbinghaus Decay Networks]
+        P135[#135 Epistemic Value Maximizat]
+        P136[#136 Holm-Bonferroni Hypothese]
+        P137[#137 Bayesian Nash Equilibrium]
+        P138[#138 Deflated Sharpe Ratio and]
+        P139[#139 Pareto Frontier Multi-Obj]
+        P140[#140 Generative Process Superv]
+        P141[#141 Genetic Program Synthesis]
+        P142[#142 Policy Gradient Optimizat]
+        P143[#143 Constitutional Policy Ali]
+        P144[#144 Hierarchical Planning Tre]
+        P145[#145 Iterative Self-Critique w]
+        P146[#146 Survey on Autonomous Agen]
+        P147[#147 Self-Referential Prompt R]
+        P148[#148 Game-Theoretic Mechanism ]
+        P149[#149 Tree Search Routing with ]
+        P150[#150 Automated Literature Synt]
+        P151[#151 Quality-Diversity Search ]
+        P152[#152 Group Relative Policy Opt]
+        P153[#153 Prover-Verifier Games for]
+        P154[#154 Lifelong Skill Memory Acc]
+        P155[#155 Modular Agent Operating S]
+        P156[#156 Unsupervised Process Rewa]
+        P157[#157 Verbal Reinforcement Lear]
+        P158[#158 Deceptive Signal Detectio]
+        P159[#159 Reflective Action Selecti]
+        P160[#160 Falsifiable Hypothesis Ge]
+        P161[#161 Automated Code Refactorin]
+        P162[#162 Verifiable Outcome Reward]
+        P163[#163 Weak-to-Strong Supervisio]
+        P164[#164 Terminal Task Execution u]
+        P165[#165 Asynchronous Protocol Mes]
+        P166[#166 Benchmark Analysis of LLM]
+        P167[#167 Recursive Introspection B]
+        P168[#168 Bayesian Prior Updating f]
+        P169[#169 Weak-to-Strong Generaliza]
+        P170[#170 Communication Bandwidth O]
+        P171[#171 Graph-of-Thoughts Executi]
+        P172[#172 Autonomous Experiment Des]
+        P173[#173 Quality-Diversity Prompt ]
+        P174[#174 On-Policy Reinforcement L]
+        P175[#175 Debate Protocols for Audi]
+        P176[#176 Episodic Experience Retri]
+        P177[#177 Standardized Inter-Agent ]
+        P178[#178 Self-Directed Curriculum ]
+        P179[#179 Consistency-Regularized R]
+        P180[#180 Multi-Aspect Verifier Ens]
+        P181[#181 Bayesian Consensus Aggreg]
+        P182[#182 Deliberative Action Searc]
+        P183[#183 Reproducibility Verificat]
+        P184[#184 Large Language Models as ]
+        P185[#185 Verifiable Reward Fine-Tu]
+        P186[#186 Constitutional Rule Enfor]
+        P187[#187 Context Budget Management]
+        P188[#188 Event-Driven Message Bus ]
+        P189[#189 Meta-Self-Improvement: Le]
+        P190[#190 Verbal Feedback Distillat]
+        P191[#191 Process Reward Model Fine]
+        P192[#192 Dynamic SOP Adaptation in]
+        P193[#193 Grounded Reflection and G]
+        P194[#194 Autonomous Evidence Acqui]
+        P195[#195 Quality Diversity Code Mu]
+        P196[#196 Reinforcement Learning wi]
+        P197[#197 Scalable Oversight via In]
+        P198[#198 Hierarchical Memory Index]
+        P199[#199 Unified Capability Owners]
+        P200[#200 Unified Cognitive Operati]
     end
     subgraph L3 [L3 (Governance Layer)]
         P33[#33 Lets Verify Step by Step]
@@ -271,6 +341,76 @@ graph TD
     P125 -->|prerequisite| P127
     P128 -->|prerequisite| P129
     P128 -->|prerequisite| P130
+    P128 -->|prerequisite| P131
+    P128 -->|prerequisite| P132
+    P128 -->|prerequisite| P133
+    P128 -->|prerequisite| P134
+    P128 -->|prerequisite| P135
+    P128 -->|prerequisite| P136
+    P128 -->|prerequisite| P137
+    P128 -->|prerequisite| P138
+    P128 -->|prerequisite| P139
+    P128 -->|prerequisite| P140
+    P128 -->|prerequisite| P141
+    P128 -->|prerequisite| P142
+    P128 -->|prerequisite| P143
+    P128 -->|prerequisite| P144
+    P128 -->|prerequisite| P145
+    P128 -->|prerequisite| P146
+    P128 -->|prerequisite| P147
+    P128 -->|prerequisite| P148
+    P128 -->|prerequisite| P149
+    P128 -->|prerequisite| P150
+    P128 -->|prerequisite| P151
+    P128 -->|prerequisite| P152
+    P128 -->|prerequisite| P153
+    P128 -->|prerequisite| P154
+    P128 -->|prerequisite| P155
+    P128 -->|prerequisite| P156
+    P128 -->|prerequisite| P157
+    P128 -->|prerequisite| P158
+    P128 -->|prerequisite| P159
+    P128 -->|prerequisite| P160
+    P128 -->|prerequisite| P161
+    P128 -->|prerequisite| P162
+    P128 -->|prerequisite| P163
+    P128 -->|prerequisite| P164
+    P128 -->|prerequisite| P165
+    P128 -->|prerequisite| P166
+    P128 -->|prerequisite| P167
+    P128 -->|prerequisite| P168
+    P128 -->|prerequisite| P169
+    P128 -->|prerequisite| P170
+    P128 -->|prerequisite| P171
+    P128 -->|prerequisite| P172
+    P128 -->|prerequisite| P173
+    P128 -->|prerequisite| P174
+    P128 -->|prerequisite| P175
+    P128 -->|prerequisite| P176
+    P128 -->|prerequisite| P177
+    P128 -->|prerequisite| P178
+    P128 -->|prerequisite| P179
+    P128 -->|prerequisite| P180
+    P128 -->|prerequisite| P181
+    P128 -->|prerequisite| P182
+    P128 -->|prerequisite| P183
+    P128 -->|prerequisite| P184
+    P128 -->|prerequisite| P185
+    P128 -->|prerequisite| P186
+    P128 -->|prerequisite| P187
+    P128 -->|prerequisite| P188
+    P128 -->|prerequisite| P189
+    P128 -->|prerequisite| P190
+    P128 -->|prerequisite| P191
+    P128 -->|prerequisite| P192
+    P128 -->|prerequisite| P193
+    P128 -->|prerequisite| P194
+    P128 -->|prerequisite| P195
+    P128 -->|prerequisite| P196
+    P128 -->|prerequisite| P197
+    P128 -->|prerequisite| P198
+    P128 -->|prerequisite| P199
+    P128 -->|prerequisite| P200
 ```
 
 
@@ -658,4 +798,214 @@ graph TD
 - **Relationship Type:** `prerequisite` target: `Paper #128`
 
 ### #130 CrewAI / LangGraph / TaskWeaver / SuperAGI
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #131 In-Context Abstraction for Test-Time Scaling
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #132 Active Inference and Free Energy Principle in Agentic Control
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #133 Causal Reasoning and Do-Calculus for Multi-Agent Decisions
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #134 Ebbinghaus Decay Networks: Human-Like Memory Retention in AI
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #135 Epistemic Value Maximization in Expected Free Energy Routing
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #136 Holm-Bonferroni Hypotheses Testing in Multi-Trial Autonomous Discovery
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #137 Bayesian Nash Equilibrium for Sycophancy Mitigation in Agent Debates
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #138 Deflated Sharpe Ratio and White's Reality Check for Algorithmic Strategy Search
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #139 Pareto Frontier Multi-Objective Capital Allocation in Autonomous Enterprise
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #140 Generative Process Supervision with Step-Wise Verification
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #141 Genetic Program Synthesis with LLM-Driven Mutation Operators
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #142 Policy Gradient Optimization with Verifiable Step Rewards
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #143 Constitutional Policy Alignment under Adjudicated Rule Trees
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #144 Hierarchical Planning Trees for Long-Horizon Agent Swarms
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #145 Iterative Self-Critique with Contrastive Feedback Buffers
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #146 Survey on Autonomous Agent Memory Architectures
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #147 Self-Referential Prompt Rewriting for Autonomous Agent Evolution
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #148 Game-Theoretic Mechanism Design for Decentralized Agent Networks
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #149 Tree Search Routing with Monte Carlo Value Function Approximations
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #150 Automated Literature Synthesis with Semantic Citation Graphs
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #151 Quality-Diversity Search in Prompt Space using MAP-Elites
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #152 Group Relative Policy Optimization for Mathematical Discovery
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #153 Prover-Verifier Games for Legible Output Certificate Generation
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #154 Lifelong Skill Memory Accumulation in Embodied Agents
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #155 Modular Agent Operating Systems: Kernel and Resource Abstractions
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #156 Unsupervised Process Reward Estimation via Consensus Trajectories
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #157 Verbal Reinforcement Learning with Episodic Memory Consolidation
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #158 Deceptive Signal Detection in Competitive Multi-Agent Interactions
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #159 Reflective Action Selection under Dynamic Environmental Constraints
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #160 Falsifiable Hypothesis Generation over Empirical Knowledge Graphs
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #161 Automated Code Refactoring via Heuristic Program Search
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #162 Verifiable Outcome Rewards for Multi-Step Theorem Proving
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #163 Weak-to-Strong Supervision in Multi-Aspect Evaluation
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #164 Terminal Task Execution under Strict Context Budgets
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #165 Asynchronous Protocol Messaging in Scalable Multi-Agent Frameworks
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #166 Benchmark Analysis of LLM Self-Correction Failure Modes
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #167 Recursive Introspection Bounds for Self-Refining AI Systems
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #168 Bayesian Prior Updating for LLM Self-Evaluation Calibration
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #169 Weak-to-Strong Generalization in Step-Wise Verifiers
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #170 Communication Bandwidth Optimization in Heterogeneous Swarms
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #171 Graph-of-Thoughts Execution for Multi-Goal Optimization
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #172 Autonomous Experiment Design with Power Analysis Guarantees
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #173 Quality-Diversity Prompt Evolution for Algorithmic Trade Discovery
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #174 On-Policy Reinforcement Learning for Dynamic Goal Adaptation
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #175 Debate Protocols for Auditing Black-Box Language Models
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #176 Episodic Experience Retrieval for Long-Horizon Software Engineering
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #177 Standardized Inter-Agent Communication Specs and Schema Validation
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #178 Self-Directed Curriculum Learning in Autonomous Discovery Loops
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #179 Consistency-Regularized Reward Functions for LLM Self-Rewarding
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #180 Multi-Aspect Verifier Ensembling for Complex Problem Solving
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #181 Bayesian Consensus Aggregation in Multi-Agent Planning
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #182 Deliberative Action Search with Dynamic World Model Feedback
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #183 Reproducibility Verification in Autonomous Scientific Workflows
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #184 Large Language Models as Open-Ended Optimizers
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #185 Verifiable Reward Fine-Tuning for Strategic Reasoning
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #186 Constitutional Rule Enforcement in Parallel Verification Cascades
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #187 Context Budget Management for Long-Running Autonomous Workflows
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #188 Event-Driven Message Bus Architecture for Multi-Agent Operating Systems
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #189 Meta-Self-Improvement: Learning to Learn Self-Correction Strategies
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #190 Verbal Feedback Distillation into Compact Policy Ensembles
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #191 Process Reward Model Fine-Tuning without Human Preference Labels
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #192 Dynamic SOP Adaptation in Heterogeneous Multi-Agent Networks
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #193 Grounded Reflection and Goal Recalibration in ReAct Loops
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #194 Autonomous Evidence Acquisition and Causal Graph Inference
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #195 Quality Diversity Code Mutation in High-Dimensional Search Spaces
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #196 Reinforcement Learning with Explicit Step Verification Signals
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #197 Scalable Oversight via Inter-Agent Debate and Consensus Audits
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #198 Hierarchical Memory Indexing for Long-Horizon Agent Navigation
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #199 Unified Capability Ownership and Service Registries for Agent Networks
+- **Relationship Type:** `prerequisite` target: `Paper #128`
+
+### #200 Unified Cognitive Operating Systems: Architecture, Control, and Evolution
 - **Relationship Type:** `prerequisite` target: `Paper #128`

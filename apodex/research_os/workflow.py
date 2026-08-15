@@ -1,13 +1,11 @@
 from __future__ import annotations
-import collections
 import time
 from uuid import UUID, uuid4
-from typing import Any, Dict, List, Optional, Set
+from typing import Dict, List, Optional
 from pydantic import BaseModel, Field
 
 from .models import (
     BaseArtifact,
-    ResearchProject,
     ResearchProposal,
     ResearchAgenda,
     ResearchQuestion,
@@ -22,17 +20,14 @@ from .models import (
     Publication,
     CitationGraph,
     ResearchRoadmap,
-    DecisionRecord,
 )
 from .events import (
     EventBus,
     WorkflowStarted,
     ArtifactCreated,
     ExperimentCompleted,
-    ReviewFailed,
     GovernanceRejected,
     PublicationAccepted,
-    HypothesisFalsified,
 )
 from .storage import ResearchRepository
 from .plugins import PluginRegistry

@@ -6,14 +6,12 @@ immutability rules, and end-to-end pipeline execution.
 from __future__ import annotations
 
 import math
-from datetime import datetime
 import pytest
 from apodex.research_os import (
     Hypothesis,
     Dataset,
     Feature,
     Experiment,
-    Model,
     HypothesisRegistry,
     DatasetRegistry,
     FeatureRegistry,
@@ -23,8 +21,6 @@ from apodex.research_os import (
     calculate_dsr,
     walk_forward_split,
     block_bootstrap,
-    capture_environment_fingerprint,
-    verify_reproducibility,
     StatisticalValidator,
     GovernanceGateway,
     ResearchPipelineOrchestrator,
@@ -284,3 +280,31 @@ def test_end_to_end_pipeline_rejection() -> None:
     assert decision.status == "REJECTED"
     assert len(decision.rejection_rationales) > 0
     assert model is None
+
+
+def test_calculate_dsr_edge_cases() -> None:
+    """Verify calculate_dsr does not crash on return lengths of 1 or extreme trials."""
+    # Under length of 1, division-by-zero is avoided by denom safe-guards
+    dsr_val_1 = calculate_dsr(sharpe=1.5, trials=5, returns_length=1, trials_variance=0.15)
+    assert 0.0 <= dsr_val_1 <= 1.0
+
+    # Large trials and large returns_length handles successfully
+    dsr_val_large = calculate_dsr(sharpe=2.0, trials=10000, returns_length=1000, trials_variance=0.2)
+    assert 0.0 <= dsr_val_large <= 1.0
+
+
+def test_standard_normal_ppf_numerical_stability() -> None:
+    """Verify standard_normal_ppf does not raise domain error on extreme probabilities."""
+    from apodex.research_os.statistical_validation import standard_normal_ppf
+
+    # Extreme inputs very close to 0 and 1
+    p_low = 1e-12
+    p_high = 1.0 - 1e-12
+
+    val_low = standard_normal_ppf(p_low)
+    val_high = standard_normal_ppf(p_high)
+
+    assert val_low < 0
+    assert val_high > 0
+    assert not math.isnan(val_low)
+    assert not math.isnan(val_high)

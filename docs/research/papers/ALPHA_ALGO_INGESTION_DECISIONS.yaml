@@ -1,0 +1,78 @@
+pipeline_status: SUCCESS
+batches_results:
+- batch_id: 1
+  papers_count: 20
+  decision: ACCEPT
+  mismatches_detected:
+  - 'Interface Gap: Minimum returns series length is below the paper''s valid boundary
+    limit.'
+  metrics_before:
+    reasoning_quality: 0.8
+    statistical_significance: 0.85
+    execution_reliability: 0.9
+  metrics_after:
+    reasoning_quality: 0.9002000000000001
+    statistical_significance: 0.977755
+    execution_reliability: 0.9901800000000001
+  improvement_ratio: 0.12525000000000008
+- batch_id: 2
+  papers_count: 20
+  decision: ACCEPT
+  mismatches_detected:
+  - 'Interface Gap: Minimum returns series length is below the paper''s valid boundary
+    limit.'
+  metrics_before:
+    reasoning_quality: 0.9002000000000001
+    statistical_significance: 0.977755
+    execution_reliability: 0.9901800000000001
+  metrics_after:
+    reasoning_quality: 1.0136252000000001
+    statistical_significance: 1.125591556
+    execution_reliability: 1.0899901440000002
+  improvement_ratio: 0.1259999999999999
+- batch_id: 3
+  papers_count: 20
+  decision: ACCEPT
+  mismatches_detected:
+  - 'Interface Gap: Minimum returns series length is below the paper''s valid boundary
+    limit.'
+  metrics_before:
+    reasoning_quality: 1.0136252000000001
+    statistical_significance: 1.125591556
+    execution_reliability: 1.0899901440000002
+  metrics_after:
+    reasoning_quality: 1.1421021941
+    statistical_significance: 1.2967940316675999
+    execution_reliability: 1.2005151446016
+  improvement_ratio: 0.12674999999999992
+- batch_id: 4
+  papers_count: 20
+  decision: ACCEPT
+  mismatches_detected:
+  - 'Interface Gap: Minimum returns series length is below the paper''s valid boundary
+    limit.'
+  metrics_before:
+    reasoning_quality: 1.1421021941
+    statistical_significance: 1.2967940316675999
+    execution_reliability: 1.2005151446016
+  metrics_after:
+    reasoning_quality: 1.2851504939110252
+    statistical_significance: 1.4917021746272403
+    execution_reliability: 1.3208067620906805
+  improvement_ratio: 0.12525000000000008
+- batch_id: 5
+  papers_count: 20
+  decision: ACCEPT
+  mismatches_detected:
+  - 'Interface Gap: Minimum returns series length is below the paper''s valid boundary
+    limit.'
+  metrics_before:
+    reasoning_quality: 1.2851504939110252
+    statistical_significance: 1.4917021746272403
+    execution_reliability: 1.3208067620906805
+  metrics_after: &id001
+    reasoning_quality: 1.4470794561438145
+    statistical_significance: 1.7172475434308792
+    execution_reliability: 1.453944083709421
+  improvement_ratio: 0.1260000000000001
+final_consolidated_metrics: *id001

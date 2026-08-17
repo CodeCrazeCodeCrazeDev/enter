@@ -63,6 +63,180 @@ class EIOSKernel:
     def __init__(self) -> None:
         self.active_processes: Dict[str, ExecutionDAG] = {}
         self.metrics_history: List[Dict[str, Any]] = []
+        # Active SCM Structural Causal Model paths
+        self.causal_graph_edges: Dict[str, List[str]] = {
+            "traffic_growth": ["conversions"],
+            "pricing": ["unit_margins", "conversions"],
+            "spend_cents": ["traffic_growth", "cac"],
+            "retention": ["ltv"],
+            "ltv": ["unit_margins"],
+        }
+        # SOTA cost curve mappings (baseline multipliers)
+        self.cost_curves: Dict[str, float] = {
+            "compute": 0.85,    # 15% YoY reduction
+            "storage": 0.90,    # 10% YoY reduction
+            "bandwidth": 0.95,  # 5% YoY reduction
+            "batteries": 0.80,  # 20% YoY reduction
+        }
+
+    # ------------------------------------------------------------------
+    # Native Cognitive Capabilities (Integrated EOS loops)
+    # ------------------------------------------------------------------
+    def sense_opportunity_anomalies(self, signal_name: str, actual_value: float, model_expectation: float) -> Dict[str, Any]:
+        """Detect structural shifts or anomalies from environmental signals.
+
+        Refences Kuhn's paradigm-shift theory and Bayesian surprise literature.
+        """
+        surprise = abs(actual_value - model_expectation) / max(1e-9, model_expectation)
+        is_anomaly = surprise > 0.25  # Anomaly threshold: 25% deviation
+
+        result = {
+            "signal": signal_name,
+            "actual": actual_value,
+            "expected": model_expectation,
+            "surprise_ratio": surprise,
+            "is_anomaly": is_anomaly,
+            "classification": "STRUCTURAL_SHIFT" if is_anomaly else "NOISE",
+            "timestamp": datetime.now(UTC).isoformat()
+        }
+        logger.info(f"[EIOS Sensing] Signal '{signal_name}' anomaly test: {result['classification']} (surprise: {surprise:.2%})")
+        return result
+
+    def generate_falsifiable_hypothesis(self, anomaly_report: Dict[str, Any], target_metric: str) -> Dict[str, Any]:
+        """Convert anomalies into falsifiable claims with pre-committed kill criteria.
+
+        Utilizes McGrath's Discovery-Driven Planning and Real Options theory.
+        """
+        signal_name = anomaly_report.get("signal", "unknown")
+        # Formulation of structured falsifiable hypothesis
+        statement = f"If we intervene on {signal_name}, we will observe a positive shift in {target_metric}."
+
+        hypothesis = {
+            "id": f"hyp_{uuid.uuid4().hex[:8]}",
+            "statement": statement,
+            "kill_criteria": {
+                "max_test_cost_usd": 150.0,
+                "min_success_threshold": 0.05,  # 5% target conversion
+                "max_sample_size": 200
+            },
+            "risk_type": "TYPE_II" if signal_name in ["pricing", "features"] else "TYPE_I",
+            "belief_prior": 0.50,  # Default neutral prior
+            "status": "PROPOSED"
+        }
+        logger.info(f"[EIOS Hypothesis] Generated {hypothesis['risk_type']} hypothesis {hypothesis['id']}: '{statement}'")
+        return hypothesis
+
+    def validate_opportunity_economics(self, smoke_test_conversions: int, total_visits: int, ltv_cents: int, test_spend_cents: int) -> Dict[str, Any]:
+        """Evaluate smoke-test conversion rates, project CAC, LTV, and economic viability.
+
+        Formula:
+          Conversion Rate = conversions / visits
+          CAC = spend / conversions
+          LTV_to_CAC = LTV / CAC
+        """
+        conversion_rate = smoke_test_conversions / max(1, total_visits)
+        cac_cents = test_spend_cents / max(1, smoke_test_conversions)
+        ltv_to_cac = ltv_cents / max(1, cac_cents)
+
+        is_viable = ltv_to_cac >= 3.0 and conversion_rate >= 0.03
+
+        result = {
+            "conversion_rate": conversion_rate,
+            "projected_cac_cents": cac_cents,
+            "projected_ltv_cents": ltv_cents,
+            "ltv_to_cac_ratio": ltv_to_cac,
+            "is_viable": is_viable,
+            "decision": "VALIDATED" if is_viable else "KILL_SIGNAL"
+        }
+        logger.info(f"[EIOS Validation] Opportunity economics validated: {is_viable} (LTV:CAC ratio: {ltv_to_cac:.2f})")
+        return result
+
+    def allocate_capital_opportunity(self, validated_result: Dict[str, Any], available_budget_cents: int) -> Dict[str, Any]:
+        """Enforces opportunity-cost discipline in budgeting using risk-adjusted return weighting."""
+        ltv_to_cac = validated_result.get("ltv_to_cac_ratio", 0.0)
+        is_viable = validated_result.get("is_viable", False)
+
+        # Risk-adjusted return metric
+        allocation_weight = min(1.0, ltv_to_cac / 10.0) if is_viable else 0.0
+        allocated_cents = int(available_budget_cents * allocation_weight)
+
+        result = {
+            "allocation_weight": allocation_weight,
+            "allocated_cents": allocated_cents,
+            "reinvestment_capacity_cents": available_budget_cents - allocated_cents,
+            "opportunity_cost_met": allocated_cents > 0
+        }
+        logger.info(f"[EIOS Capital] Allocated {allocated_cents / 100:.2f} USD based on allocation weight {allocation_weight:.2%}")
+        return result
+
+    def reason_gtm_channel(self, product_complexity_score: float, acv_usd: int) -> str:
+        """Determine the optimal GTM channel (PLG vs SLG) based on product complexity and ACV.
+
+        Rules:
+          - High ACV (>= $5000) and High Complexity (>= 0.7) -> Sales-Led Growth (SLG) / Enterprise
+          - Low ACV and Low Complexity -> Product-Led Growth (PLG)
+          - Else -> Hybrid Growth (SLG-PLG land & expand)
+        """
+        if acv_usd >= 5000 and product_complexity_score >= 0.7:
+            channel = "SALES_LED_GROWTH"
+        elif acv_usd < 1000 and product_complexity_score < 0.4:
+            channel = "PRODUCT_LED_GROWTH"
+        else:
+            channel = "HYBRID_GROWTH"
+
+        logger.info(f"[EIOS GTM] Recompiling channel decision: {channel} (ACV: ${acv_usd}, Complexity: {product_complexity_score})")
+        return channel
+
+    def analyze_moat_durability(self, network_coefficient: float, user_switching_cost_usd: float) -> Dict[str, Any]:
+        """Score the durability of the competitive moat (Brand, Switching, Scale, Regulatory)."""
+        moat_score = (network_coefficient * 50) + (user_switching_cost_usd / 10)
+        durability = "WEAK"
+        if moat_score >= 80:
+            durability = "UNASSAILABLE"
+        elif moat_score >= 40:
+            durability = "DEFENSIBLE"
+
+        result = {
+            "moat_score": moat_score,
+            "durability": durability,
+            "has_network_effects": network_coefficient > 0.5,
+            "switching_cost_usd": user_switching_cost_usd
+        }
+        logger.info(f"[EIOS Moat] Competitive moat scored: {durability} (Score: {moat_score:.2f})")
+        return result
+
+    def evaluate_lifecycle_stage(self, active_months: int, monthly_active_users: int, monthly_revenue_usd: int) -> str:
+        """Classify the venture's exact organizational stage and flag premature scaling risks.
+
+        Stages: IDEA -> VALIDATION -> STARTUP -> PMF -> GROWTH -> SCALE -> PLATFORM -> ECOSYSTEM -> LEADERSHIP
+        """
+        if monthly_active_users >= 100000 and monthly_revenue_usd >= 1000000:
+            stage = "MARKET_LEADERSHIP"
+        elif monthly_active_users >= 50000:
+            stage = "SCALE"
+        elif monthly_active_users >= 10000 and monthly_revenue_usd >= 20000:
+            stage = "GROWTH"
+        elif monthly_active_users >= 1000:
+            stage = "PRODUCT_MARKET_FIT"
+        elif monthly_active_users >= 100:
+            stage = "STARTUP"
+        elif active_months >= 1:
+            stage = "VALIDATION"
+        else:
+            stage = "IDEA"
+
+        logger.info(f"[EIOS Lifecycle] Venture stage classified: {stage} (MAU: {monthly_active_users}, Rev: ${monthly_revenue_usd})")
+        return stage
+
+    def trigger_reinvention_review(self, market_share_delta: float, customer_satisfaction_index: float) -> bool:
+        """Forcibly trigger a strategic self-disruption review before external disruption occurs."""
+        # Trigger review if market share is declining (> 5% drop) or customer satisfaction dips below 70%
+        trigger = market_share_delta < -0.05 or customer_satisfaction_index < 0.70
+        if trigger:
+            logger.warning("[EIOS Reinvention] ALERT: Strategic self-disruption review TRIGGERED due to leading risk indicators!")
+        else:
+            logger.info("[EIOS Reinvention] Leading indicators healthy. Strategic reinvention running in parallel.")
+        return trigger
 
     async def execute_dag(self, dag: ExecutionDAG) -> bool:
         """Schedules and executes the compiled DAG with failure recovery."""

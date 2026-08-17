@@ -295,11 +295,11 @@ def test_calculate_dsr_edge_cases() -> None:
 
 def test_standard_normal_ppf_numerical_stability() -> None:
     """Verify standard_normal_ppf does not raise domain error on extreme probabilities."""
-    from apodex.research_os.statistical_validation import standard_normal_ppf
+    from apodex.research_os.statistical_validation import standard_normal_ppf, standard_normal_cdf
 
-    # Extreme inputs very close to 0 and 1
-    p_low = 1e-12
-    p_high = 1.0 - 1e-12
+    # Extreme inputs very close to 0, 1, or out of bounds
+    p_low = 1e-18
+    p_high = 1.0 + 1e-18
 
     val_low = standard_normal_ppf(p_low)
     val_high = standard_normal_ppf(p_high)
@@ -308,3 +308,29 @@ def test_standard_normal_ppf_numerical_stability() -> None:
     assert val_high > 0
     assert not math.isnan(val_low)
     assert not math.isnan(val_high)
+
+    cdf_low = standard_normal_cdf(-100.0)
+    cdf_high = standard_normal_cdf(100.0)
+    assert 0.0 < cdf_low < 1.0
+    assert 0.0 < cdf_high < 1.0
+
+
+def test_reproducibility_verification_safety() -> None:
+    """Verify reproducibility check gracefully handles missing or invalid metrics."""
+    from apodex.research_os.reproducibility import verify_reproducibility
+
+    orig = Experiment(
+        experiment_id="exp_test",
+        hypothesis_id="H_01",
+        dataset_id="DS_01",
+        status="COMPLETED",
+        returns_time_series=[0.01, -0.005, 0.02],
+        metrics={"sharpe": 1.5},
+    )
+
+    replayed_returns = [0.01, -0.005, 0.02]
+    replayed_metrics = {"sharpe": 0.5}  # Mismatched metric
+
+    # Should safely return False
+    res = verify_reproducibility(orig, replayed_returns, replayed_metrics)
+    assert res is False

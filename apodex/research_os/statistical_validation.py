@@ -63,12 +63,11 @@ def standard_normal_cdf(x: float) -> float:
 
 def standard_normal_ppf(p: float) -> float:
     """Standard normal inverse cumulative distribution function (approximation)."""
-    # Winitzki approximation for inverse error function
-    if p <= 0.0 or p >= 1.0:
-        raise ValueError("Probability must be strictly between 0 and 1.")
+    # Winitzki approximation for inverse error function with probability bounds clamping
+    p_clamped = max(1e-12, min(1.0 - 1e-12, float(p)))
 
     # Map to [-1, 1] range for erf_inv
-    y = 2.0 * p - 1.0
+    y = 2.0 * p_clamped - 1.0
     a = 0.147
     if y == 0.0:
         return 0.0

@@ -59,9 +59,13 @@ def verify_reproducibility(
         if abs(orig_r - rep_r) > tolerance:
             return False
 
-    # Compare key metrics
-    orig_sharpe = original.metrics.get("sharpe", 0.0)
-    rep_sharpe = replayed_metrics.get("sharpe", 0.0)
+    # Compare key metrics safely converting to float
+    try:
+        orig_sharpe = float(original.metrics.get("sharpe", 0.0))
+        rep_sharpe = float(replayed_metrics.get("sharpe", 0.0))
+    except (ValueError, TypeError):
+        return False
+
     if abs(orig_sharpe - rep_sharpe) > tolerance:
         return False
 

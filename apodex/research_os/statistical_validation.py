@@ -62,13 +62,15 @@ def standard_normal_cdf(x: float) -> float:
 
 
 def standard_normal_ppf(p: float) -> float:
-    """Standard normal inverse cumulative distribution function (approximation)."""
-    # Winitzki approximation for inverse error function
-    if p <= 0.0 or p >= 1.0:
-        raise ValueError("Probability must be strictly between 0 and 1.")
+    """Standard normal inverse cumulative distribution function (approximation).
+
+    Clamps p to [1e-12, 1.0 - 1e-12] to guarantee robust execution without exceptions.
+    """
+    # Clamp probability to avoid numerical singularities or exceptions
+    p_clamped = max(1e-12, min(1.0 - 1e-12, float(p)))
 
     # Map to [-1, 1] range for erf_inv
-    y = 2.0 * p - 1.0
+    y = 2.0 * p_clamped - 1.0
     a = 0.147
     if y == 0.0:
         return 0.0
@@ -135,7 +137,7 @@ def calculate_dsr(
     std_sr_daily = math.sqrt(max(1e-12, var_sr_daily))
 
     # Scale standard error back to annualized
-    std_sr_annual = std_sr_daily * math.sqrt(252.0)
+    std_sr_annual = max(1e-8, std_sr_daily * math.sqrt(252.0))
 
     # Compute Z-score for deflation
     z_score = (sharpe - sr_0) / std_sr_annual
@@ -192,8 +194,12 @@ def block_bootstrap(
     rng = np.random.default_rng(seed)
     ret_arr = np.asarray(returns)
     n = len(ret_arr)
-    if n <= block_size:
-        # Fallback to standard bootstrap if data is too short
+    if n == 0:
+        return [0.0] * num_samples
+
+    # Guard block_size relative to dataset length n
+    block_size = max(1, min(block_size, n))
+    if n <= block_size and n > 1:
         block_size = max(1, n // 2)
 
     bootstrapped_sharpes = []

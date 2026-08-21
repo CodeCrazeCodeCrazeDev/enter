@@ -14,6 +14,7 @@ from uuid import UUID, uuid4
 from datetime import datetime
 
 from ...ai_eos.domain.models import VentureCell, Hypothesis, Evidence, Theory
+from .eos_first_principles import FirstPrinciplesEOSEngine, SystemState, VentureGrowthStage
 
 logger = logging.getLogger("sero.eos_engine")
 
@@ -474,6 +475,7 @@ class EOSEngine:
         self.reinvention_engine = ReinventionEngine()
         self.memory = EntrepreneurialMemory()
         self.evaluator = EvaluationFramework()
+        self.first_principles_engine = FirstPrinciplesEOSEngine()
 
     def run_continuous_sensing_cycle(self, cells: List[VentureCell], total_budget_cents: int) -> Dict[str, Any]:
         """Execute one complete hierarchical sensing, planning, allocation, and diagnostic loop."""

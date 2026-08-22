@@ -394,6 +394,42 @@ class LearnableRoutingGateDispatcher:
 
         return selected_agent_id
 
+    def register_200_paper_corpus_principles(self, corpus_path: str = 'docs/research/papers/AI_EOS_RESEARCH_DB.yaml') -> Dict[str, Any]:
+        """
+        Dynamically indexes and registers transferable principles across all 200 papers in AI_EOS_RESEARCH_DB.yaml.
+        Provides a centralized principle lookup table for runtime execution across AEAN, EOS, EIOS, and ResearchOS.
+        """
+        import yaml
+        if not os.path.exists(corpus_path):
+            logger.warning(f"Corpus file not found at {corpus_path}. Returning empty lookup table.")
+            return {}
+
+        with open(corpus_path, 'r', encoding='utf-8') as f:
+            data = yaml.safe_load(f)
+
+        papers = data.get('papers', []) if isinstance(data, dict) else data
+        principles_registry = {}
+
+        for paper in papers:
+            pid = paper.get('id')
+            meta = paper.get('metadata', {})
+            title = meta.get('title', f'Paper {pid}')
+            facts = paper.get('technical_facts', {})
+            analysis = paper.get('analysis', {})
+
+            principles_registry[pid] = {
+                'title': title,
+                'domain': meta.get('domain', 'General'),
+                'method': facts.get('method', ''),
+                'principle': analysis.get('implementation_notes', ''),
+                'architectural_fit': analysis.get('architectural_fit', ''),
+                'novelty_score': analysis.get('scientific_novelty', {}).get('score', 5),
+                'readiness_score': analysis.get('production_readiness', {}).get('score', 5)
+            }
+
+        logger.info(f"Successfully registered principles for {len(principles_registry)} research papers into runtime integration layer.")
+        return principles_registry
+
     def update_routing_parameters(self, agent_id: str, success: bool, cost_incurred: float) -> None:
         """Conjugate updating of agent's empirical performance profiles."""
         agent = self.agents.get(agent_id)

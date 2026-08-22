@@ -223,3 +223,53 @@ class ResearchOS(IResearchOS):
 
         self.hypotheses.save(hyp.hypothesis_id, hyp)
         return exp
+
+    # ------------------------------------------------------------------
+    # Cross-Subsystem Integration Bridges (EIOS, EOS, AEAN, APODEX)
+    # ------------------------------------------------------------------
+    def export_validated_hypothesis_to_kernel(self, hypothesis_id: UUID) -> Dict[str, Any]:
+        """Bridge validated ResearchOS scientific hypothesis to EIOS Kernel execution DAG payload."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis {hypothesis_id} not found.")
+
+        if hyp.status != "validated":
+            logger.warning(f"Exporting non-validated hypothesis {hypothesis_id} (status: {hyp.status}) to kernel.")
+
+        kernel_payload = {
+            "source_subsystem": "ResearchOS",
+            "hypothesis_id": str(hyp.hypothesis_id),
+            "title": hyp.title,
+            "target_metric": hyp.target_metric,
+            "significance_alpha": hyp.significance_level_alpha,
+            "exported_at": datetime.utcnow().isoformat(),
+            "recommended_action": f"Deploy empirical verification pipeline for {hyp.target_metric}"
+        }
+        logger.info(f"Exported hypothesis {hypothesis_id} to EIOS Kernel bridge payload.")
+        return kernel_payload
+
+    def promote_hypothesis_to_eos(self, hypothesis_id: UUID, commercial_value: float) -> Dict[str, Any]:
+        """Bridge validated hypothesis to EOS decision engine for capital allocation and strategic decision making."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis {hypothesis_id} not found.")
+
+        score = self.score_opportunity(
+            commercial_value=commercial_value,
+            expected_info_gain=0.8,
+            option_value=0.5,
+            alpha=0.5,
+            beta=0.3,
+            gamma=0.2
+        )
+
+        eos_proposal = {
+            "hypothesis_id": str(hyp.hypothesis_id),
+            "title": hyp.title,
+            "status": hyp.status,
+            "commercial_score": score,
+            "promoted_at": datetime.utcnow().isoformat(),
+            "approved_for_eos_pipeline": hyp.status == "validated" or score > 0.6
+        }
+        logger.info(f"Promoted hypothesis {hypothesis_id} to EOS decision engine. Priority score: {score:.4f}")
+        return eos_proposal

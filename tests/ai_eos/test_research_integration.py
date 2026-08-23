@@ -189,3 +189,31 @@ def test_learnable_routing_gate_dispatcher() -> None:
     dispatcher.update_routing_parameters(agent_id="agent_cheap", success=True, cost_incurred=0.01)
     assert dispatcher.agents["agent_cheap"].historical_success_rate > 0.50
     assert dispatcher.agents["agent_cheap"].epistemic_curiosity < 0.20
+
+
+def test_research_corpus_indexer_and_200_paper_principles() -> None:
+    """Verifies that ResearchCorpusIndexer correctly indexes all 200 papers and maps principles."""
+    from apodex.ai_eos.research.integration import register_200_paper_corpus_principles
+    from apodex.ai_eos.research.research_os import ResearchOS
+
+    indexer = register_200_paper_corpus_principles()
+    assert len(indexer.raw_papers) == 200
+    assert len(indexer.principles) == 200
+
+    # Query principles by subsystem
+    aean_principles = indexer.query_principles_by_subsystem("AEAN")
+    eos_principles = indexer.query_principles_by_subsystem("EOS")
+    ros_principles = indexer.query_principles_by_subsystem("Research OS")
+
+    assert len(aean_principles) > 0
+    assert len(eos_principles) > 0
+    assert len(ros_principles) > 0
+
+    # Verify Research OS dynamic literature review over 200-paper corpus
+    ros = ResearchOS()
+    review = ros.conduct_literature_review(domain="Active Inference")
+
+    assert review["domain"] == "Active Inference"
+    assert review["reviewed_citations_count"] > 0
+    assert len(review["citations"]) > 0
+    assert "whitespace_found" in review

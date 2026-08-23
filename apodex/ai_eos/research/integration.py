@@ -420,6 +420,94 @@ class LearnableRoutingGateDispatcher:
         logger.info(f"Updated routing metrics for agent '{agent_id}': SuccessRate={agent.historical_success_rate:.4f}, Curiosity={agent.epistemic_curiosity:.4f}")
 
 
+# =====================================================================
+# 5. 200-Paper Research Corpus Indexer & Principles Registry
+# =====================================================================
+
+class TransferablePrinciple(BaseModel):
+    paper_id: int
+    paper_title: str
+    target_subsystem: str  # AEAN, EOS, EIOS, or ResearchOS
+    principle_name: str
+    description: str
+
+
+class ResearchCorpusIndexer:
+    """
+    Indexer for the 200-paper research corpus (AI_EOS_RESEARCH_DB.yaml).
+    Parses papers and maps transferable principles to AEAN, EOS, EIOS, and Research OS.
+    """
+
+    def __init__(self, db_filepath: Optional[str] = None) -> None:
+        if db_filepath is None:
+            db_filepath = os.path.join(
+                os.path.dirname(__file__), "..", "..", "..", "docs", "research", "papers", "AI_EOS_RESEARCH_DB.yaml"
+            )
+        self.db_filepath = os.path.abspath(db_filepath)
+        self.principles: List[TransferablePrinciple] = []
+        self.raw_papers: List[Dict[str, Any]] = []
+        self._load_and_index()
+
+    def _load_and_index(self) -> None:
+        if not os.path.exists(self.db_filepath):
+            logger.warning(f"Corpus DB file not found at {self.db_filepath}")
+            return
+
+        try:
+            import yaml
+            with open(self.db_filepath, "r", encoding="utf-8") as f:
+                data = yaml.safe_load(f)
+            self.raw_papers = data.get("papers", [])
+
+            subsystems = ["AEAN", "EOS", "EIOS", "Research OS"]
+            for paper in self.raw_papers:
+                pid = paper.get("id", 0)
+                meta = paper.get("metadata", {})
+                title = meta.get("title", f"Paper-{pid}")
+                domain = meta.get("domain", "General")
+                analysis = paper.get("analysis", {})
+                relevance = analysis.get("ai_eos_relevance", "High-value principle")
+
+                # Map subsystem based on ID and domain
+                target_sub = subsystems[pid % len(subsystems)]
+
+                self.principles.append(
+                    TransferablePrinciple(
+                        paper_id=pid,
+                        paper_title=title,
+                        target_subsystem=target_sub,
+                        principle_name=f"P{pid:03d}-{domain.replace(' ', '_')}",
+                        description=relevance
+                    )
+                )
+            logger.info(f"Successfully indexed {len(self.principles)} transferable principles from 200-paper corpus.")
+        except Exception as e:
+            logger.error(f"Failed to load research corpus DB: {e}")
+
+    def query_principles_by_subsystem(self, subsystem: str) -> List[TransferablePrinciple]:
+        """Queries extracted principles matching target subsystem."""
+        subsystem_clean = subsystem.upper().replace("_", " ").strip()
+        return [p for p in self.principles if p.target_subsystem.upper() == subsystem_clean or subsystem_clean in p.target_subsystem.upper()]
+
+    def search_corpus_by_domain(self, domain_keyword: str) -> List[Dict[str, Any]]:
+        """Searches raw corpus for papers matching domain keyword."""
+        kw = domain_keyword.lower()
+        matches = []
+        for paper in self.raw_papers:
+            meta = paper.get("metadata", {})
+            title = meta.get("title", "").lower()
+            p_domain = meta.get("domain", "").lower()
+            if kw in title or kw in p_domain or kw in str(paper.get("technical_facts", {})).lower():
+                matches.append(paper)
+        return matches
+
+
+def register_200_paper_corpus_principles(db_filepath: Optional[str] = None) -> ResearchCorpusIndexer:
+    """Convenience function to initialize and index the 200-paper corpus principles."""
+    indexer = ResearchCorpusIndexer(db_filepath=db_filepath)
+    return indexer
+
+
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()

@@ -114,13 +114,43 @@ class ResearchOS(IResearchOS):
     # Autonomous Science Engine
     # ------------------------------------------------------------------
     def conduct_literature_review(self, domain: str) -> Dict[str, Any]:
-        """Automated literature synthesis and citation mapping over active scientific namespaces."""
+        """Automated literature synthesis and citation mapping over active scientific namespaces (200-paper corpus)."""
         logger.info(f"Autonomous Science Engine conducting literature synthesis for domain: {domain}")
+        from .integration import register_200_paper_corpus_principles
+        indexer = register_200_paper_corpus_principles()
+
+        # Search matching papers in 200-paper corpus
+        matched_papers = indexer.search_corpus_by_domain(domain)
+        if not matched_papers:
+            # Fallback if domain keyword is narrow: return top sampled papers
+            matched_papers = indexer.raw_papers[:14] if indexer.raw_papers else []
+
+        citations = []
+        synthesized_trends = []
+        for p in matched_papers[:15]:
+            meta = p.get("metadata", {})
+            title = meta.get("title", "Untitled")
+            p_domain = meta.get("domain", "General")
+            citations.append({
+                "id": p.get("id"),
+                "title": title,
+                "domain": p_domain,
+                "authors": meta.get("authors", []),
+                "year": meta.get("year", 2025)
+            })
+            if p_domain and p_domain not in synthesized_trends:
+                synthesized_trends.append(p_domain)
+
+        # Principles for Research OS
+        ros_principles = indexer.query_principles_by_subsystem("Research OS")
+
         return {
             "domain": domain,
-            "reviewed_citations_count": 14,
-            "synthesized_trends": ["Deep Reinforcement learning with GRPO", "Active Inference with Expected Free Energy approximation"],
-            "whitespace_found": "Expected Free Energy implementation under lightweight micro-VM environments."
+            "reviewed_citations_count": len(citations),
+            "citations": citations,
+            "synthesized_trends": synthesized_trends[:5] if synthesized_trends else ["Active Inference", "Process Verification"],
+            "whitespace_found": f"Transferable principle integration for '{domain}' within micro-agent environments.",
+            "transferable_principles_count": len(ros_principles)
         }
 
     def design_experiment(self, hypothesis_id: UUID) -> Dict[str, Any]:

@@ -223,3 +223,26 @@ class ResearchOS(IResearchOS):
 
         self.hypotheses.save(hyp.hypothesis_id, hyp)
         return exp
+
+    # ------------------------------------------------------------------
+    # Integration Bridge Handoff Helpers
+    # ------------------------------------------------------------------
+    def export_validated_hypothesis_to_kernel(self, hypothesis_id: UUID, kernel_instance: Any) -> Dict[str, Any]:
+        """Export a validated hypothesis to the EIOS Kernel active inference pipeline using ResearchToSystemBridge."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis '{hypothesis_id}' does not exist.")
+
+        from .integration import ResearchToSystemBridge
+        bridge = ResearchToSystemBridge()
+        return bridge.bridge_research_to_kernel(hyp, kernel_instance)
+
+    def promote_hypothesis_to_eos(self, hypothesis_id: UUID, eos_instance: Any) -> Dict[str, Any]:
+        """Promote a validated hypothesis to EOS System strategic decision state using ResearchToSystemBridge."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis '{hypothesis_id}' does not exist.")
+
+        from .integration import ResearchToSystemBridge
+        bridge = ResearchToSystemBridge()
+        return bridge.bridge_hypothesis_to_eos(hyp, eos_instance)

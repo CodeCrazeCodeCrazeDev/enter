@@ -50,19 +50,30 @@ def verify_reproducibility(
     if original.status != "COMPLETED":
         return False
 
+    orig_returns = original.returns_time_series or []
+    rep_returns = replayed_returns or []
+
     # Check length of returns series
-    if len(original.returns_time_series) != len(replayed_returns):
+    if len(orig_returns) != len(rep_returns):
         return False
 
     # Check individual returns values under tolerance
-    for orig_r, rep_r in zip(original.returns_time_series, replayed_returns):
-        if abs(orig_r - rep_r) > tolerance:
+    for orig_r, rep_r in zip(orig_returns, rep_returns):
+        try:
+            val_orig = float(orig_r)
+            val_rep = float(rep_r)
+            if abs(val_orig - val_rep) > tolerance:
+                return False
+        except (ValueError, TypeError):
             return False
 
     # Compare key metrics
-    orig_sharpe = original.metrics.get("sharpe", 0.0)
-    rep_sharpe = replayed_metrics.get("sharpe", 0.0)
-    if abs(orig_sharpe - rep_sharpe) > tolerance:
+    try:
+        orig_sharpe = float(original.metrics.get("sharpe", 0.0))
+        rep_sharpe = float(replayed_metrics.get("sharpe", 0.0))
+        if abs(orig_sharpe - rep_sharpe) > tolerance:
+            return False
+    except (ValueError, TypeError):
         return False
 
     return True

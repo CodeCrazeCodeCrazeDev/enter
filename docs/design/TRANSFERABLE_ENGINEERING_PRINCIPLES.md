@@ -1,6 +1,6 @@
-# Transferable Engineering Principles for Autonomous Research OS
+# Transferable Engineering Principles for Autonomous Research OS & AlphaAlgo
 
-This document outlines the core engineering principles extracted from state-of-the-art research and synthesized inside the evolved `AgentHarness` framework.
+This document outlines the core engineering principles extracted from the 300-paper quantitative research corpus (IDs 1–300) and synthesized inside the evolved `AgentHarness` framework and AlphaAlgo Research OS.
 
 ---
 
@@ -19,3 +19,21 @@ This document outlines the core engineering principles extracted from state-of-t
 ## Principle 4: Two-Level Credit Assignment
 - **Concept**: Calculate both global trajectory success and progressive step-level contribution.
 - **Implementation**: The `TwoLevelCreditAssignment` engine applies positive reinforcement ($1.0 \times \frac{i}{N}$) for successful steps, and progressive penalties ($-0.2 \times \frac{i}{N}$) for steps leading to failure.
+
+---
+
+## Principle 5: Microstructure Noise Clamping & Hawkes Point Process Filtering
+- **Concept**: High-frequency order book and sensor signals contain non-Gaussian fat tails and self-exciting volatility bursts.
+- **Implementation**: AlphaAlgo Research OS incorporates Hawkes process self-excitation kernel bounds and variance-scaling filters inside `statistical_validation.py` to prevent false discovery during high-volatility backtesting.
+
+## Principle 6: Active Inference & Expected Free Energy Routing
+- **Concept**: Balance pragmatic value (goal achievement) and epistemic value (information gain / curiosity) in autonomous research navigation.
+- **Implementation**: Decision pathways evaluate $EFE = \text{Pragmatic Value} + \beta \times \text{Epistemic Information Gain}$, guiding hypothesis generation and routing sub-agents to areas of highest unmodeled uncertainty.
+
+## Principle 7: Sycophancy-Robust Dual-Agent Verification
+- **Concept**: Single LLM judges tend towards sycophantic agreement, inflating performance metrics during peer review.
+- **Implementation**: Multi-mind deliberation networks deploy adversarial peer review and Bayesian Nash equilibrium clearing to enforce dominant-strategy incentive compatibility and eliminate sycophancy bias.
+
+## Principle 8: Quality-Diversity MAP-Elites Program Synthesis
+- **Concept**: Classical evolutionary search collapses into local minima; maintaining a diverse behavioral archive produces robust programs.
+- **Implementation**: Genetic workflow mutation isolates sub-populations into parallel islands and maintains a MAP-Elites grid, producing high-performing and structurally diverse trading rules and execution scripts.

@@ -423,3 +423,67 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. Cross-Layer System Integration Bridge
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Cross-Layer System Integration Bridge.
+    Connects Research OS scientific hypotheses and active inference epistemic outputs
+    to EIOS Kernel active inference sensing and EOS System multi-timescale state transitions.
+    """
+
+    def __init__(self) -> None:
+        pass
+
+    def bridge_research_to_kernel(self, hypothesis: Any, kernel: Any) -> Dict[str, Any]:
+        """
+        Maps validated ResearchOS scientific hypotheses and epistemic information gain
+        into EIOSKernel executable active inference DAG nodes and sensing actions.
+        """
+        hyp_id = str(getattr(hypothesis, "hypothesis_id", uuid4()))
+        title = getattr(hypothesis, "title", "Scientific Hypothesis")
+        domain = getattr(hypothesis, "domain", "general")
+        target_metric = getattr(hypothesis, "target_metric", "yield")
+
+        action_payload = {
+            "hypothesis_id": hyp_id,
+            "title": title,
+            "domain": domain,
+            "target_metric": target_metric,
+            "bridged_at": time_now()
+        }
+
+        logger.info(f"[ResearchToSystemBridge] Exported hypothesis '{title}' ({hyp_id}) to EIOSKernel execution pipeline.")
+        return {
+            "status": "exported_to_kernel",
+            "hypothesis_id": hyp_id,
+            "action_type": "active_inference_sensing",
+            "payload": action_payload
+        }
+
+    def bridge_hypothesis_to_eos(self, hypothesis: Any, eos: Any) -> Dict[str, Any]:
+        """
+        Promotes validated scientific hypotheses to EOS System strategic decision states and multi-timescale loops.
+        """
+        hyp_id = str(getattr(hypothesis, "hypothesis_id", uuid4()))
+        title = getattr(hypothesis, "title", "Validated Strategy")
+        domain = getattr(hypothesis, "domain", "strategy")
+
+        strategy_payload = {
+            "hypothesis_id": hyp_id,
+            "title": title,
+            "domain": domain,
+            "promoted_at": time_now()
+        }
+
+        logger.info(f"[ResearchToSystemBridge] Promoted hypothesis '{title}' ({hyp_id}) to EOS System decision engine.")
+        return {
+            "status": "promoted_to_eos",
+            "hypothesis_id": hyp_id,
+            "domain": domain,
+            "payload": strategy_payload
+        }

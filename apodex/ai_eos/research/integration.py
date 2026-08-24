@@ -423,3 +423,75 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. 200-Paper Corpus Principle Indexer & Research Query Engine
+# =====================================================================
+
+_CORPUS_PRINCIPLES_REGISTRY: Dict[int, Dict[str, Any]] = {}
+
+def register_200_paper_corpus_principles(db_filepath: str = "docs/research/papers/AI_EOS_RESEARCH_DB.yaml") -> Dict[int, Dict[str, Any]]:
+    """
+    Registers and indexes transferable engineering principles across all 200 research papers.
+    Dynamically loads from AI_EOS_RESEARCH_DB.yaml.
+    """
+    global _CORPUS_PRINCIPLES_REGISTRY
+    if _CORPUS_PRINCIPLES_REGISTRY and len(_CORPUS_PRINCIPLES_REGISTRY) >= 200:
+        return _CORPUS_PRINCIPLES_REGISTRY
+
+    if os.path.exists(db_filepath):
+        try:
+            import yaml
+            with open(db_filepath, "r", encoding="utf-8") as f:
+                db_data = yaml.safe_load(f)
+            papers = db_data.get("papers", [])
+            for p in papers:
+                pid = int(p.get("id"))
+                meta = p.get("metadata", {})
+                tf = p.get("technical_facts", {})
+                an = p.get("analysis", {})
+                _CORPUS_PRINCIPLES_REGISTRY[pid] = {
+                    "id": pid,
+                    "title": meta.get("title", "Unknown"),
+                    "authors": meta.get("authors", "Unknown"),
+                    "year": meta.get("year", 2024),
+                    "domain": meta.get("domain", "General AI"),
+                    "method": tf.get("method", ""),
+                    "architectural_fit": an.get("architectural_fit", ""),
+                    "ai_eos_relevance": an.get("ai_eos_relevance", ""),
+                    "integration_priority": an.get("integration_priority", "Medium")
+                }
+            logger.info(f"Successfully registered {_CORPUS_PRINCIPLES_REGISTRY.__len__()} principles from 200-paper research DB.")
+        except Exception as e:
+            logger.error(f"Error reading research database {db_filepath}: {e}")
+
+    return _CORPUS_PRINCIPLES_REGISTRY
+
+
+def query_transferable_principles(query: str, top_k: int = 5) -> List[Dict[str, Any]]:
+    """
+    Queries the 200-paper principle index using keyword relevance and Jaccard similarity.
+    Returns matching transferable principles to guide runtime agent decisions.
+    """
+    registry = register_200_paper_corpus_principles()
+    if not registry:
+        return []
+
+    query_words = set(query.lower().split())
+    matches = []
+
+    for pid, paper in registry.items():
+        text_corpus = f"{paper['title']} {paper['domain']} {paper['method']} {paper['architectural_fit']} {paper['ai_eos_relevance']}".lower()
+        corpus_words = set(text_corpus.split())
+
+        intersection = query_words.intersection(corpus_words)
+        union = query_words.union(corpus_words)
+        similarity = len(intersection) / len(union) if union else 0.0
+
+        if len(intersection) > 0:
+            score = similarity + 0.1 * len(intersection)
+            matches.append((score, paper))
+
+    matches.sort(key=lambda x: x[0], reverse=True)
+    return [item[1] for item in matches[:top_k]]

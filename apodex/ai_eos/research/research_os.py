@@ -116,11 +116,23 @@ class ResearchOS(IResearchOS):
     def conduct_literature_review(self, domain: str) -> Dict[str, Any]:
         """Automated literature synthesis and citation mapping over active scientific namespaces."""
         logger.info(f"Autonomous Science Engine conducting literature synthesis for domain: {domain}")
+        from .integration import query_transferable_principles, register_200_paper_corpus_principles
+
+        principles = query_transferable_principles(domain, top_k=5)
+        total_corpus = len(register_200_paper_corpus_principles())
+
+        trends = [p.get("method", "N/A") for p in principles] if principles else [
+            "Deep Reinforcement learning with GRPO",
+            "Active Inference with Expected Free Energy approximation"
+        ]
+
         return {
             "domain": domain,
-            "reviewed_citations_count": 14,
-            "synthesized_trends": ["Deep Reinforcement learning with GRPO", "Active Inference with Expected Free Energy approximation"],
-            "whitespace_found": "Expected Free Energy implementation under lightweight micro-VM environments."
+            "reviewed_citations_count": total_corpus,
+            "matching_principles_count": len(principles),
+            "synthesized_trends": trends,
+            "top_matching_principles": principles,
+            "whitespace_found": f"Transferable engineering principle integration active for {domain}."
         }
 
     def design_experiment(self, hypothesis_id: UUID) -> Dict[str, Any]:

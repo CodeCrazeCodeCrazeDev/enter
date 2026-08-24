@@ -189,3 +189,35 @@ def test_learnable_routing_gate_dispatcher() -> None:
     dispatcher.update_routing_parameters(agent_id="agent_cheap", success=True, cost_incurred=0.01)
     assert dispatcher.agents["agent_cheap"].historical_success_rate > 0.50
     assert dispatcher.agents["agent_cheap"].epistemic_curiosity < 0.20
+
+
+def test_200_paper_corpus_principles_registration_and_query() -> None:
+    """Verifies indexing and querying of transferable engineering principles from the 200-paper corpus."""
+    from apodex.ai_eos.research.integration import (
+        register_200_paper_corpus_principles,
+        query_transferable_principles,
+    )
+    from apodex.ai_eos.research.research_os import ResearchOS
+
+    # 1. Register corpus principles
+    registry = register_200_paper_corpus_principles()
+    assert len(registry) == 200
+    assert 1 in registry
+    assert 200 in registry
+
+    # Check structure of Paper #1
+    paper1 = registry[1]
+    assert paper1["id"] == 1
+    assert "Awesome-Agent-Papers" in paper1["title"]
+
+    # 2. Query transferable principles for Active Inference
+    matches = query_transferable_principles("Active Inference", top_k=5)
+    assert len(matches) > 0
+    assert any("active inference" in str(m).lower() or "inference" in str(m).lower() for m in matches)
+
+    # 3. Test ResearchOS integration conducting literature review
+    ros = ResearchOS()
+    lit_review = ros.conduct_literature_review("Active Inference")
+    assert lit_review["reviewed_citations_count"] == 200
+    assert lit_review["matching_principles_count"] > 0
+    assert len(lit_review["synthesized_trends"]) > 0

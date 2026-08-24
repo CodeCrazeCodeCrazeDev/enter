@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 integration.py: Multi-paradigm scientific research-to-code integration layer.
-Incorporates transferable engineering principles extracted from the 200-paper corpus,
-directly resolving high-priority research debt in AI-EOS, AEAN, and Research OS.
+Incorporates transferable engineering principles extracted from the 300-paper corpus (IDs 1-300),
+directly resolving high-priority research debt in AI-EOS, AEAN, and AlphaAlgo Research OS.
 """
 
 from __future__ import annotations
@@ -13,11 +13,52 @@ import ast
 import tempfile
 import sys
 import os
+import yaml
 from typing import Any, Dict, List, Optional, Tuple, Set
 from uuid import UUID, uuid4
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger("sero.research.integration")
+
+# Global registry of extracted 300-paper corpus transferable principles
+ALPHAALGO_RESEARCH_PRINCIPLES: Dict[int, Dict[str, Any]] = {}
+
+
+def register_300_paper_corpus_principles(yaml_path: str = "docs/research/papers/ALPHA_ALGO_100_NEW_RESEARCH.yaml") -> int:
+    """Loads and registers transferable principles from the AlphaAlgo 100-paper research corpus into memory."""
+    if not os.path.exists(yaml_path):
+        logger.warning(f"Research corpus file not found: {yaml_path}")
+        return 0
+
+    with open(yaml_path, "r", encoding="utf-8") as f:
+        data = yaml.safe_load(f)
+
+    count = 0
+    for paper in data.get("papers", []):
+        p_id = paper.get("id")
+        meta = paper.get("metadata", {})
+        facts = paper.get("technical_facts", {})
+        analysis = paper.get("analysis", {})
+
+        ALPHAALGO_RESEARCH_PRINCIPLES[p_id] = {
+            "title": meta.get("title"),
+            "domain": meta.get("domain"),
+            "doi": meta.get("doi"),
+            "problem": facts.get("problem"),
+            "method": facts.get("method"),
+            "relevance": analysis.get("ai_eos_relevance"),
+            "implementation_notes": analysis.get("implementation_notes"),
+            "architectural_fit": analysis.get("architectural_fit"),
+        }
+        count += 1
+
+    logger.info(f"Successfully registered {count} transferable research principles into AlphaAlgo Research OS.")
+    return count
+
+
+# Auto-register on module load if YAML exists
+register_300_paper_corpus_principles()
+
 
 # =====================================================================
 # 1. Self-Referential Code Rewrite & Verification Engine (STOP / Gödel)

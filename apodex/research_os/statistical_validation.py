@@ -24,7 +24,7 @@ def adjust_p_values(p_values: List[float], method: str = "HOLM") -> List[float]:
 
     method = method.upper()
     if method == "BONFERRONI":
-        return [min(1.0, p * n) for p in p_values]
+        return [min(1.0, max(0.0, p * n)) for p in p_values]
 
     elif method == "HOLM":
         # Sort and track indices
@@ -34,7 +34,7 @@ def adjust_p_values(p_values: List[float], method: str = "HOLM") -> List[float]:
         for rank, (orig_idx, p) in enumerate(indexed_p):
             # Holm-Bonferroni multiplier: N - rank
             multiplier = n - rank
-            adj_p = min(1.0, p * multiplier)
+            adj_p = min(1.0, max(0.0, p * multiplier))
             running_max = max(running_max, adj_p)
             adjusted[orig_idx] = running_max
         return adjusted
@@ -47,10 +47,10 @@ def adjust_p_values(p_values: List[float], method: str = "HOLM") -> List[float]:
         running_min = 1.0
         for rank_idx, (orig_idx, p) in reversed(list(enumerate(indexed_p))):
             rank = rank_idx + 1
-            adj_p = (p * n) / rank
-            running_min = min(running_min, adj_p)
+            adj_p = (p * n) / rank if rank > 0 else p
+            running_min = min(running_min, min(1.0, max(0.0, adj_p)))
             adjusted[orig_idx] = running_min
-        return [min(1.0, p) for p in adjusted]
+        return [min(1.0, max(0.0, p)) for p in adjusted]
 
     else:
         raise ValueError(f"Unknown multiple-testing adjustment method: {method}")
@@ -63,12 +63,11 @@ def standard_normal_cdf(x: float) -> float:
 
 def standard_normal_ppf(p: float) -> float:
     """Standard normal inverse cumulative distribution function (approximation)."""
-    # Winitzki approximation for inverse error function
-    if p <= 0.0 or p >= 1.0:
-        raise ValueError("Probability must be strictly between 0 and 1.")
+    # Safe clamp probability to open interval (1e-12, 1 - 1e-12)
+    p_clamped = min(max(p, 1e-12), 1.0 - 1e-12)
 
     # Map to [-1, 1] range for erf_inv
-    y = 2.0 * p - 1.0
+    y = 2.0 * p_clamped - 1.0
     a = 0.147
     if y == 0.0:
         return 0.0
@@ -109,6 +108,9 @@ def calculate_dsr(
     if trials <= 1:
         return 1.0  # If only one trial was run, no deflation is needed
 
+    # Clamp trials_variance to strictly non-negative
+    trials_variance = max(0.0, trials_variance)
+
     # Euler-Mascheroni constant
     euler_gamma = 0.5772156649
 
@@ -119,8 +121,8 @@ def calculate_dsr(
         z_n_e = standard_normal_ppf(1.0 - 1.0 / (trials * math.e))
     except (ValueError, ZeroDivisionError):
         # Fallback if trials is extremely large or calculation overflows
-        z_n = math.sqrt(2.0 * math.log(trials))
-        z_n_e = math.sqrt(2.0 * math.log(trials / math.e))
+        z_n = math.sqrt(2.0 * math.log(max(2, trials)))
+        z_n_e = math.sqrt(2.0 * math.log(max(2.0, trials / math.e)))
 
     # Expected maximum Sharpe Ratio under null
     sr_0 = math.sqrt(trials_variance) * ((1.0 - euler_gamma) * z_n + euler_gamma * z_n_e)
@@ -138,7 +140,7 @@ def calculate_dsr(
     std_sr_annual = std_sr_daily * math.sqrt(252.0)
 
     # Compute Z-score for deflation
-    z_score = (sharpe - sr_0) / std_sr_annual
+    z_score = (sharpe - sr_0) / max(1e-12, std_sr_annual)
 
     # Return cumulative probability (DSR value)
     return standard_normal_cdf(z_score)
@@ -165,6 +167,9 @@ def walk_forward_split(
         List of tuples: ((train_start, train_end), (test_start, test_end))
     """
     splits = []
+    if total_length <= 0 or train_size <= 0 or test_size <= 0 or step_size <= 0:
+        return splits
+
     current_test_start = train_size
 
     while current_test_start + test_size <= total_length:
@@ -189,33 +194,32 @@ def block_bootstrap(
 
     Preserves temporal dependencies (autocorrelation) in financial returns.
     """
-    rng = np.random.default_rng(seed)
-    ret_arr = np.asarray(returns)
+    ret_arr = np.asarray(returns, dtype=float)
     n = len(ret_arr)
-    if n <= block_size:
-        # Fallback to standard bootstrap if data is too short
-        block_size = max(1, n // 2)
+    if n == 0:
+        return [0.0] * num_samples
+
+    rng = np.random.default_rng(seed)
+    block_size = max(1, min(block_size, n))
 
     bootstrapped_sharpes = []
 
     for _ in range(num_samples):
         resampled = []
         while len(resampled) < n:
-            # Randomly select a start index for the block
-            start_idx = rng.integers(0, n - block_size + 1)
+            start_max = max(1, n - block_size + 1)
+            start_idx = rng.integers(0, start_max)
             block = ret_arr[start_idx : start_idx + block_size]
             resampled.extend(block)
 
-        # Trim to exactly original size
         resampled_arr = np.array(resampled[:n])
         mean_ret = np.mean(resampled_arr)
-        std_ret = np.std(resampled_arr, ddof=1)
+        std_ret = np.std(resampled_arr, ddof=1 if n > 1 else 0)
 
         if std_ret > 1e-8:
-            # Annualized Sharpe Ratio assuming daily returns (252)
             sh = (mean_ret / std_ret) * math.sqrt(252.0)
         else:
             sh = 0.0
-        bootstrapped_sharpes.append(sh)
+        bootstrapped_sharpes.append(float(sh))
 
     return bootstrapped_sharpes

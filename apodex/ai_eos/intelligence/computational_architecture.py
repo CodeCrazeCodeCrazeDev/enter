@@ -170,6 +170,9 @@ class ActiveInferencePlanner:
         return sorted(ranked, key=lambda x: x[1])
 
 
+from apodex.ai_eos.intelligence.fourteen_layer_engine import FourteenLayerEngine
+
+
 class EntrepreneurialIntelligenceOrchestrator:
     """
     The master coordinating engine that drives the complete 14-layer execution pipeline.
@@ -179,6 +182,7 @@ class EntrepreneurialIntelligenceOrchestrator:
         self.causal_engine = causal_engine
         self.planner = planner
         self.opportunities: List[Opportunity] = []
+        self.fourteen_layer_engine = FourteenLayerEngine()
 
     def ingest_signal(self, signal: Dict[str, Any]) -> Opportunity:
         """Senses external changes and creates a candidate opportunity state."""
@@ -220,10 +224,19 @@ class EntrepreneurialIntelligenceOrchestrator:
         intervention_var = primary_opp.variables[0] if primary_opp.variables else "marketing_spend"
         inter_state = self.causal_engine.execute_do_intervention(intervention_var, 1.5)
 
+        # 4. Integrate 14-Layer Engine Pipeline Execution
+        fourteen_layer_results = self.fourteen_layer_engine.execute_complete_14_layer_pipeline({
+            "title": primary_opp.title,
+            "domain": primary_opp.domain,
+            "variables": primary_opp.variables,
+            "tam_cents": primary_opp.tam_cents
+        })
+
         return {
             "status": "executed",
             "selected_opportunity": primary_opp.title,
             "best_expected_free_energy": best_efe,
             "intervention_performed": f"do({intervention_var} = 1.5)",
-            "propagated_state": inter_state
+            "propagated_state": inter_state,
+            "fourteen_layer_results": fourteen_layer_results
         }

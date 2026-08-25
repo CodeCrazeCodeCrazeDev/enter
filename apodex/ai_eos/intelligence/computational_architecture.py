@@ -10,6 +10,25 @@ from typing import Dict, Any, List, Tuple, Optional, Set
 from uuid import UUID, uuid4
 from pydantic import BaseModel, Field
 
+from .fourteen_layer_engine import (
+    Layer1_Reality,
+    Layer2_OpportunityDiscovery,
+    Layer3_ProblemDiscovery,
+    Layer4_DecisionMaking,
+    Layer5_OpportunityEvaluation,
+    Layer6_ProductCreation,
+    Layer7_CustomerUnderstanding,
+    Layer8_Marketing,
+    Layer9_Sales,
+    Layer10_Growth,
+    Layer11_Competition,
+    Layer12_OrganizationalDesign,
+    Layer13_MetaLearning,
+    Layer14_AIEntrepreneurship,
+    FourteenLayerEngine,
+    ComputationalArchitectureOfEntrepreneurship,
+)
+
 logger = logging.getLogger("sero.computational_architecture")
 
 
@@ -179,6 +198,7 @@ class EntrepreneurialIntelligenceOrchestrator:
         self.causal_engine = causal_engine
         self.planner = planner
         self.opportunities: List[Opportunity] = []
+        self.fourteen_layer_engine = FourteenLayerEngine()
 
     def ingest_signal(self, signal: Dict[str, Any]) -> Opportunity:
         """Senses external changes and creates a candidate opportunity state."""
@@ -220,10 +240,41 @@ class EntrepreneurialIntelligenceOrchestrator:
         intervention_var = primary_opp.variables[0] if primary_opp.variables else "marketing_spend"
         inter_state = self.causal_engine.execute_do_intervention(intervention_var, 1.5)
 
+        # 4. Execute 14 Layer Engine Sub-Pipeline
+        pipeline_14_res = self.fourteen_layer_engine.run_full_14_layer_pipeline(
+            raw_signals=[{"title": primary_opp.title, "tam_cents": primary_opp.tam_cents, "signal_strength": 0.8, "noise_level": 0.2}],
+            total_budget_cents=primary_opp.tam_cents
+        )
+
         return {
             "status": "executed",
             "selected_opportunity": primary_opp.title,
             "best_expected_free_energy": best_efe,
             "intervention_performed": f"do({intervention_var} = 1.5)",
-            "propagated_state": inter_state
+            "propagated_state": inter_state,
+            "fourteen_layer_pipeline_results": pipeline_14_res
         }
+
+
+__all__ = [
+    "Opportunity",
+    "AdvancedCausalEngine",
+    "ActiveInferencePlanner",
+    "EntrepreneurialIntelligenceOrchestrator",
+    "Layer1_Reality",
+    "Layer2_OpportunityDiscovery",
+    "Layer3_ProblemDiscovery",
+    "Layer4_DecisionMaking",
+    "Layer5_OpportunityEvaluation",
+    "Layer6_ProductCreation",
+    "Layer7_CustomerUnderstanding",
+    "Layer8_Marketing",
+    "Layer9_Sales",
+    "Layer10_Growth",
+    "Layer11_Competition",
+    "Layer12_OrganizationalDesign",
+    "Layer13_MetaLearning",
+    "Layer14_AIEntrepreneurship",
+    "FourteenLayerEngine",
+    "ComputationalArchitectureOfEntrepreneurship",
+]

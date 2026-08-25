@@ -223,3 +223,31 @@ class ResearchOS(IResearchOS):
 
         self.hypotheses.save(hyp.hypothesis_id, hyp)
         return exp
+
+    # ------------------------------------------------------------------
+    # Integration Bridge Helpers
+    # ------------------------------------------------------------------
+    def export_validated_hypothesis_to_kernel(self, hypothesis_id: UUID) -> Dict[str, Any]:
+        """Export a validated hypothesis payload to Layer 2 EIOS Kernel."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis '{hypothesis_id}' not found.")
+        return {
+            "hypothesis_id": str(hyp.hypothesis_id),
+            "title": hyp.title,
+            "domain": hyp.domain,
+            "status": hyp.status,
+            "exported": True
+        }
+
+    def promote_hypothesis_to_eos(self, hypothesis_id: UUID) -> Dict[str, Any]:
+        """Promote a validated research hypothesis into an actionable EOS strategic initiative."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis '{hypothesis_id}' not found.")
+        return {
+            "hypothesis_id": str(hyp.hypothesis_id),
+            "strategic_title": f"EOS Initiative: {hyp.title}",
+            "domain": hyp.domain,
+            "promoted": True
+        }

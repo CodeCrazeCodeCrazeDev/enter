@@ -6,7 +6,11 @@ from apodex.ai_eos.intelligence.computational_architecture import (
     Opportunity,
     AdvancedCausalEngine,
     ActiveInferencePlanner,
-    EntrepreneurialIntelligenceOrchestrator
+    EntrepreneurialIntelligenceOrchestrator,
+    FourteenLayerEngine,
+    ComputationalArchitectureOfEntrepreneurship,
+    Layer1_Reality,
+    Layer14_AIEntrepreneurship,
 )
 
 
@@ -101,3 +105,14 @@ def test_orchestrated_pipeline_execution() -> None:
     assert pipeline_result["selected_opportunity"] == "Autonomous Scientific Hardware Venture"
     assert "best_expected_free_energy" in pipeline_result
     assert pipeline_result["propagated_state"]["marketing_spend"] == 1.5
+    assert "fourteen_layer_pipeline_results" in pipeline_result
+
+
+def test_fourteen_layer_reexports() -> None:
+    l1 = Layer1_Reality()
+    assert l1.analyze_fundamental_reality()["definition"] is not None
+    l14 = Layer14_AIEntrepreneurship()
+    assert l14.allocate_resources_kelly(100, 0.5, 2.0)["allocated_capital_cents"] >= 0
+
+    orchestrator = ComputationalArchitectureOfEntrepreneurship()
+    assert isinstance(orchestrator, FourteenLayerEngine)

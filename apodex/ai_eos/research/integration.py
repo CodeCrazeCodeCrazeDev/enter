@@ -420,6 +420,50 @@ class LearnableRoutingGateDispatcher:
         logger.info(f"Updated routing metrics for agent '{agent_id}': SuccessRate={agent.historical_success_rate:.4f}, Curiosity={agent.epistemic_curiosity:.4f}")
 
 
+# =====================================================================
+# 5. AlphaAlgo 100-Paper Quantitative Research Principle Registry
+# =====================================================================
+
+ALPHAALGO_100_PRINCIPLES: Dict[str, Dict[str, Any]] = {
+    "DeflatedSharpeRatio": {
+        "papers": [201, 202, 215, 230],
+        "domain": "Quantitative Finance / Hypothesis Testing",
+        "principle": "Deflate Sharpe Ratio to account for selection bias and backtest overfitting across multiple trials using Euler-Mascheroni and extreme value statistics.",
+        "target_subsystem": "ResearchOS / StatisticalValidation"
+    },
+    "WalkForwardValidation": {
+        "papers": [205, 212, 240],
+        "domain": "Time Series Forecasting / Out-of-Sample Testing",
+        "principle": "Apply rolling and expanding walk-forward splits to prevent temporal data leakage and verify out-of-sample performance decay.",
+        "target_subsystem": "ResearchOS / WalkForwardSplit"
+    },
+    "StationaryBlockBootstrap": {
+        "papers": [208, 222, 255],
+        "domain": "Stochastic Modeling / Statistical Validation",
+        "principle": "Use random block sizes to preserve autocorrelations and non-Gaussian fat-tailed dependence structure in bootstrap resampling.",
+        "target_subsystem": "ResearchOS / BlockBootstrap"
+    },
+    "MultipleTestingCorrections": {
+        "papers": [210, 235, 270],
+        "domain": "Statistical Inference / Multi-Hypothesis Testing",
+        "principle": "Control Family-Wise Error Rate (Holm-Bonferroni) and False Discovery Rate (Benjamini-Hochberg) to eliminate false positive alpha discoveries.",
+        "target_subsystem": "ResearchOS / AdjustPValues"
+    },
+    "ProbabilityClamping": {
+        "papers": [218, 260, 290],
+        "domain": "Numerical Stability / Bayesian Inference",
+        "principle": "Clamp probability bounds strictly to [1e-12, 1 - 1e-12] to safeguard inverse cumulative normal CDF computations against log domain overflow.",
+        "target_subsystem": "ResearchOS / StandardNormalPPF"
+    }
+}
+
+
+def register_100_paper_alphaalgo_principles() -> Dict[str, Dict[str, Any]]:
+    """Registers and returns the 100-paper AlphaAlgo quantitative research principles."""
+    logger.info(f"Registered {len(ALPHAALGO_100_PRINCIPLES)} core quantitative research principles from 100-paper AlphaAlgo corpus (IDs 201-300).")
+    return ALPHAALGO_100_PRINCIPLES
+
+
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()

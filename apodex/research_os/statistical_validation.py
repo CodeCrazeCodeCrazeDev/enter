@@ -63,12 +63,11 @@ def standard_normal_cdf(x: float) -> float:
 
 def standard_normal_ppf(p: float) -> float:
     """Standard normal inverse cumulative distribution function (approximation)."""
-    # Winitzki approximation for inverse error function
-    if p <= 0.0 or p >= 1.0:
-        raise ValueError("Probability must be strictly between 0 and 1.")
+    # Clamp probability to prevent domain error and float precision issues near 0 and 1
+    p_clamped = max(1e-12, min(1.0 - 1e-12, p))
 
     # Map to [-1, 1] range for erf_inv
-    y = 2.0 * p - 1.0
+    y = 2.0 * p_clamped - 1.0
     a = 0.147
     if y == 0.0:
         return 0.0
@@ -123,7 +122,8 @@ def calculate_dsr(
         z_n_e = math.sqrt(2.0 * math.log(trials / math.e))
 
     # Expected maximum Sharpe Ratio under null
-    sr_0 = math.sqrt(trials_variance) * ((1.0 - euler_gamma) * z_n + euler_gamma * z_n_e)
+    safe_variance = max(0.0, trials_variance)
+    sr_0 = math.sqrt(safe_variance) * ((1.0 - euler_gamma) * z_n + euler_gamma * z_n_e)
 
     # Standard deviation of the estimated Sharpe Ratio (under non-normality)
     # Annualized Sharpe to daily Sharpe scale (approx) for standard error
@@ -135,7 +135,7 @@ def calculate_dsr(
     std_sr_daily = math.sqrt(max(1e-12, var_sr_daily))
 
     # Scale standard error back to annualized
-    std_sr_annual = std_sr_daily * math.sqrt(252.0)
+    std_sr_annual = max(1e-12, std_sr_daily * math.sqrt(252.0))
 
     # Compute Z-score for deflation
     z_score = (sharpe - sr_0) / std_sr_annual
@@ -189,9 +189,12 @@ def block_bootstrap(
 
     Preserves temporal dependencies (autocorrelation) in financial returns.
     """
-    rng = np.random.default_rng(seed)
     ret_arr = np.asarray(returns)
     n = len(ret_arr)
+    if n == 0:
+        return []
+
+    rng = np.random.default_rng(seed)
     if n <= block_size:
         # Fallback to standard bootstrap if data is too short
         block_size = max(1, n // 2)
@@ -202,14 +205,16 @@ def block_bootstrap(
         resampled = []
         while len(resampled) < n:
             # Randomly select a start index for the block
-            start_idx = rng.integers(0, n - block_size + 1)
+            max_start = max(0, n - block_size)
+            start_idx = rng.integers(0, max_start + 1) if max_start > 0 else 0
             block = ret_arr[start_idx : start_idx + block_size]
             resampled.extend(block)
 
         # Trim to exactly original size
         resampled_arr = np.array(resampled[:n])
-        mean_ret = np.mean(resampled_arr)
-        std_ret = np.std(resampled_arr, ddof=1)
+        ddof_val = 1 if len(resampled_arr) > 1 else 0
+        mean_ret = np.mean(resampled_arr) if len(resampled_arr) > 0 else 0.0
+        std_ret = np.std(resampled_arr, ddof=ddof_val) if len(resampled_arr) > 0 else 0.0
 
         if std_ret > 1e-8:
             # Annualized Sharpe Ratio assuming daily returns (252)

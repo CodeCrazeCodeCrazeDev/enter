@@ -116,11 +116,26 @@ class ResearchOS(IResearchOS):
     def conduct_literature_review(self, domain: str) -> Dict[str, Any]:
         """Automated literature synthesis and citation mapping over active scientific namespaces."""
         logger.info(f"Autonomous Science Engine conducting literature synthesis for domain: {domain}")
+        from .integration import register_100_paper_alphaalgo_principles
+        alpha_principles = register_100_paper_alphaalgo_principles()
+
+        domain_lower = domain.lower()
+        matching_principles = [
+            p for name, p in alpha_principles.items()
+            if domain_lower in p["domain"].lower() or domain_lower in {"all", "general", "quantitative finance", "finance"}
+        ]
+
         return {
             "domain": domain,
-            "reviewed_citations_count": 14,
-            "synthesized_trends": ["Deep Reinforcement learning with GRPO", "Active Inference with Expected Free Energy approximation"],
-            "whitespace_found": "Expected Free Energy implementation under lightweight micro-VM environments."
+            "reviewed_citations_count": 100,
+            "synthesized_trends": [
+                "Deflated Sharpe Ratio (DSR) Extreme Value Correction",
+                "Stationary Block Bootstrapping for Non-Gaussian Return Distributions",
+                "Holm-Bonferroni / Benjamini-Hochberg FWER & FDR Adjustments",
+                "Active Inference with Expected Free Energy approximation"
+            ],
+            "whitespace_found": "Expected Free Energy with Deflated Sharpe Ratio under high-frequency market regimes.",
+            "matching_alphaalgo_principles": matching_principles
         }
 
     def design_experiment(self, hypothesis_id: UUID) -> Dict[str, Any]:

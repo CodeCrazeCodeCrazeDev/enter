@@ -474,8 +474,7 @@ class CognitiveBrain(BaseModel):
     self_improvement: SelfImprovementEngine = Field(default_factory=SelfImprovementEngine)
     executor: LongHorizonExecutor = Field(default_factory=LongHorizonExecutor)
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = {"arbitrary_types_allowed": True}
 
     def run_strategic_cycle(self, goal_title: str) -> Dict[str, Any]:
         """Executes a single unified cognitive cycle across all integrated primitives."""

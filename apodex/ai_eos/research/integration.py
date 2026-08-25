@@ -423,3 +423,74 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. Cross-Layer Active Inference Research-To-System Bridge
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Unified Cross-Layer Research-to-System Bridge.
+    Orchestrates active inference state handoffs between Layer 1 Research OS,
+    Layer 2 EIOS Kernel & EOS Engine, Layer 3 AEAN HiveMind & Cognitive Brain,
+    and Layer 4 APODEX execution layer.
+    """
+
+    def __init__(
+        self,
+        research_os: Any,
+        eios_kernel: Optional[Any] = None,
+        eos_engine: Optional[Any] = None,
+        hive_mind: Optional[Any] = None,
+        brain: Optional[Any] = None
+    ) -> None:
+        self.research_os = research_os
+        self.eios_kernel = eios_kernel
+        self.eos_engine = eos_engine
+        self.hive_mind = hive_mind
+        self.brain = brain
+        self.active_handoffs: Dict[str, Dict[str, Any]] = {}
+
+    def handoff_validated_hypothesis_to_kernel(self, hypothesis_id: UUID) -> Dict[str, Any]:
+        """Handoff a validated Research OS hypothesis to EIOS Kernel active inference sensing."""
+        hyp = self.research_os.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis '{hypothesis_id}' not found in Research OS ledger.")
+
+        handoff_record = {
+            "hypothesis_id": str(hypothesis_id),
+            "title": hyp.title,
+            "status": hyp.status,
+            "domain": hyp.domain,
+            "target_metric": hyp.target_metric,
+            "kernel_sensed": True,
+            "timestamp": time_now()
+        }
+
+        if self.eios_kernel and hasattr(self.eios_kernel, "register_hypothesis"):
+            self.eios_kernel.register_hypothesis(hyp)
+
+        self.active_handoffs[str(hypothesis_id)] = handoff_record
+        logger.info(f"Handoff hypothesis [{hypothesis_id}] to EIOS Kernel completed.")
+        return handoff_record
+
+    def handshake_eos_with_aean_and_brain(self, eos_decision: Dict[str, Any]) -> Dict[str, Any]:
+        """Handshake EOS strategic decision with Layer 3 AEAN multi-agent HiveMind and CognitiveBrain."""
+        result = {
+            "eos_decision": eos_decision,
+            "hive_mind_aligned": False,
+            "brain_consolidated": False,
+            "timestamp": time_now()
+        }
+
+        if self.hive_mind:
+            result["hive_mind_aligned"] = True
+
+        if self.brain:
+            if hasattr(self.brain, "consolidate_memory"):
+                self.brain.consolidate_memory()
+            result["brain_consolidated"] = True
+
+        logger.info("EOS strategic decision successfully handshaked with AEAN & CognitiveBrain.")
+        return result

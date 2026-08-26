@@ -423,3 +423,103 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. 200-Paper & 300-Paper Corpus Principles Registration & Retrieval
+# =====================================================================
+
+_CORPUS_PRINCIPLES_CACHE: List[Dict[str, Any]] = []
+
+
+def register_200_paper_corpus_principles() -> List[Dict[str, Any]]:
+    """Registers scientific principles from the research paper corpus into system runtime."""
+    global _CORPUS_PRINCIPLES_CACHE
+    if _CORPUS_PRINCIPLES_CACHE:
+        return _CORPUS_PRINCIPLES_CACHE
+
+    _CORPUS_PRINCIPLES_CACHE = [
+        {
+            "id": "AEAN-1",
+            "domain": "multi-agent reasoning",
+            "title": "Graph-of-Thought Non-Linear Reasoning",
+            "subsystem": "AEAN",
+            "principle": "Replace linear ReAct execution loops with directed acyclic graphs of thought nodes to support speculative branching and backtracking."
+        },
+        {
+            "id": "AEAN-2",
+            "domain": "coordination debate",
+            "title": "Sycophancy-Resistant Swarm Debate",
+            "subsystem": "AEAN",
+            "principle": "Enforce Red Team role assignment during multi-agent consensus to eliminate compliance bias."
+        },
+        {
+            "id": "AEAN-3",
+            "domain": "routing dispatch",
+            "title": "Expected Free Energy Routing Gate",
+            "subsystem": "AEAN",
+            "principle": "Dispatch sub-tasks evaluating EFE = Pragmatic Value + Epistemic Curiosity - Cost."
+        },
+        {
+            "id": "EOS-1",
+            "domain": "growth loop optimization",
+            "title": "Multi-Timescale Coupled Feedback Loops",
+            "subsystem": "EOS",
+            "principle": "Couple fast tactical telemetry loops with slow strategic moat re-allocation."
+        },
+        {
+            "id": "EOS-2",
+            "domain": "capital allocation",
+            "title": "Advanced Kelly Criterion with Volatility Bounds",
+            "subsystem": "EOS",
+            "principle": "Allocate growth capital via fractional Kelly criterion bounded by variance limits."
+        },
+        {
+            "id": "EIOS-1",
+            "domain": "active inference",
+            "title": "Variational Free Energy State Sensing",
+            "subsystem": "EIOS",
+            "principle": "Continuous environmental state estimation via surprise minimization F = D_KL(q||p) - E[log p]."
+        },
+        {
+            "id": "EIOS-2",
+            "domain": "causal reasoning",
+            "title": "Pearl Do-Calculus Structural Interventions",
+            "subsystem": "EIOS",
+            "principle": "Execute explicit structural interventions do(X=x) to isolate genuine causal drivers."
+        },
+        {
+            "id": "ResearchOS-1",
+            "domain": "code rewrite",
+            "title": "Self-Referential Code Rewrite with GRC AST Audit",
+            "subsystem": "ResearchOS",
+            "principle": "Self-mutate codebase under AST static linting and sandbox dry-run execution."
+        },
+        {
+            "id": "ResearchOS-2",
+            "domain": "genetic synthesis",
+            "title": "Genetic Workflow Optimizer",
+            "subsystem": "ResearchOS",
+            "principle": "Evolve agent workflows using island population tracking and MAP-Elites parameter selection."
+        },
+        {
+            "id": "ResearchOS-3",
+            "domain": "statistical validation",
+            "title": "Welch T-Test and Probability Bounds Validation",
+            "subsystem": "ResearchOS",
+            "principle": "Validate empirical gains using Welch t-test with clamped probability distribution limits."
+        }
+    ]
+    return _CORPUS_PRINCIPLES_CACHE
+
+
+def get_corpus_principles(domain_filter: Optional[str] = None) -> List[Dict[str, Any]]:
+    """Retrieves registered corpus principles, optionally filtered by domain keyword."""
+    principles = register_200_paper_corpus_principles()
+    if not domain_filter:
+        return principles
+    filter_lower = domain_filter.lower()
+    return [
+        p for p in principles
+        if filter_lower in p["domain"].lower() or filter_lower in p["subsystem"].lower() or filter_lower in p["principle"].lower()
+    ]

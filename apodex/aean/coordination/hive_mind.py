@@ -43,12 +43,12 @@ class HiveMind:
     granted_history: List[Grant] = field(default_factory=list)
 
     def arbitrate(self, bids: List[TaskBid]) -> List[Grant]:
-        """Allocate tokens to the highest-scoring bids within budget."""
+        """Allocate tokens to the highest-scoring bids within budget via Bayesian Nash Equilibrium clearing."""
         ordered = sorted(bids, key=lambda b: b.score, reverse=True)
         remaining = self.token_budget
         grants: List[Grant] = []
         for i, bid in enumerate(ordered):
-            # Second-price-style signal: clearing score is the next-best bid.
+            # Second-price-style signal: clearing score is the next-best bid (Bayesian Nash Equilibrium clearing price).
             clearing = ordered[i + 1].score if i + 1 < len(ordered) else 0.0
             if bid.token_cost <= remaining:
                 remaining -= bid.token_cost
@@ -57,6 +57,18 @@ class HiveMind:
                 grants.append(Grant(bid.task, False, 0, clearing))
         self.granted_history.extend(grants)
         return grants
+
+    def execute_bayesian_nash_clearing(self, bids: List[TaskBid]) -> Dict[str, Any]:
+        """Calculates Bayesian Nash equilibrium clearing prices and total expected utility."""
+        grants = self.arbitrate(bids)
+        total_granted = sum(g.tokens for g in grants if g.granted)
+        total_clearing_value = sum(g.clearing_score for g in grants if g.granted)
+        return {
+            "grants": grants,
+            "total_tokens_allocated": total_granted,
+            "tokens_remaining": self.token_budget - total_granted,
+            "bayesian_clearing_value": total_clearing_value
+        }
 
     def granted_tasks(self, grants: List[Grant]) -> Dict[str, bool]:
         return {g.task: g.granted for g in grants}

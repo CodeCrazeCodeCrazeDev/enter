@@ -57,12 +57,45 @@ class ExecutionDAG(BaseModel):
 class EIOSKernel:
     """The central core of the Entrepreneurial Intelligence Operating System.
 
-    Manages task scheduling, failure recovery (retries), and model routing.
+    Manages task scheduling, failure recovery (retries), active inference state sensing,
+    and causal do-calculus interventions derived from corpus research principles.
     """
 
     def __init__(self) -> None:
         self.active_processes: Dict[str, ExecutionDAG] = {}
         self.metrics_history: List[Dict[str, Any]] = []
+
+    def compute_expected_free_energy(
+        self,
+        pragmatic_value: float,
+        epistemic_information_gain: float,
+        cost_penalty: float = 0.0
+    ) -> float:
+        """
+        Calculates Expected Free Energy (EFE) for active inference sensing.
+        EFE = Pragmatic Value + Epistemic Information Gain - Cost Penalty.
+        """
+        efe = pragmatic_value + epistemic_information_gain - cost_penalty
+        logger.info(f"[EIOS Kernel] Active Inference EFE Score: {efe:.4f} (Pragmatic={pragmatic_value}, Epistemic={epistemic_information_gain})")
+        return float(efe)
+
+    def execute_do_calculus_intervention(
+        self,
+        intervention_var: str,
+        value: Any,
+        causal_graph: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """
+        Executes Pearl's Causal Do-Calculus structural intervention do(X = value).
+        Severs incoming edges to intervention_var in causal_graph and overrides value.
+        """
+        modified_graph = {k: v.copy() if isinstance(v, list) else v for k, v in causal_graph.items()}
+        # Sever incoming causal links to intervention_var
+        if "parents" in modified_graph and intervention_var in modified_graph["parents"]:
+            modified_graph["parents"][intervention_var] = []
+        modified_graph[intervention_var] = value
+        logger.info(f"[EIOS Kernel] Executed do-calculus intervention do({intervention_var} = {value})")
+        return modified_graph
 
     async def execute_dag(self, dag: ExecutionDAG) -> bool:
         """Schedules and executes the compiled DAG with failure recovery."""

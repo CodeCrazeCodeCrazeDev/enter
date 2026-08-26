@@ -423,3 +423,104 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. Cross-Layer Research-to-System Bridge (ResearchOS -> EIOS/EOS -> AEAN -> APODEX)
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Unified Cross-Layer Active Inference Bridge.
+    Orchestrates handoffs between:
+      - Layer 1 Research OS (Hypothesis generation & walk-forward validation)
+      - Layer 2 EIOS Kernel & EOS (Active inference sensing, EFE scoring, causal interventions)
+      - Layer 3 AEAN (Hive Mind multi-agent debate and consensus execution)
+      - Layer 4 APODEX (Platform decision execution and tool dispatch)
+    """
+
+    def __init__(
+        self,
+        research_os: Any,
+        eios_kernel: Optional[Any] = None,
+        eos_engine: Optional[Any] = None,
+        hive_mind: Optional[Any] = None
+    ) -> None:
+        self.research_os = research_os
+        self.eios_kernel = eios_kernel
+        self.eos_engine = eos_engine
+        self.hive_mind = hive_mind
+        self.handoff_audit_trail: List[Dict[str, Any]] = []
+
+    def execute_cross_layer_handoff(
+        self,
+        hypothesis_title: str,
+        hypothesis_description: str,
+        target_metric: str,
+        ground_truth_yield: float = 1.2,
+        seed: int = 42
+    ) -> Dict[str, Any]:
+        """
+        Executes an end-to-end active inference handoff cycle from Research OS down to APODEX execution.
+        """
+        # Phase 1: Research OS Hypothesis Registration & Sandbox Experiment Simulation
+        hyp = self.research_os.register_hypothesis(
+            title=hypothesis_title,
+            description=hypothesis_description,
+            null_hypothesis=f"{target_metric} <= 0",
+            target_metric=target_metric,
+            significance_alpha=0.05
+        )
+
+        exp = self.research_os.create_experiment(hypothesis_id=hyp.hypothesis_id, seed=seed)
+        exp_result = self.research_os.execute_experiment_simulation(
+            experiment_id=exp.experiment_id,
+            ground_truth_yield=ground_truth_yield
+        )
+
+        handoff_record: Dict[str, Any] = {
+            "hypothesis_id": str(hyp.hypothesis_id),
+            "title": hyp.title,
+            "status": hyp.status,
+            "is_statistically_significant": exp_result.is_statistically_significant,
+            "p_value": exp_result.p_value,
+            "effect_size": exp_result.effect_size,
+            "timestamp": time_now()
+        }
+
+        # Phase 2: EIOS Kernel Active Inference Sensing
+        if self.eios_kernel and hasattr(self.eios_kernel, "register_research_hypothesis"):
+            self.eios_kernel.register_research_hypothesis(hyp)
+            if hasattr(self.eios_kernel, "sense_opportunity_anomalies"):
+                anomalies = self.eios_kernel.sense_opportunity_anomalies()
+                handoff_record["eios_anomalies_sensed"] = len(anomalies)
+
+        # Phase 3: EOS System Decision Engine Promotion
+        if self.eos_engine and hasattr(self.eos_engine, "ingest_validated_research"):
+            self.eos_engine.ingest_validated_research(hyp, exp_result)
+            handoff_record["eos_ingested"] = True
+
+        # Phase 4: AEAN Hive Mind Strategy Execution
+        if self.hive_mind:
+            if hasattr(self.hive_mind, "conduct_debate_consensus"):
+                consensus_score = self.hive_mind.conduct_debate_consensus(
+                    proposal=f"Deploy validated strategy from research: {hyp.title}"
+                )
+                handoff_record["aean_consensus_score"] = consensus_score
+            elif hasattr(self.hive_mind, "arbitrate"):
+                from apodex.aean.coordination.hive_mind import TaskBid
+                bids = [
+                    TaskBid(
+                        task=f"deploy_research_{hyp.title}",
+                        priority=0.9,
+                        expected_value=exp_result.effect_size,
+                        token_cost=10
+                    )
+                ]
+                grants = self.hive_mind.arbitrate(bids)
+                if grants and grants[0].granted:
+                    handoff_record["aean_consensus_score"] = grants[0].clearing_score + 0.8
+
+        self.handoff_audit_trail.append(handoff_record)
+        logger.info(f"Cross-layer handoff completed successfully for hypothesis '{hypothesis_title}' [Status: {hyp.status}]")
+        return handoff_record

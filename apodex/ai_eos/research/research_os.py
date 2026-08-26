@@ -223,3 +223,35 @@ class ResearchOS(IResearchOS):
 
         self.hypotheses.save(hyp.hypothesis_id, hyp)
         return exp
+
+    # ------------------------------------------------------------------
+    # Subsystem Handoff & Bridge Helpers
+    # ------------------------------------------------------------------
+    def export_validated_hypothesis_to_kernel(self, hypothesis_id: UUID, eios_kernel: Any) -> bool:
+        """Exports a validated research hypothesis directly to EIOS Kernel for active inference sensing."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp or hyp.status != "validated":
+            logger.warning(f"Cannot export hypothesis {hypothesis_id}: Not found or not validated.")
+            return False
+
+        if hasattr(eios_kernel, "register_research_hypothesis"):
+            eios_kernel.register_research_hypothesis(hyp)
+            logger.info(f"Exported validated hypothesis '{hyp.title}' [id={hyp.hypothesis_id}] to EIOS Kernel.")
+            return True
+        return False
+
+    def promote_hypothesis_to_eos(self, hypothesis_id: UUID, eos_engine: Any) -> bool:
+        """Promotes a validated research hypothesis directly into EOS System decision engine states."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp or hyp.status != "validated":
+            logger.warning(f"Cannot promote hypothesis {hypothesis_id}: Not found or not validated.")
+            return False
+
+        if hasattr(eos_engine, "ingest_validated_research"):
+            # Find associated experiment
+            matching_exps = [e for e in self.experiments.list_all() if e.hypothesis_id == hypothesis_id]
+            exp = matching_exps[-1] if matching_exps else None
+            eos_engine.ingest_validated_research(hyp, exp)
+            logger.info(f"Promoted validated hypothesis '{hyp.title}' [id={hyp.hypothesis_id}] to EOS Engine.")
+            return True
+        return False

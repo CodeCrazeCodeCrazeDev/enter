@@ -57,12 +57,91 @@ class ExecutionDAG(BaseModel):
 class EIOSKernel:
     """The central core of the Entrepreneurial Intelligence Operating System.
 
-    Manages task scheduling, failure recovery (retries), and model routing.
+    Manages task scheduling, failure recovery (retries), model routing, and
+    native first-principles cognitive capabilities (EOS Sensing & Execution).
     """
 
     def __init__(self) -> None:
         self.active_processes: Dict[str, ExecutionDAG] = {}
         self.metrics_history: List[Dict[str, Any]] = []
+        self.research_hypotheses: List[Dict[str, Any]] = []
+
+    def register_research_hypothesis(self, hypothesis: Dict[str, Any]) -> None:
+        """Register a scientific hypothesis exported from ResearchOS."""
+        self.research_hypotheses.append(hypothesis)
+        logger.info(f"[Kernel] Registered ResearchOS hypothesis: {hypothesis.get('title', 'Untitled')}")
+
+    def sense_opportunity_anomalies(self, market_observations: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Sense structural anomalies where observed market values diverge from expectations."""
+        anomalies = []
+        for obs in market_observations:
+            obs_val = obs.get("observed", 0.0)
+            exp_val = obs.get("expected", 1.0)
+            divergence = abs(obs_val - exp_val) / max(0.001, abs(exp_val))
+            if divergence >= 0.20:
+                anomaly = {**obs, "divergence": divergence, "is_structural": True}
+                anomalies.append(anomaly)
+        return anomalies
+
+    def generate_falsifiable_hypothesis(self, anomaly: Dict[str, Any]) -> Dict[str, Any]:
+        """Convert a market anomaly into a falsifiable claim with kill criteria."""
+        return {
+            "hypothesis_id": f"hyp_{uuid.uuid4().hex[:8]}",
+            "claim": f"Structural opportunity in {anomaly.get('domain', 'market')}: {anomaly.get('description', '')}",
+            "kill_criteria": f"Falsify if metric < {anomaly.get('expected', 1.0) * 1.2:.2f}",
+            "posterior_confidence": 0.50,
+            "status": "PROPOSED",
+        }
+
+    def validate_opportunity_economics(self, arpu_usd: float, cac_usd: float, churn_rate: float) -> Dict[str, Any]:
+        """Calculate unit economics and LTV:CAC health."""
+        ltv = arpu_usd / max(0.01, churn_rate)
+        ltv_cac = ltv / max(1.0, cac_usd)
+        payback_months = cac_usd / max(1.0, arpu_usd)
+        viable = ltv_cac >= 3.0 and payback_months <= 12.0
+        return {
+            "ltv_usd": ltv,
+            "ltv_to_cac": ltv_cac,
+            "payback_months": payback_months,
+            "economically_viable": viable,
+        }
+
+    def allocate_capital_opportunity(self, initiatives: List[Dict[str, Any]], budget_usd: float) -> Dict[str, float]:
+        """Allocate capital based on expected return / EFE minimization."""
+        if not initiatives:
+            return {}
+        total = sum(i.get("score", 1.0) for i in initiatives)
+        allocations = {}
+        for init in initiatives:
+            share = init.get("score", 1.0) / total if total > 0 else 1.0 / len(initiatives)
+            allocations[init.get("id", "init")] = budget_usd * share
+        return allocations
+
+    def reason_gtm_channel(self, price_usd: float, complexity: str) -> str:
+        """Determines optimal GTM motion based on price and complexity."""
+        if complexity == "HIGH" and price_usd >= 10000.0:
+            return "SALES_LED"
+        if complexity == "LOW" and price_usd < 500.0:
+            return "PLG"
+        return "HYBRID_CONTENT"
+
+    def analyze_moat_durability(self, network_density: float, switching_cost: float, brand_trust: float, cost_adv: float) -> float:
+        """Quantifies composite moat durability score [0, 1]."""
+        return 0.35 * network_density + 0.25 * switching_cost + 0.20 * brand_trust + 0.20 * cost_adv
+
+    def evaluate_lifecycle_stage(self, customers: int, mrr: float, retention_flat: bool) -> str:
+        """Classifies venture growth stage."""
+        if mrr >= 100000.0:
+            return "GROWTH"
+        if retention_flat and mrr >= 10000.0:
+            return "PMF"
+        if customers >= 10:
+            return "STARTUP"
+        return "VALIDATION" if customers > 0 else "IDEA"
+
+    def trigger_reinvention_review(self, growth_decay: float, attrition_rate: float) -> bool:
+        """Triggers self-disruption review if metrics decay."""
+        return growth_decay > 0.15 and attrition_rate > 0.20
 
     async def execute_dag(self, dag: ExecutionDAG) -> bool:
         """Schedules and executes the compiled DAG with failure recovery."""

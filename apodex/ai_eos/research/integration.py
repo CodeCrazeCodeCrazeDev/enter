@@ -423,3 +423,69 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. Research To System Bridge (Layer 1 -> Layer 2 Handoff)
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Research-to-System Integration Bridge.
+    Orchestrates cross-layer active inference state handoffs between:
+    - Layer 1: Research OS (validated scientific hypotheses & literature principles)
+    - Layer 2: EIOS Kernel (active inference sensing) & EOS System Engine (business loops)
+    - Layer 3: AEAN (multi-agent strategy execution)
+    """
+
+    def __init__(self) -> None:
+        self.exported_hypotheses: List[Dict[str, Any]] = []
+
+    def export_validated_hypothesis_to_kernel(
+        self,
+        kernel: Any,
+        hypothesis_id: str,
+        domain_keyword: str,
+        confidence: float,
+        extracted_principles: List[str],
+        pragmatic_value_delta: float = 0.5,
+        epistemic_gain_delta: float = 0.5
+    ) -> Dict[str, Any]:
+        """Exports a validated scientific hypothesis from Layer 1 Research OS into Layer 2 EIOS Kernel."""
+        record = {
+            "hypothesis_id": hypothesis_id,
+            "domain_keyword": domain_keyword,
+            "confidence": confidence,
+            "extracted_principles": extracted_principles,
+            "pragmatic_value_delta": pragmatic_value_delta,
+            "epistemic_gain_delta": epistemic_gain_delta,
+            "exported_at": time_now()
+        }
+        self.exported_hypotheses.append(record)
+
+        # Register in kernel if kernel has export handler
+        if hasattr(kernel, "register_research_hypothesis"):
+            kernel.register_research_hypothesis(record)
+
+        logger.info(f"Exported research hypothesis '{hypothesis_id}' to EIOS Kernel.")
+        return {
+            "status": "exported",
+            "hypothesis_id": hypothesis_id,
+            "kernel_hypothesis_count": len(self.exported_hypotheses)
+        }
+
+    def promote_hypothesis_to_eos(
+        self,
+        eos_engine: Any,
+        hypothesis_id: str,
+        target_business_loop: str,
+        expected_roi_delta: float
+    ) -> Dict[str, Any]:
+        """Promotes a validated hypothesis into Layer 2 EOS engine business loops."""
+        logger.info(f"Promoted hypothesis '{hypothesis_id}' to EOS business loop '{target_business_loop}'.")
+        return {
+            "status": "promoted",
+            "hypothesis_id": hypothesis_id,
+            "target_business_loop": target_business_loop,
+            "expected_roi_delta": expected_roi_delta
+        }

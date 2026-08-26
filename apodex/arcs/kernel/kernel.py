@@ -63,6 +63,31 @@ class EIOSKernel:
     def __init__(self) -> None:
         self.active_processes: Dict[str, ExecutionDAG] = {}
         self.metrics_history: List[Dict[str, Any]] = []
+        self.research_hypotheses: List[Dict[str, Any]] = []
+
+    def register_research_hypothesis(self, hypothesis_record: Dict[str, Any]) -> None:
+        """Registers an exported scientific hypothesis from Layer 1 Research OS."""
+        self.research_hypotheses.append(hypothesis_record)
+        logger.info(f"[Kernel] Registered research hypothesis: {hypothesis_record.get('hypothesis_id')}")
+
+    def sense_opportunity_anomalies(self, market_signals: Dict[str, Any], active_hypotheses: Optional[List[str]] = None) -> Dict[str, Any]:
+        """Senses market opportunity anomalies using Active Inference Expected Free Energy (EFE)."""
+        volatility = float(market_signals.get("volatility", 0.1))
+        growth = float(market_signals.get("growth_rate", 0.05))
+        volume_delta = float(market_signals.get("volume_delta", 0.1))
+
+        # Expected Free Energy = Epistemic Uncertainty + Pragmatic Value
+        epistemic_uncertainty = volatility * 0.5
+        pragmatic_value = (growth + volume_delta) * 0.5
+        expected_free_energy = float(abs(epistemic_uncertainty + pragmatic_value))
+
+        return {
+            "status": "sensed",
+            "signals": market_signals,
+            "active_hypotheses": active_hypotheses or [],
+            "expected_free_energy": expected_free_energy,
+            "anomalies_detected": volatility > 0.2 or volume_delta > 0.2
+        }
 
     async def execute_dag(self, dag: ExecutionDAG) -> bool:
         """Schedules and executes the compiled DAG with failure recovery."""

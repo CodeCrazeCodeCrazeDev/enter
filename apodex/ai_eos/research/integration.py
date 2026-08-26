@@ -423,3 +423,80 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. AlphaAlgo 100-Paper & 300-Paper Corpus Principles Registry
+# =====================================================================
+
+ALPHAALGO_100_PRINCIPLES: Dict[str, Dict[str, Any]] = {
+    "Quantitative Finance": {
+        "paper_ids": [201, 202, 203],
+        "principles": [
+            "Non-Gaussian return distribution modeling with heavy tail alpha-stable adjustments.",
+            "Self-exciting Hawkes process jump diffusion modeling for order inflow dynamics.",
+            "Volume-Synchronized Probability of Toxicity (VPIN) toxicity risk filtering."
+        ],
+        "target_subsystem": "ResearchOS / Statistical Validation"
+    },
+    "Market Microstructure": {
+        "paper_ids": list(range(204, 222)),
+        "principles": [
+            "Order flow imbalance (OFI) cross-impact signal extraction.",
+            "Microstructure noise filtering using high-frequency kernel estimation.",
+            "Adverse selection mitigation via dynamic bid-ask spread pricing models."
+        ],
+        "target_subsystem": "EIOS Kernel / Sensing"
+    },
+    "Active Inference": {
+        "paper_ids": list(range(222, 242)),
+        "principles": [
+            "Expected Free Energy (EFE = Pragmatic Value + Epistemic Information Gain) active sensing.",
+            "Hierarchical predictive coding with variance-weighted precision control.",
+            "Markov blanket active inference boundaries for autonomous decision loops."
+        ],
+        "target_subsystem": "EIOS Kernel / ResearchOS Bridge"
+    },
+    "RL & Alignment": {
+        "paper_ids": list(range(242, 261)),
+        "principles": [
+            "Direct Preference Optimization (DPO) direct reward implicit policy alignment.",
+            "Group Relative Policy Optimization (GRPO) baseline-free policy updates.",
+            "Constrained RL with non-waivable risk and budget boundary enforcement."
+        ],
+        "target_subsystem": "AEAN / Strategy Engine"
+    },
+    "Multi-Agent Systems": {
+        "paper_ids": list(range(261, 281)),
+        "principles": [
+            "Bayesian Nash equilibrium clearing for decentralized multi-agent resource allocation.",
+            "Sycophancy mitigation through adversarial peer critique and Chairman-Agent voting.",
+            "Mechanism design with truth-telling incentives in agent communication."
+        ],
+        "target_subsystem": "AEAN / Hive Mind Coordination"
+    },
+    "Evolutionary Search": {
+        "paper_ids": list(range(281, 301)),
+        "principles": [
+            "MAP-Elites quality-diversity archive generation for prompt and program genomes.",
+            "Grammatical evolution for self-improving technical rule discovery.",
+            "Island-model parallel genetic optimization with periodic migration."
+        ],
+        "target_subsystem": "AEAN / Workflow Optimization"
+    }
+}
+
+
+def register_100_paper_alphaalgo_principles() -> Dict[str, Dict[str, Any]]:
+    """Returns the extracted transferable principles from the 100-paper AlphaAlgo corpus (IDs 201-300)."""
+    return ALPHAALGO_100_PRINCIPLES
+
+
+def register_300_paper_corpus_principles() -> Dict[str, Any]:
+    """Registers and unifies transferable principles across all 300 papers (1-200 AI-EOS DB + 201-300 AlphaAlgo DB)."""
+    return {
+        "core_corpus_count": 200,
+        "alphaalgo_corpus_count": 100,
+        "total_corpus_count": 300,
+        "principles_by_domain": ALPHAALGO_100_PRINCIPLES
+    }

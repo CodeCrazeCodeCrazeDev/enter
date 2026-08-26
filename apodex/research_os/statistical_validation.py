@@ -63,9 +63,8 @@ def standard_normal_cdf(x: float) -> float:
 
 def standard_normal_ppf(p: float) -> float:
     """Standard normal inverse cumulative distribution function (approximation)."""
-    # Winitzki approximation for inverse error function
-    if p <= 0.0 or p >= 1.0:
-        raise ValueError("Probability must be strictly between 0 and 1.")
+    # Probability bounds clamping to prevent float overflow or domain errors at extreme values
+    p = max(1e-15, min(1.0 - 1e-15, float(p)))
 
     # Map to [-1, 1] range for erf_inv
     y = 2.0 * p - 1.0
@@ -121,6 +120,9 @@ def calculate_dsr(
         # Fallback if trials is extremely large or calculation overflows
         z_n = math.sqrt(2.0 * math.log(trials))
         z_n_e = math.sqrt(2.0 * math.log(trials / math.e))
+
+    # Safeguard trials_variance
+    trials_variance = max(1e-15, trials_variance)
 
     # Expected maximum Sharpe Ratio under null
     sr_0 = math.sqrt(trials_variance) * ((1.0 - euler_gamma) * z_n + euler_gamma * z_n_e)

@@ -57,12 +57,115 @@ class ExecutionDAG(BaseModel):
 class EIOSKernel:
     """The central core of the Entrepreneurial Intelligence Operating System.
 
-    Manages task scheduling, failure recovery (retries), and model routing.
+    Manages task scheduling, failure recovery (retries), model routing,
+    and native cognitive entrepreneurial capabilities.
     """
 
     def __init__(self) -> None:
         self.active_processes: Dict[str, ExecutionDAG] = {}
         self.metrics_history: List[Dict[str, Any]] = []
+
+    def sense_opportunity_anomalies(self, signals: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Filters incoming signals for structural anomalies vs noise."""
+        from ...ai_eos.intelligence.eos_first_principles import Signal, SignalToIdeaPipeline
+        pipeline = SignalToIdeaPipeline()
+        anomalies = []
+        for s in signals:
+            sig = Signal(
+                signal_id=s.get("id", uuid.uuid4().hex[:8]),
+                source=s.get("source", "unknown"),
+                content=s.get("content", ""),
+                is_anomaly=s.get("is_anomaly", True),
+                structural_shift_probability=s.get("structural_shift_probability", 0.8),
+                noise_level=s.get("noise_level", 0.2)
+            )
+            if pipeline.filter_signal(sig):
+                anomalies.append(s)
+        return anomalies
+
+    def generate_falsifiable_hypothesis(self, anomaly: Dict[str, Any]) -> Dict[str, Any]:
+        """Converts an anomaly signal into a structured falsifiable hypothesis with kill criteria."""
+        content = anomaly.get("content", "Structural Shift Opportunity")
+        return {
+            "hypothesis_id": f"hyp_{uuid.uuid4().hex[:8]}",
+            "claim": f"If structural shift holds: {content}",
+            "falsification_condition": "Cheap test CTR < 2% or conversion < 1%",
+            "status": "PROPOSED",
+            "created_at": datetime.now(UTC).isoformat()
+        }
+
+    def validate_opportunity_economics(self, hypothesis: Dict[str, Any], test_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Evaluates unit economics and cheap real-option test results."""
+        from ...ai_eos.intelligence.eos_first_principles import SignalToIdeaPipeline
+        pipeline = SignalToIdeaPipeline()
+        test_cost = test_data.get("cost_usd", 100.0)
+        info_gain = test_data.get("expected_info_gain", 10.0)
+        valid = pipeline.evaluate_cheap_test(test_cost, info_gain)
+
+        arpu = test_data.get("arpu_usd", 50.0)
+        cac = test_data.get("cac_usd", 30.0)
+        healthy = (arpu / max(1.0, cac)) >= 1.5
+
+        return {
+            "hypothesis_id": hypothesis.get("hypothesis_id"),
+            "cheap_test_passed": valid,
+            "unit_economics_viable": healthy,
+            "decision": "PROCEED" if (valid and healthy) else "DISCARD"
+        }
+
+    def allocate_capital_opportunity(self, initiatives: List[Dict[str, Any]], total_budget_cents: int) -> Dict[str, int]:
+        """Allocates budget across active initiatives based on expected return and risk."""
+        if not initiatives:
+            return {}
+        total_score = sum(i.get("expected_return_score", 1.0) for i in initiatives)
+        allocations = {}
+        for i in initiatives:
+            init_id = i.get("id", uuid.uuid4().hex[:8])
+            share = i.get("expected_return_score", 1.0) / max(0.001, total_score)
+            allocations[init_id] = int(total_budget_cents * share)
+        return allocations
+
+    def reason_gtm_channel(
+        self,
+        product_complexity: str,
+        price_point_cents: int,
+        network_effects: bool
+    ) -> List[str]:
+        """Determines optimal distribution channels using GTMSystem rules."""
+        from ...ai_eos.intelligence.eos_first_principles import GTMSystem
+        gtm = GTMSystem()
+        price_usd = price_point_cents / 100.0
+        channels = gtm.select_optimal_distribution_channels(product_complexity, price_usd, network_effects)
+        return [c.value for c in channels]
+
+    def analyze_moat_durability(self, moat_metrics: Dict[str, float]) -> float:
+        """Calculates normalized composite moat durability score [0, 1]."""
+        from ...ai_eos.intelligence.eos_first_principles import MoatEvaluator
+        evaluator = MoatEvaluator()
+        return evaluator.calculate_composite_moat_score(
+            network_density=moat_metrics.get("network_density", 0.5),
+            avg_switching_cost_usd=moat_metrics.get("avg_switching_cost_usd", 1000.0),
+            brand_trust_score=moat_metrics.get("brand_trust_score", 0.5),
+            cost_advantage_percent=moat_metrics.get("cost_advantage_percent", 0.2),
+            ip_protection_score=moat_metrics.get("ip_protection_score", 0.3),
+            counter_positioning_score=moat_metrics.get("counter_positioning_score", 0.4)
+        )
+
+    def evaluate_lifecycle_stage(self, company_metrics: Dict[str, Any]) -> str:
+        """Classifies venture stage across the 9 company growth stages."""
+        from ...ai_eos.intelligence.eos_first_principles import CompanyGrowthEngine
+        engine = CompanyGrowthEngine()
+        stage = engine.classify_stage(
+            paying_customers=company_metrics.get("paying_customers", 0),
+            nrr=company_metrics.get("nrr", 1.0),
+            retention_flattens=company_metrics.get("retention_flattens", False),
+            annual_revenue_usd=company_metrics.get("annual_revenue_usd", 0.0)
+        )
+        return stage.value
+
+    def trigger_reinvention_review(self, revenue_decay: float, churn_rate: float) -> bool:
+        """Checks whether structural metric decay mandates a self-disruption review."""
+        return (revenue_decay > 0.15 and churn_rate > 0.20)
 
     async def execute_dag(self, dag: ExecutionDAG) -> bool:
         """Schedules and executes the compiled DAG with failure recovery."""

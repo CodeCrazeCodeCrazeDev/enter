@@ -223,3 +223,37 @@ class ResearchOS(IResearchOS):
 
         self.hypotheses.save(hyp.hypothesis_id, hyp)
         return exp
+
+    # ------------------------------------------------------------------
+    # Cross-System Integration Hooks (EIOS Kernel & EOS Engine)
+    # ------------------------------------------------------------------
+    def export_validated_hypothesis_to_kernel(self, hypothesis_id: UUID, kernel_instance: Any) -> bool:
+        """Export a validated ResearchOS hypothesis into EIOS Kernel active inference sensing."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp or hyp.status != "validated":
+            logger.warning(f"Refusing to export unvalidated or missing hypothesis '{hypothesis_id}' to kernel.")
+            return False
+
+        if hasattr(kernel_instance, "register_research_hypothesis"):
+            kernel_instance.register_research_hypothesis(
+                hypothesis_id=str(hyp.hypothesis_id),
+                statement=hyp.statement,
+                domain=hyp.domain,
+                confidence=hyp.significance_level_alpha
+            )
+            logger.info(f"Successfully exported hypothesis {hypothesis_id} to EIOS Kernel.")
+            return True
+        return False
+
+    def promote_hypothesis_to_eos(self, hypothesis_id: UUID, eos_engine_instance: Any) -> bool:
+        """Promote a validated ResearchOS hypothesis into EOS active hypothesis engine."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp or hyp.status != "validated":
+            logger.warning(f"Refusing to promote unvalidated or missing hypothesis '{hypothesis_id}' to EOS.")
+            return False
+
+        if hasattr(eos_engine_instance, "ingest_validated_research"):
+            eos_engine_instance.ingest_validated_research(hyp)
+            logger.info(f"Successfully promoted hypothesis {hypothesis_id} to EOS Engine.")
+            return True
+        return False

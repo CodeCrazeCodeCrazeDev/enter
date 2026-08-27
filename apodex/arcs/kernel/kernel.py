@@ -63,6 +63,39 @@ class EIOSKernel:
     def __init__(self) -> None:
         self.active_processes: Dict[str, ExecutionDAG] = {}
         self.metrics_history: List[Dict[str, Any]] = []
+        self.registered_research_hypotheses: Dict[str, Dict[str, Any]] = {}
+
+    def register_research_hypothesis(
+        self,
+        hypothesis_id: str,
+        statement: str,
+        domain: str,
+        confidence: float
+    ) -> None:
+        """Registers a ResearchOS hypothesis for active inference sensing."""
+        self.registered_research_hypotheses[hypothesis_id] = {
+            "statement": statement,
+            "domain": domain,
+            "confidence": confidence,
+            "registered_at": datetime.now(UTC).isoformat()
+        }
+        logger.info(f"[Kernel] Registered research hypothesis {hypothesis_id} for sensing.")
+
+    def sense_opportunity_anomalies(self, market_signal: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Active inference sensing mechanism to detect anomalies against registered research hypotheses."""
+        anomalies = []
+        for hyp_id, data in self.registered_research_hypotheses.items():
+            domain = data["domain"]
+            if domain in market_signal:
+                signal_val = market_signal[domain]
+                if isinstance(signal_val, (int, float)) and signal_val > 1.5:
+                    anomalies.append({
+                        "hypothesis_id": hyp_id,
+                        "domain": domain,
+                        "anomaly_score": float(signal_val),
+                        "status": "FLAGGED_FOR_EFE_EVALUATION"
+                    })
+        return anomalies
 
     async def execute_dag(self, dag: ExecutionDAG) -> bool:
         """Schedules and executes the compiled DAG with failure recovery."""

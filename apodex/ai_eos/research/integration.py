@@ -423,3 +423,42 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. Research To System Bridge (Active Inference Integration)
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Orchestrates cross-layer active inference state handoffs between
+    Layer 1 Research OS hypotheses, Layer 2 EIOS Kernel sensing, Layer 2 EOS
+    System decisions, and Layer 3 AEAN multi-agent strategy execution.
+    """
+
+    def __init__(self, research_os: Any, eios_kernel: Any, eos_engine: Any) -> None:
+        self.research_os = research_os
+        self.eios_kernel = eios_kernel
+        self.eos_engine = eos_engine
+
+    def promote_validated_hypothesis(self, hypothesis_id: UUID) -> Dict[str, Any]:
+        """
+        Transfers a validated hypothesis from ResearchOS into active EIOS sensing
+        and EOS decision engine states.
+        """
+        hyp = self.research_os.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis '{hypothesis_id}' not found in ResearchOS.")
+
+        # Export to EIOS Kernel
+        kernel_res = self.research_os.export_validated_hypothesis_to_kernel(hypothesis_id, self.eios_kernel)
+
+        # Promote to EOS Engine
+        eos_res = self.research_os.promote_hypothesis_to_eos(hypothesis_id, self.eos_engine)
+
+        return {
+            "hypothesis_id": str(hypothesis_id),
+            "kernel_registration": kernel_res,
+            "eos_promotion": eos_res,
+            "status": "PROMOTED_TO_SYSTEM"
+        }

@@ -20,7 +20,10 @@ from apodex.ai_eos.research.integration import (
     ProgramGenome,
     TrajectoryStep,
     SpecializedAgentProfile,
+    get_200_paper_corpus_principles,
+    register_200_paper_corpus_principles,
 )
+from apodex.ai_eos.research.research_os import ResearchOS
 
 
 def test_code_rewrite_engine_security_and_sandbox() -> None:
@@ -189,3 +192,36 @@ def test_learnable_routing_gate_dispatcher() -> None:
     dispatcher.update_routing_parameters(agent_id="agent_cheap", success=True, cost_incurred=0.01)
     assert dispatcher.agents["agent_cheap"].historical_success_rate > 0.50
     assert dispatcher.agents["agent_cheap"].epistemic_curiosity < 0.20
+
+
+def test_200_paper_corpus_principles_registration() -> None:
+    """Verifies that 200-paper corpus principles register and map to AEAN, EOS, EIOS, ResearchOS."""
+    principles = get_200_paper_corpus_principles()
+    assert len(principles) == 10
+    assert "P01" in principles
+    assert "P02" in principles
+
+    p01 = principles["P01"]
+    assert p01.subsystem == "EIOS"
+    assert len(p01.paper_ids) > 0
+
+    p03 = principles["P03"]
+    assert p03.subsystem == "AEAN"
+    assert p03.implementation_class == "CodeRewriteEngine"
+
+
+def test_research_os_200_paper_literature_review() -> None:
+    """Verifies that ResearchOS queries 200-paper principles during literature synthesis."""
+    ros = ResearchOS()
+
+    # Query domain matching EIOS Active Inference principle
+    review_eios = ros.conduct_literature_review("EIOS")
+    assert review_eios["domain"] == "EIOS"
+    assert review_eios["total_corpus_papers"] == 200
+    assert review_eios["matched_principles_count"] >= 1
+    assert any(p["id"] == "P01" for p in review_eios["grounded_principles"])
+
+    # Query domain matching EOS Causal principle
+    review_eos = ros.conduct_literature_review("EOS")
+    assert review_eos["matched_principles_count"] >= 1
+    assert any(p["id"] == "P02" for p in review_eos["grounded_principles"])

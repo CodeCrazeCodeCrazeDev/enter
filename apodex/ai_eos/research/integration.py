@@ -20,6 +20,126 @@ from pydantic import BaseModel, Field
 logger = logging.getLogger("sero.research.integration")
 
 # =====================================================================
+# 0. 200-Paper Corpus Principles Registry
+# =====================================================================
+
+class TransferablePrinciple(BaseModel):
+    principle_id: str
+    title: str
+    subsystem: str  # AEAN, EOS, EIOS, ResearchOS
+    paper_ids: List[int]
+    concept: str
+    implementation_class: str
+
+
+CORPUS_200_PRINCIPLES: Dict[str, TransferablePrinciple] = {}
+
+
+def register_200_paper_corpus_principles() -> Dict[str, TransferablePrinciple]:
+    """
+    Registers transferable engineering principles synthesized across all 200 papers
+    in the AI-EOS Research Knowledge Graph (AI_EOS_RESEARCH_DB.yaml).
+    """
+    global CORPUS_200_PRINCIPLES
+    principles = [
+        TransferablePrinciple(
+            principle_id="P01",
+            title="Active Inference Expected Free Energy Routing",
+            subsystem="EIOS",
+            paper_ids=[75, 76, 77, 90],
+            concept="Minimize Expected Free Energy (EFE) balancing Epistemic Information Gain and Pragmatic Value subject to budget limits.",
+            implementation_class="LearnableRoutingGateDispatcher / EIOSKernel"
+        ),
+        TransferablePrinciple(
+            principle_id="P02",
+            title="Pearl's Causal Do-Calculus Interventions",
+            subsystem="EOS",
+            paper_ids=[130, 135, 140, 150],
+            concept="Evaluate strategic interventions via structural causal model do-interventions P(Y|do(X)) to eliminate confounding bias.",
+            implementation_class="EOSEngine / ResearchOS"
+        ),
+        TransferablePrinciple(
+            principle_id="P03",
+            title="Self-Referential AST Security Code Rewrite",
+            subsystem="AEAN",
+            paper_ids=[8, 9, 10, 11, 12, 13, 14, 15],
+            concept="Execute safe runtime code evolution via AST syntax parsing, sandboxed compilation, and GRC security linting.",
+            implementation_class="CodeRewriteEngine"
+        ),
+        TransferablePrinciple(
+            principle_id="P04",
+            title="Genetic Workflow Mutation & MAP-Elites Diversity",
+            subsystem="AEAN",
+            paper_ids=[90, 91, 92, 93, 94, 95, 96, 97, 98],
+            concept="Evolve agent prompt genomes and parameter configurations using Gaussian mutations and MAP-Elites fitness selection.",
+            implementation_class="GeneticWorkflowOptimizer"
+        ),
+        TransferablePrinciple(
+            principle_id="P05",
+            title="Advantage Estimation & DPO Preference Collection",
+            subsystem="ResearchOS",
+            paper_ids=[16, 20, 25, 30, 99, 100, 101, 102, 103, 104],
+            concept="Compute temporal-difference advantage values across agent trajectories to construct DPO preference pairs.",
+            implementation_class="SFTPreferenceCollector"
+        ),
+        TransferablePrinciple(
+            principle_id="P06",
+            title="Hexagonal Strategic Planning Isolation",
+            subsystem="AEAN",
+            paper_ids=[64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74],
+            concept="Isolate strategic planning context windows from raw step execution outputs to avoid context pollution.",
+            implementation_class="StrategicPlanner / PlanVerifier"
+        ),
+        TransferablePrinciple(
+            principle_id="P07",
+            title="Multi-Tier Memory Consolidation & Decay Filtering",
+            subsystem="AEAN",
+            paper_ids=[119, 120, 121, 122, 123, 124, 125, 126, 127, 128],
+            concept="Distinguish short-term context history from persistent SQLite semantic memory, applying Ebbinghaus decay filtering.",
+            implementation_class="CMOS Memory System"
+        ),
+        TransferablePrinciple(
+            principle_id="P08",
+            title="Model-Collapse Guard via Quality Downsampling",
+            subsystem="ResearchOS",
+            paper_ids=[1, 2, 3, 4, 5, 6, 7, 105, 106, 107, 108],
+            concept="Track synthetic vs ground-truth dataset ratios and downsample low-scoring self-generated traces to prevent collapse.",
+            implementation_class="TrajectoryDatasetCompiler"
+        ),
+        TransferablePrinciple(
+            principle_id="P09",
+            title="Two-Level Credit Assignment",
+            subsystem="EOS",
+            paper_ids=[49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63],
+            concept="Combine global trajectory success rewards with step-wise progressive reinforcement and penalty signals.",
+            implementation_class="TwoLevelCreditAssignment"
+        ),
+        TransferablePrinciple(
+            principle_id="P10",
+            title="Multi-Agent Swarm Debate & Sycophancy Mitigation",
+            subsystem="AEAN",
+            paper_ids=[105, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118],
+            concept="Conduct multi-agent cross-examination debate with adversarial red-teaming to eliminate compliance bias.",
+            implementation_class="SwarmDebate / HiveMind"
+        )
+    ]
+    CORPUS_200_PRINCIPLES = {p.principle_id: p for p in principles}
+    logger.info(f"Registered {len(CORPUS_200_PRINCIPLES)} transferable engineering principles from 200-paper corpus.")
+    return CORPUS_200_PRINCIPLES
+
+
+def get_200_paper_corpus_principles() -> Dict[str, TransferablePrinciple]:
+    """Returns the registered 200-paper principles dict, registering them if uninitialized."""
+    if not CORPUS_200_PRINCIPLES:
+        register_200_paper_corpus_principles()
+    return CORPUS_200_PRINCIPLES
+
+
+# Auto-register on import
+register_200_paper_corpus_principles()
+
+
+# =====================================================================
 # 1. Self-Referential Code Rewrite & Verification Engine (STOP / Gödel)
 # =====================================================================
 

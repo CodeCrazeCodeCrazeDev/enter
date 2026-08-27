@@ -16,6 +16,7 @@ from ..domain.models import Hypothesis, Experiment, ExecutionStatus
 from ..interfaces.services import IResearchOS
 from ..infrastructure.identity import DeterministicIdentityGenerator
 from ..infrastructure.persistence import InMemoryLedger
+from .integration import get_200_paper_corpus_principles
 
 logger = logging.getLogger("sero.ros")
 
@@ -114,12 +115,50 @@ class ResearchOS(IResearchOS):
     # Autonomous Science Engine
     # ------------------------------------------------------------------
     def conduct_literature_review(self, domain: str) -> Dict[str, Any]:
-        """Automated literature synthesis and citation mapping over active scientific namespaces."""
+        """Automated literature synthesis and citation mapping over 200-paper scientific corpus."""
         logger.info(f"Autonomous Science Engine conducting literature synthesis for domain: {domain}")
+        principles_registry = get_200_paper_corpus_principles()
+
+        # Query matching principles based on domain keyword
+        domain_lower = domain.lower()
+        matched_principles = []
+        matched_paper_ids = set()
+
+        for pid, principle in principles_registry.items():
+            if (domain_lower in principle.title.lower() or
+                domain_lower in principle.subsystem.lower() or
+                domain_lower in principle.concept.lower() or
+                domain_lower in principle.implementation_class.lower()):
+                matched_principles.append({
+                    "id": pid,
+                    "title": principle.title,
+                    "subsystem": principle.subsystem,
+                    "concept": principle.concept,
+                    "implementation_class": principle.implementation_class,
+                    "papers": principle.paper_ids
+                })
+                matched_paper_ids.update(principle.paper_ids)
+
+        if not matched_principles:
+            # Fallback to returning all principles summary
+            for pid, principle in principles_registry.items():
+                matched_principles.append({
+                    "id": pid,
+                    "title": principle.title,
+                    "subsystem": principle.subsystem,
+                    "concept": principle.concept,
+                    "implementation_class": principle.implementation_class,
+                    "papers": principle.paper_ids
+                })
+                matched_paper_ids.update(principle.paper_ids)
+
         return {
             "domain": domain,
-            "reviewed_citations_count": 14,
-            "synthesized_trends": ["Deep Reinforcement learning with GRPO", "Active Inference with Expected Free Energy approximation"],
+            "reviewed_citations_count": len(matched_paper_ids),
+            "total_corpus_papers": 200,
+            "matched_principles_count": len(matched_principles),
+            "synthesized_trends": [p["title"] for p in matched_principles[:5]],
+            "grounded_principles": matched_principles,
             "whitespace_found": "Expected Free Energy implementation under lightweight micro-VM environments."
         }
 

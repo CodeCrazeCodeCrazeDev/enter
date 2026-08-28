@@ -116,12 +116,61 @@ class ResearchOS(IResearchOS):
     def conduct_literature_review(self, domain: str) -> Dict[str, Any]:
         """Automated literature synthesis and citation mapping over active scientific namespaces."""
         logger.info(f"Autonomous Science Engine conducting literature synthesis for domain: {domain}")
+        from .integration import register_100_paper_alphaalgo_principles
+        alpha_principles = register_100_paper_alphaalgo_principles()
+
+        matching_principles = [
+            p for p in alpha_principles
+            if domain.lower() in p["domain"].lower() or domain.lower() in p["principle"].lower() or domain == "all"
+        ]
+
         return {
             "domain": domain,
-            "reviewed_citations_count": 14,
-            "synthesized_trends": ["Deep Reinforcement learning with GRPO", "Active Inference with Expected Free Energy approximation"],
+            "reviewed_citations_count": 100,
+            "extracted_principles": matching_principles if matching_principles else alpha_principles,
+            "synthesized_trends": [
+                "Exact Standard Normal CDF P-Value Estimation",
+                "Probability Bounds Clamping for Inverse Error Functions",
+                "Expected Free Energy Active Inference Sensing"
+            ],
             "whitespace_found": "Expected Free Energy implementation under lightweight micro-VM environments."
         }
+
+    def export_validated_hypothesis_to_kernel(self, hypothesis_id: UUID, kernel: Any) -> bool:
+        """Export a validated hypothesis to EIOS Kernel for active inference sensing."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp or hyp.status != "validated":
+            logger.warning(f"Cannot export hypothesis {hypothesis_id}: Not found or not validated.")
+            return False
+
+        if hasattr(kernel, "register_research_hypothesis"):
+            kernel.register_research_hypothesis({
+                "hypothesis_id": str(hyp.hypothesis_id),
+                "title": hyp.title,
+                "target_metric": hyp.target_metric,
+                "confidence": getattr(hyp, "posterior_confidence", 0.95)
+            })
+            logger.info(f"Exported validated hypothesis '{hyp.title}' to EIOS Kernel.")
+            return True
+        return False
+
+    def promote_hypothesis_to_eos(self, hypothesis_id: UUID, eos_engine: Any) -> bool:
+        """Promote a validated hypothesis into EOS Hypothesis Engine."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp or hyp.status != "validated":
+            logger.warning(f"Cannot promote hypothesis {hypothesis_id}: Not found or not validated.")
+            return False
+
+        if hasattr(eos_engine, "ingest_validated_research"):
+            eos_engine.ingest_validated_research({
+                "hypothesis_id": str(hyp.hypothesis_id),
+                "title": hyp.title,
+                "description": hyp.description,
+                "confidence": getattr(hyp, "posterior_confidence", 0.95)
+            })
+            logger.info(f"Promoted validated hypothesis '{hyp.title}' to EOS Engine.")
+            return True
+        return False
 
     def design_experiment(self, hypothesis_id: UUID) -> Dict[str, Any]:
         """Generate mathematical experimental design (e.g., power analysis and required sample size)."""

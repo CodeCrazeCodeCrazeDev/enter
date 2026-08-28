@@ -116,6 +116,25 @@ class HypothesisEngine:
     def add_hypothesis(self, hyp: Hypothesis) -> None:
         self.hypotheses[hyp.hypothesis_id] = hyp
 
+    def ingest_validated_research(self, research_data: Dict[str, Any]) -> None:
+        """Ingests validated research hypothesis from Research OS."""
+        hyp_id_raw = research_data.get("hypothesis_id")
+        try:
+            hyp_id = UUID(str(hyp_id_raw)) if hyp_id_raw else uuid4()
+        except ValueError:
+            hyp_id = uuid4()
+
+        hyp = Hypothesis(
+            hypothesis_id=hyp_id,
+            statement=research_data.get("description", research_data.get("title", "Validated Research Hypothesis")),
+            domain="validated_research",
+            title=research_data.get("title", "Validated Research"),
+            status="active",
+            posterior_confidence=research_data.get("confidence", 0.95)
+        )
+        self.hypotheses[hyp.hypothesis_id] = hyp
+        logger.info(f"Ingested validated research hypothesis '{hyp.title}' into EOS Hypothesis Engine.")
+
     def update_with_evidence(self, hyp_id: UUID, evidence: Evidence) -> None:
         """Update posterior confidence and distributions based on statistical evidence."""
         hyp = self.hypotheses.get(hyp_id)
@@ -474,6 +493,14 @@ class EOSEngine:
         self.reinvention_engine = ReinventionEngine()
         self.memory = EntrepreneurialMemory()
         self.evaluator = EvaluationFramework()
+
+    def ingest_validated_research(self, research_data: Dict[str, Any]) -> None:
+        """Forward research hypotheses to internal hypothesis engine."""
+        self.hypothesis_engine.ingest_validated_research(research_data)
+
+    @property
+    def active_hypotheses(self) -> List[Hypothesis]:
+        return list(self.hypothesis_engine.hypotheses.values())
 
     def run_continuous_sensing_cycle(self, cells: List[VentureCell], total_budget_cents: int) -> Dict[str, Any]:
         """Execute one complete hierarchical sensing, planning, allocation, and diagnostic loop."""

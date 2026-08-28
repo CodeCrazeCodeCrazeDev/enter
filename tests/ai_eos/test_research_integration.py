@@ -20,7 +20,12 @@ from apodex.ai_eos.research.integration import (
     ProgramGenome,
     TrajectoryStep,
     SpecializedAgentProfile,
+    register_200_paper_corpus_principles,
+    get_registered_principles_by_domain,
+    get_registered_principles_by_subsystem,
+    ResearchToSystemBridge,
 )
+from apodex.ai_eos.research.research_os import ResearchOS
 
 
 def test_code_rewrite_engine_security_and_sandbox() -> None:
@@ -189,3 +194,42 @@ def test_learnable_routing_gate_dispatcher() -> None:
     dispatcher.update_routing_parameters(agent_id="agent_cheap", success=True, cost_incurred=0.01)
     assert dispatcher.agents["agent_cheap"].historical_success_rate > 0.50
     assert dispatcher.agents["agent_cheap"].epistemic_curiosity < 0.20
+
+
+def test_200_paper_corpus_principles_registration_and_query() -> None:
+    """Verifies registration and subsystem filtering of 200-paper principles."""
+    principles = register_200_paper_corpus_principles()
+    assert len(principles) >= 10
+
+    # Test filtering by domain
+    active_inf_principles = get_registered_principles_by_domain("Active Inference")
+    assert len(active_inf_principles) >= 1
+    assert "Active Inference" in active_inf_principles[0].title or "Active Inference" in active_inf_principles[0].domain
+
+    # Test filtering by target subsystem
+    aean_principles = get_registered_principles_by_subsystem("AEAN")
+    assert len(aean_principles) >= 1
+    assert any(p.target_subsystem == "AEAN" for p in aean_principles)
+
+
+def test_research_os_literature_review_integration() -> None:
+    """Verifies that ResearchOS conducts literature review querying registered 200-paper principles."""
+    ros = ResearchOS()
+    res = ros.conduct_literature_review("Active Inference")
+
+    assert res["domain"] == "Active Inference"
+    assert len(res["principles"]) >= 1
+    assert "Active Inference EFE Strategy Routing" in res["synthesized_trends"]
+
+
+def test_research_to_system_bridge_execution() -> None:
+    """Verifies end-to-end 4-layer active inference state handoff via ResearchToSystemBridge."""
+    bridge = ResearchToSystemBridge()
+    cycle_res = bridge.execute_cross_layer_cycle("Active Inference")
+
+    assert cycle_res["cycle_status"] == "COMPLETED"
+    assert cycle_res["matched_principles_count"] >= 1
+    assert cycle_res["eios_record"]["bridge_stage"] == "ResearchOS_to_EIOS"
+    assert cycle_res["eos_record"]["bridge_stage"] == "EIOS_to_EOS"
+    assert cycle_res["aean_record"]["bridge_stage"] == "EOS_to_AEAN"
+    assert len(bridge.handoff_history) == 3

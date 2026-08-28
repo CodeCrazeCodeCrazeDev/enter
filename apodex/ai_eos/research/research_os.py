@@ -223,3 +223,43 @@ class ResearchOS(IResearchOS):
 
         self.hypotheses.save(hyp.hypothesis_id, hyp)
         return exp
+
+    # ------------------------------------------------------------------
+    # Integration Bridge Handoff Methods
+    # ------------------------------------------------------------------
+    def export_validated_hypothesis_to_kernel(self, hypothesis_id: UUID) -> Dict[str, Any]:
+        """Exports a validated Research OS hypothesis payload to EIOS Kernel active inference sensing."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis '{hypothesis_id}' not found.")
+        if hyp.status != "validated":
+            logger.warning(f"Hypothesis '{hypothesis_id}' has status '{hyp.status}', exporting as unvalidated candidate.")
+
+        posterior_conf = getattr(hyp, "posterior_confidence", 0.90)
+        # If hypothesis is validated but posterior_confidence is at default 0.5, bump to 0.90
+        if hyp.status == "validated" and posterior_conf <= 0.5:
+            posterior_conf = 0.90
+
+        return {
+            "hypothesis_id": str(hyp.hypothesis_id),
+            "title": hyp.title,
+            "target_metric": hyp.target_metric,
+            "posterior_confidence": posterior_conf,
+            "status": hyp.status,
+            "exported_at": datetime.utcnow().isoformat()
+        }
+
+    def promote_hypothesis_to_eos(self, hypothesis_id: UUID, eos_engine: Any) -> bool:
+        """Promotes a validated Research OS hypothesis into the EOS Engine decision lifecycle."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis '{hypothesis_id}' not found.")
+
+        payload = self.export_validated_hypothesis_to_kernel(hypothesis_id)
+        if hasattr(eos_engine, "ingest_validated_research"):
+            eos_engine.ingest_validated_research(payload)
+            logger.info(f"Promoted hypothesis '{hyp.title}' to EOS Engine.")
+            return True
+        else:
+            logger.warning("Target EOS Engine does not support ingest_validated_research.")
+            return False

@@ -57,12 +57,34 @@ class ExecutionDAG(BaseModel):
 class EIOSKernel:
     """The central core of the Entrepreneurial Intelligence Operating System.
 
-    Manages task scheduling, failure recovery (retries), and model routing.
+    Manages task scheduling, failure recovery (retries), active inference sensing over research hypotheses, and model routing.
     """
 
     def __init__(self) -> None:
         self.active_processes: Dict[str, ExecutionDAG] = {}
         self.metrics_history: List[Dict[str, Any]] = []
+        self.research_hypotheses: Dict[str, Dict[str, Any]] = {}
+
+    def register_research_hypothesis(self, hyp_data: Dict[str, Any]) -> None:
+        """Register a research hypothesis for EFE active inference sensing."""
+        hyp_id = hyp_data.get("hypothesis_id", uuid.uuid4().hex)
+        self.research_hypotheses[hyp_id] = hyp_data
+        logger.info(f"[Kernel] Registered research hypothesis {hyp_id} for active inference.")
+
+    def sense_opportunity_anomalies(self) -> List[Dict[str, Any]]:
+        """Sense market anomalies and evaluate Expected Free Energy across registered research hypotheses."""
+        anomalies = []
+        for hyp_id, hyp in self.research_hypotheses.items():
+            conf = hyp.get("confidence", 0.5)
+            # Epistemic Information Gain = 1 - conf; Pragmatic Value = conf
+            efe = (1.0 - conf) * 0.8 + conf * 0.5
+            anomalies.append({
+                "hypothesis_id": hyp_id,
+                "title": hyp.get("title", ""),
+                "expected_free_energy": efe,
+                "anomaly_detected": efe > 0.4
+            })
+        return anomalies
 
     async def execute_dag(self, dag: ExecutionDAG) -> bool:
         """Schedules and executes the compiled DAG with failure recovery."""

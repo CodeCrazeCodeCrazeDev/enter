@@ -474,6 +474,27 @@ class EOSEngine:
         self.reinvention_engine = ReinventionEngine()
         self.memory = EntrepreneurialMemory()
         self.evaluator = EvaluationFramework()
+        self.promoted_research_hypotheses: Dict[str, Dict[str, Any]] = {}
+
+    def ingest_validated_research(self, hypothesis_payload: Dict[str, Any]) -> None:
+        """Ingests validated research hypotheses promoted from Layer 1 Research OS into EOS active decision loops."""
+        hyp_id = hypothesis_payload.get("hypothesis_id", str(uuid4()))
+        self.promoted_research_hypotheses[hyp_id] = hypothesis_payload
+
+        # Convert to local Hypothesis model if needed
+        local_hyp = Hypothesis(
+            hypothesis_id=UUID(hyp_id) if isinstance(hyp_id, str) and len(hyp_id) == 36 else uuid4(),
+            statement=hypothesis_payload.get("statement", hypothesis_payload.get("title", "Promoted Research Hypothesis")),
+            domain=hypothesis_payload.get("domain", "General"),
+            status="active",
+            posterior_confidence=0.95
+        )
+        self.hypothesis_engine.add_hypothesis(local_hyp)
+        logger.info(f"[EOS Engine] Ingested promoted research hypothesis: '{local_hyp.statement}' [id={hyp_id}]")
+
+    @property
+    def active_hypotheses(self) -> List[Hypothesis]:
+        return list(self.hypothesis_engine.hypotheses.values())
 
     def run_continuous_sensing_cycle(self, cells: List[VentureCell], total_budget_cents: int) -> Dict[str, Any]:
         """Execute one complete hierarchical sensing, planning, allocation, and diagnostic loop."""

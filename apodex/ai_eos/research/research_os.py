@@ -116,12 +116,61 @@ class ResearchOS(IResearchOS):
     def conduct_literature_review(self, domain: str) -> Dict[str, Any]:
         """Automated literature synthesis and citation mapping over active scientific namespaces."""
         logger.info(f"Autonomous Science Engine conducting literature synthesis for domain: {domain}")
+        from .integration import get_corpus_principles
+        all_principles = get_corpus_principles()
+
+        domain_lower = domain.lower()
+        matching_principles = [
+            p for p in all_principles
+            if domain_lower in p["domain"].lower() or domain_lower in p["title"].lower() or domain_lower in p["principle"].lower()
+        ]
+
+        if not matching_principles:
+            matching_principles = all_principles[:10]
+
+        synthesized_trends = [p["principle"] for p in matching_principles[:5]]
+        matching_titles = [p["title"] for p in matching_principles]
+
         return {
             "domain": domain,
-            "reviewed_citations_count": 14,
-            "synthesized_trends": ["Deep Reinforcement learning with GRPO", "Active Inference with Expected Free Energy approximation"],
-            "whitespace_found": "Expected Free Energy implementation under lightweight micro-VM environments."
+            "reviewed_citations_count": len(matching_principles),
+            "synthesized_trends": synthesized_trends,
+            "matching_papers": matching_titles,
+            "whitespace_found": f"Integration of active principles in domain '{domain}' across cognitive execution layers."
         }
+
+    def export_validated_hypothesis_to_kernel(self, hypothesis_id: UUID) -> Dict[str, Any]:
+        """Exports a validated research hypothesis to EIOS Kernel for Active Inference EFE sensing."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp or hyp.status != "validated":
+            raise ValueError(f"Hypothesis '{hypothesis_id}' is not validated or does not exist.")
+
+        handoff_payload = {
+            "hypothesis_id": str(hyp.hypothesis_id),
+            "title": hyp.title,
+            "target_metric": hyp.target_metric,
+            "status": hyp.status,
+            "efe_pragmatic_value": float(getattr(hyp, "effect_size", 1.0) or 1.0),
+            "efe_epistemic_value": 0.5
+        }
+        logger.info(f"Exported validated hypothesis '{hyp.title}' to EIOS Kernel.")
+        return handoff_payload
+
+    def promote_hypothesis_to_eos(self, hypothesis_id: UUID) -> Dict[str, Any]:
+        """Promotes a validated hypothesis directly into EOS decision engine active state."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp or hyp.status != "validated":
+            raise ValueError(f"Hypothesis '{hypothesis_id}' is not validated or does not exist.")
+
+        eos_payload = {
+            "hypothesis_id": str(hyp.hypothesis_id),
+            "title": hyp.title,
+            "statement": hyp.statement,
+            "domain": hyp.domain,
+            "status": hyp.status
+        }
+        logger.info(f"Promoted validated hypothesis '{hyp.title}' to EOS Decision Engine.")
+        return eos_payload
 
     def design_experiment(self, hypothesis_id: UUID) -> Dict[str, Any]:
         """Generate mathematical experimental design (e.g., power analysis and required sample size)."""

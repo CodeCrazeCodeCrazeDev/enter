@@ -63,6 +63,50 @@ class EIOSKernel:
     def __init__(self) -> None:
         self.active_processes: Dict[str, ExecutionDAG] = {}
         self.metrics_history: List[Dict[str, Any]] = []
+        self.research_hypotheses: Dict[str, Dict[str, Any]] = {}
+
+    def register_research_hypothesis(self, hypothesis_payload: Dict[str, Any]) -> None:
+        """Registers a research hypothesis exported from Layer 1 Research OS for EFE sensing."""
+        hyp_id = hypothesis_payload.get("hypothesis_id", str(uuid.uuid4()))
+        self.research_hypotheses[hyp_id] = hypothesis_payload
+        logger.info(f"[EIOS Kernel] Registered research hypothesis for EFE sensing: {hypothesis_payload.get('title')} [id={hyp_id}]")
+
+    def sense_opportunity_anomalies(self, market_signals: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Senses market opportunity anomalies using Expected Free Energy (EFE = Pragmatic Value + Epistemic Value).
+        Evaluates active market signals against registered research hypotheses.
+        """
+        anomalies = []
+        for signal in market_signals:
+            signal_metric = signal.get("target_metric", "revenue")
+            observed_variance = float(signal.get("variance", 0.5))
+
+            # Match against registered research hypotheses
+            matching_hyp = next(
+                (h for h in self.research_hypotheses.values() if h.get("target_metric") == signal_metric),
+                None
+            )
+
+            pragmatic_val = matching_hyp.get("efe_pragmatic_value", 1.0) if matching_hyp else 0.5
+            epistemic_val = matching_hyp.get("efe_epistemic_value", 0.5) if matching_hyp else observed_variance
+
+            # EFE Calculation: Pragmatic Value + Epistemic Information Gain
+            efe_score = pragmatic_val + epistemic_val
+
+            if efe_score > 0.8:
+                anomaly = {
+                    "signal_id": signal.get("id", str(uuid.uuid4())),
+                    "domain": signal_metric,
+                    "efe_score": efe_score,
+                    "pragmatic_value": pragmatic_val,
+                    "epistemic_value": epistemic_val,
+                    "recommended_action": f"Deploy exploratory RCT active inference campaign for '{signal_metric}'",
+                    "matched_hypothesis": matching_hyp.get("title") if matching_hyp else None
+                }
+                anomalies.append(anomaly)
+                logger.info(f"[EIOS Kernel] Sensed high-EFE opportunity anomaly: {anomaly}")
+
+        return anomalies
 
     async def execute_dag(self, dag: ExecutionDAG) -> bool:
         """Schedules and executes the compiled DAG with failure recovery."""

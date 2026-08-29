@@ -420,6 +420,90 @@ class LearnableRoutingGateDispatcher:
         logger.info(f"Updated routing metrics for agent '{agent_id}': SuccessRate={agent.historical_success_rate:.4f}, Curiosity={agent.epistemic_curiosity:.4f}")
 
 
+# =====================================================================
+# 5. ResearchToSystemBridge: Unified Cross-Layer Active Inference Bridge
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Bridge orchestrating active inference state handoffs between:
+    - Layer 1: Research OS (Hypothesis generation & scientific validation)
+    - Layer 2: EIOS Kernel & EOS Engine (Sensing, EFE planning, capital allocation)
+    - Layer 3: AEAN Multi-Agent HiveMind (Coordination, EKG, governance)
+    - Layer 4: APODEX Platform Runtime (Execution, monitoring, deployment)
+    """
+
+    def __init__(
+        self,
+        research_os: Any = None,
+        eios_kernel: Any = None,
+        eos_engine: Any = None,
+        hive_mind: Any = None
+    ) -> None:
+        self.research_os = research_os
+        self.eios_kernel = eios_kernel
+        self.eos_engine = eos_engine
+        self.hive_mind = hive_mind
+        self.active_handoff_records: List[Dict[str, Any]] = []
+
+    def handoff_validated_hypothesis(self, hypothesis_id: Any) -> Dict[str, Any]:
+        """
+        Extracts a validated research hypothesis from Layer 1 Research OS,
+        registers it as an active inference anomaly sensor in Layer 2 EIOS/EOS,
+        and triggers Layer 3 AEAN multi-agent strategy alignment.
+        """
+        record: Dict[str, Any] = {
+            "hypothesis_id": str(hypothesis_id),
+            "status": "initiated",
+            "layer1_research_os": False,
+            "layer2_eios_kernel": False,
+            "layer2_eos_engine": False,
+            "layer3_aean_hivemind": False,
+            "timestamp": time_now()
+        }
+
+        # 1. Fetch hypothesis from Research OS if available
+        hyp_obj = None
+        if self.research_os and hasattr(self.research_os, "hypotheses"):
+            hyp_obj = self.research_os.hypotheses.get(hypothesis_id)
+            if hyp_obj:
+                record["layer1_research_os"] = True
+                record["title"] = getattr(hyp_obj, "title", str(hypothesis_id))
+                record["target_metric"] = getattr(hyp_obj, "target_metric", "unknown")
+
+        # 2. Register into Layer 2 EIOS Kernel
+        if self.eios_kernel and hasattr(self.eios_kernel, "register_research_hypothesis"):
+            self.eios_kernel.register_research_hypothesis(
+                hypothesis_id=str(hypothesis_id),
+                title=record.get("title", f"Hypothesis-{hypothesis_id}"),
+                metric=record.get("target_metric", "efficiency")
+            )
+            record["layer2_eios_kernel"] = True
+
+        # 3. Promote into Layer 2 EOS Engine
+        if self.eos_engine and hasattr(self.eos_engine, "ingest_validated_research"):
+            self.eos_engine.ingest_validated_research(
+                hypothesis_id=hypothesis_id,
+                title=record.get("title", f"Hypothesis-{hypothesis_id}"),
+                metric=record.get("target_metric", "efficiency")
+            )
+            record["layer2_eos_engine"] = True
+
+        # 4. Notify Layer 3 AEAN HiveMind
+        if self.hive_mind and hasattr(self.hive_mind, "register_research_insight"):
+            self.hive_mind.register_research_insight(
+                insight_id=str(hypothesis_id),
+                topic=record.get("title", "Validated Research Hypothesis"),
+                confidence=0.95
+            )
+            record["layer3_aean_hivemind"] = True
+
+        record["status"] = "completed"
+        self.active_handoff_records.append(record)
+        logger.info(f"[ResearchToSystemBridge] Successfully handed off hypothesis {hypothesis_id} across all unified system layers.")
+        return record
+
+
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()

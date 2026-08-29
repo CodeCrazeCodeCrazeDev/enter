@@ -223,3 +223,39 @@ class ResearchOS(IResearchOS):
 
         self.hypotheses.save(hyp.hypothesis_id, hyp)
         return exp
+
+    # ------------------------------------------------------------------
+    # Cross-Subsystem Handoff Integration Bridge Helpers
+    # ------------------------------------------------------------------
+    def export_validated_hypothesis_to_kernel(self, hypothesis_id: UUID, kernel_ref: Any) -> bool:
+        """Export a validated hypothesis into EIOS Kernel as active inference sensor state."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp or hyp.status != "validated":
+            logger.warning(f"Cannot export unvalidated/missing hypothesis {hypothesis_id} to kernel.")
+            return False
+
+        if hasattr(kernel_ref, "register_research_hypothesis"):
+            kernel_ref.register_research_hypothesis(
+                hypothesis_id=str(hypothesis_id),
+                title=hyp.title,
+                metric=hyp.target_metric
+            )
+            logger.info(f"Exported validated hypothesis {hyp.title} to EIOS Kernel.")
+            return True
+        return False
+
+    def promote_hypothesis_to_eos(self, hypothesis_id: UUID, eos_ref: Any) -> bool:
+        """Promote a validated hypothesis into the EOS decision engine state."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp:
+            return False
+
+        if hasattr(eos_ref, "ingest_validated_research"):
+            eos_ref.ingest_validated_research(
+                hypothesis_id=hypothesis_id,
+                title=hyp.title,
+                metric=hyp.target_metric
+            )
+            logger.info(f"Promoted hypothesis {hyp.title} into EOS Engine.")
+            return True
+        return False

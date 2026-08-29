@@ -155,12 +155,12 @@ def test_event_serialization():
     )
 
     # Serialize to JSON
-    json_data = event.json()
+    json_data = event.model_dump_json()
     assert "update_id" in json_data
     assert "affected_entity_ids" in json_data
 
     # Parse back
-    parsed_event = RealityStateUpdatedEvent.parse_raw(json_data)
+    parsed_event = RealityStateUpdatedEvent.model_validate_json(json_data)
     assert parsed_event.update_id == event.update_id
     assert parsed_event.affected_entity_ids == event.affected_entity_ids
     assert parsed_event.version == "1.0.0"

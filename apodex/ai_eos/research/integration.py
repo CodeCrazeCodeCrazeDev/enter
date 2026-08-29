@@ -423,3 +423,87 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. 200-Paper Corpus Principles Registry & Indexing Engine
+# =====================================================================
+
+_200_PAPER_PRINCIPLES_CACHE: Optional[Dict[int, Dict[str, Any]]] = None
+
+
+def register_200_paper_corpus_principles(
+    db_path: str = "docs/research/papers/AI_EOS_RESEARCH_DB.yaml"
+) -> Dict[int, Dict[str, Any]]:
+    """
+    Parses and indexes transferable engineering principles extracted from the
+    200-paper AI-EOS research database (IDs 1-200), mapping each principle
+    to its target subsystem (AEAN, EOS, EIOS, or ResearchOS).
+    """
+    global _200_PAPER_PRINCIPLES_CACHE
+    if _200_PAPER_PRINCIPLES_CACHE is not None:
+        return _200_PAPER_PRINCIPLES_CACHE
+
+    principles: Dict[int, Dict[str, Any]] = {}
+    if not os.path.exists(db_path):
+        logger.warning(f"Research DB path not found: {db_path}. Returning empty principles index.")
+        _200_PAPER_PRINCIPLES_CACHE = principles
+        return principles
+
+    try:
+        import yaml
+        with open(db_path, "r", encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+        papers = data.get("papers", []) if data else []
+
+        for p in papers:
+            pid = p.get("id")
+            if pid is None:
+                continue
+            meta = p.get("metadata", {})
+            analysis = p.get("analysis", {})
+            domain = meta.get("domain", "General AI")
+            title = meta.get("title", f"Paper {pid}")
+            relevance = analysis.get("ai_eos_relevance", "")
+            notes = analysis.get("implementation_notes", "")
+            fit = analysis.get("architectural_fit", "")
+
+            domain_lower = domain.lower()
+            title_lower = title.lower()
+
+            if any(kw in domain_lower or kw in title_lower for kw in ["causal", "active inference", "sensing", "opportunity", "kernel", "anomaly", "calibration", "bayesian", "oversight"]):
+                subsystem = "EIOS"
+            elif any(kw in domain_lower or kw in title_lower for kw in ["decision", "portfolio", "growth", "business", "governance", "trade", "risk", "game theory"]):
+                subsystem = "EOS"
+            elif any(kw in domain_lower or kw in title_lower for kw in ["agent", "multi-agent", "planning", "swarm", "coordination", "prompt", "mcts", "tree", "thought", "debate", "mas"]):
+                subsystem = "AEAN"
+            else:
+                subsystem = "ResearchOS"
+
+            principles[int(pid)] = {
+                "id": int(pid),
+                "title": title,
+                "domain": domain,
+                "subsystem": subsystem,
+                "relevance": relevance,
+                "implementation_notes": notes,
+                "architectural_fit": fit,
+                "principle": f"{relevance} {notes}".strip()
+            }
+
+        _200_PAPER_PRINCIPLES_CACHE = principles
+        logger.info(f"Successfully registered {len(principles)} transferable engineering principles from 200-paper corpus.")
+    except Exception as e:
+        logger.error(f"Failed to load 200-paper principles from {db_path}: {e}")
+        principles = {}
+
+    return principles
+
+
+def get_corpus_principles(subsystem: Optional[str] = None) -> List[Dict[str, Any]]:
+    """Retrieves transferable principles, optionally filtered by target subsystem (AEAN, EOS, EIOS, ResearchOS)."""
+    all_principles = register_200_paper_corpus_principles()
+    if subsystem is None:
+        return list(all_principles.values())
+    subsystem_upper = subsystem.upper()
+    return [p for p in all_principles.values() if p["subsystem"].upper() == subsystem_upper]

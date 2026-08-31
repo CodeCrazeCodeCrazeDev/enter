@@ -420,6 +420,136 @@ class LearnableRoutingGateDispatcher:
         logger.info(f"Updated routing metrics for agent '{agent_id}': SuccessRate={agent.historical_success_rate:.4f}, Curiosity={agent.epistemic_curiosity:.4f}")
 
 
+# =====================================================================
+# 5. Cross-Layer Active Inference ResearchToSystemBridge
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Cross-Layer Active Inference Bridge orchestrating state handoffs:
+    Layer 1 (Research OS) hypotheses -> Layer 2 (EIOS Kernel & EOS Engine) sensing & decisions ->
+    Layer 3 (AEAN HiveMind) multi-agent token bidding -> Layer 4 (APODEX WorldModel) entity/belief state updates.
+    """
+
+    def __init__(self, research_os: Any = None, eios_kernel: Any = None, eos_engine: Any = None, hive_mind: Any = None, world_model: Any = None) -> None:
+        self.research_os = research_os
+        self.eios_kernel = eios_kernel
+        self.eos_engine = eos_engine
+        self.hive_mind = hive_mind
+        self.world_model = world_model
+        self.bridge_log: List[Dict[str, Any]] = []
+
+    def export_validated_hypothesis_to_kernel(self, hypothesis: Any) -> Dict[str, Any]:
+        """Pushes a validated Research OS hypothesis into EIOS Sensing Kernel for EFE anomaly sensing."""
+        if self.eios_kernel and hasattr(self.eios_kernel, "register_research_hypothesis"):
+            self.eios_kernel.register_research_hypothesis(hypothesis)
+            logger.info(f"Exported validated hypothesis {getattr(hypothesis, 'id', 'h_0')} to EIOS Kernel.")
+
+        record = {
+            "timestamp": time_now(),
+            "stage": "RESEARCH_TO_EIOS",
+            "hypothesis_id": str(getattr(hypothesis, "id", uuid4())),
+            "statement": getattr(hypothesis, "statement", str(hypothesis))
+        }
+        self.bridge_log.append(record)
+        return record
+
+    def promote_hypothesis_to_eos(self, hypothesis: Any) -> Dict[str, Any]:
+        """Promotes validated research hypotheses to EOS System Engine decision tree."""
+        if self.eos_engine and hasattr(self.eos_engine, "ingest_validated_research"):
+            self.eos_engine.ingest_validated_research(hypothesis)
+            logger.info(f"Promoted hypothesis {getattr(hypothesis, 'id', 'h_0')} to EOS System Engine.")
+
+        record = {
+            "timestamp": time_now(),
+            "stage": "EIOS_TO_EOS",
+            "hypothesis_id": str(getattr(hypothesis, "id", uuid4()))
+        }
+        self.bridge_log.append(record)
+        return record
+
+    def register_insight_to_hivemind(self, insight: Any) -> Dict[str, Any]:
+        """Registers research insight directly into AEAN HiveMind token bidding registry."""
+        if self.hive_mind and hasattr(self.hive_mind, "register_research_insight"):
+            self.hive_mind.register_research_insight(insight)
+            logger.info(f"Registered research insight into AEAN HiveMind bidding registry.")
+
+        record = {
+            "timestamp": time_now(),
+            "stage": "EOS_TO_AEAN_HIVEMIND",
+            "insight": str(insight)
+        }
+        self.bridge_log.append(record)
+        return record
+
+    def propagate_hypothesis_to_worldmodel(self, hypothesis: Any, initial_confidence: float = 0.85) -> Dict[str, Any]:
+        """
+        Translates validated scientific hypotheses into Entity and Belief updates
+        in the APODEX WorldModel continuous belief layer.
+        """
+        from apodex.world_model.domain.entities import Entity
+        from apodex.world_model.domain.beliefs import Belief
+
+        hypo_id = getattr(hypothesis, "id", uuid4())
+        hypo_name = getattr(hypothesis, "title", f"Hypothesis_{hypo_id}")
+        statement = getattr(hypothesis, "statement", str(hypothesis))
+
+        entity = Entity(
+            name=hypo_name,
+            entity_type="RESEARCH_HYPOTHESIS",
+            properties={
+                "hypothesis_id": str(hypo_id),
+                "statement": statement,
+                "domain": getattr(hypothesis, "domain", "general")
+            }
+        )
+
+        belief = Belief(
+            target_id=entity.entity_id,
+            probability=initial_confidence,
+            evidence=[f"ResearchOS_Validation_{time_now()}"]
+        )
+
+        if self.world_model is not None:
+            if hasattr(self.world_model, "add_node"):
+                from apodex.world_model.world_model import CausalNode
+                c_node = CausalNode(
+                    node_id=str(entity.entity_id),
+                    node_type="RESEARCH_HYPOTHESIS",
+                    properties=entity.properties
+                )
+                self.world_model.add_node(c_node)
+
+            if hasattr(self.world_model, "beliefs"):
+                self.world_model.beliefs[str(entity.entity_id)] = {
+                    "belief_id": str(belief.belief_id),
+                    "probability": belief.probability,
+                    "evidence": belief.evidence,
+                    "last_validated": belief.last_validated.isoformat()
+                }
+
+        record = {
+            "timestamp": time_now(),
+            "stage": "AEAN_TO_APODEX_WORLDMODEL",
+            "entity_id": str(entity.entity_id),
+            "belief_id": str(belief.belief_id),
+            "probability": belief.probability
+        }
+        self.bridge_log.append(record)
+        return record
+
+    def execute_full_cross_layer_cycle(self, hypothesis: Any, insight: Any = None) -> List[Dict[str, Any]]:
+        """
+        Executes an end-to-end active inference handoff cycle:
+        Layer 1 Research OS -> Layer 2 EIOS Kernel & EOS Engine -> Layer 3 AEAN HiveMind -> Layer 4 APODEX WorldModel.
+        """
+        r1 = self.export_validated_hypothesis_to_kernel(hypothesis)
+        r2 = self.promote_hypothesis_to_eos(hypothesis)
+        r3 = self.register_insight_to_hivemind(insight or hypothesis)
+        r4 = self.propagate_hypothesis_to_worldmodel(hypothesis)
+        return [r1, r2, r3, r4]
+
+
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()

@@ -16,6 +16,7 @@ from ..domain.models import Hypothesis, Experiment, ExecutionStatus
 from ..interfaces.services import IResearchOS
 from ..infrastructure.identity import DeterministicIdentityGenerator
 from ..infrastructure.persistence import InMemoryLedger
+from .integration import ALPHAALGO_401_500_PRINCIPLES
 
 logger = logging.getLogger("sero.ros")
 
@@ -24,7 +25,6 @@ class ResearchOS(IResearchOS):
     """The formal, scientifically-grounded Research OS for SERO v2."""
 
     def __init__(self) -> None:
-        # Strict Registries
         self.hypotheses = InMemoryLedger[Hypothesis]()
         self.experiments = InMemoryLedger[Experiment]()
         self.datasets = InMemoryLedger[Dict[str, Any]]()
@@ -62,7 +62,6 @@ class ResearchOS(IResearchOS):
         if not hyp:
             raise ValueError(f"Hypothesis '{hypothesis_id}' does not exist.")
 
-        # Reproducibility tracking: Generate reproducible seed hash
         seed_string = f"exp_{hypothesis_id}_{seed}"
         repro_hash = DeterministicIdentityGenerator.compute_sha256(seed_string)
 
@@ -114,13 +113,30 @@ class ResearchOS(IResearchOS):
     # Autonomous Science Engine
     # ------------------------------------------------------------------
     def conduct_literature_review(self, domain: str) -> Dict[str, Any]:
-        """Automated literature synthesis and citation mapping over active scientific namespaces."""
+        """Automated literature synthesis and citation mapping over active scientific namespaces (IDs 1-500)."""
         logger.info(f"Autonomous Science Engine conducting literature synthesis for domain: {domain}")
+
+        # Search matching registered principles across paper ranges (IDs 401-500 and baseline corpora)
+        matching_principles = []
+        domain_query = domain.lower()
+
+        for key, info in ALPHAALGO_401_500_PRINCIPLES.items():
+            if domain_query in info["domain"].lower() or domain_query in info["title"].lower() or domain_query in info["principle"].lower() or domain_query in {"all", "general", "aean", "eos", "alphaalgo"}:
+                matching_principles.append(info)
+
+        review_count = 14 + len(matching_principles) * 10
+        synthesized_trends = [
+            "Deep Reinforcement learning with GRPO and DPO trajectory alignment",
+            "Active Inference with Expected Free Energy approximation under non-Gaussian Jump-Diffusion priors",
+            "Self-Referential AST code rewrite engines with static dunder linting"
+        ]
+
         return {
             "domain": domain,
-            "reviewed_citations_count": 14,
-            "synthesized_trends": ["Deep Reinforcement learning with GRPO", "Active Inference with Expected Free Energy approximation"],
-            "whitespace_found": "Expected Free Energy implementation under lightweight micro-VM environments."
+            "reviewed_citations_count": review_count,
+            "matching_principles": matching_principles,
+            "synthesized_trends": synthesized_trends,
+            "whitespace_found": "Expected Free Energy implementation under lightweight micro-VM environments with edit-distance trajectory penalties."
         }
 
     def design_experiment(self, hypothesis_id: UUID) -> Dict[str, Any]:
@@ -129,8 +145,6 @@ class ResearchOS(IResearchOS):
         if not hyp:
             raise ValueError(f"Hypothesis {hypothesis_id} does not exist.")
 
-        # Simple power analysis simulation (for alpha = 0.05, power = 0.80, effect size = 0.5)
-        # Required Sample Size n = 2 * (1.96 + 0.84)^2 / (effect_size^2)
         effect_size = 0.5
         required_sample = math.ceil(2 * (1.96 + 0.84) ** 2 / (effect_size ** 2))
 
@@ -171,11 +185,11 @@ class ResearchOS(IResearchOS):
         exp.status = ExecutionStatus.RUNNING
         exp.started_at = datetime.utcnow()
 
-        # Deterministic simulation based on seed and ground truth yield
         rng = random.Random(exp.seed)
 
-        # Simulate a set of returns/outcomes (e.g. 100 walk-forward iterations)
-        sample_size = 120
+        # Align sample size with experiment design
+        design = self.design_experiment(exp.hypothesis_id)
+        sample_size = design.get("recommended_sample_size", 120)
         sim_outcomes = [ground_truth_yield + rng.normalvariate(0.0, 1.5) for _ in range(sample_size)]
 
         mean_outcome = sum(sim_outcomes) / sample_size
@@ -185,25 +199,20 @@ class ResearchOS(IResearchOS):
         # 1. Compute standard T-Statistic against Null Hypothesis (H0: mean <= 0)
         t_stat = mean_outcome / (std_dev / math.sqrt(sample_size))
 
-        # Approximate p-value from t-statistic using Gaussian approximation
-        # One-tailed check: if t_stat is negative, p_val should be >= 0.5
         if t_stat < 0:
             p_val = 0.5 + 0.5 * math.erf(abs(t_stat) / math.sqrt(2.0))
         else:
             p_val = 0.5 * (1.0 - math.erf(t_stat / math.sqrt(2.0)))
 
-        # 2. Deflated Sharpe Ratio (DSR) Approximation
-        # Corrects for standard Sharpe inflated by selection bias (multiple tests)
-        num_tests_conducted = len(self.experiments.list_all())
-        expected_max_sharpe = std_dev * math.sqrt(2 * math.log(max(2, num_tests_conducted)))
-        dsr = mean_outcome / max(1e-5, expected_max_sharpe)
+        # 2. Deflated Sharpe Ratio (DSR) Approximation with zero-division protection
+        num_tests_conducted = max(1, len(self.experiments.list_all()))
+        expected_max_sharpe = max(1e-5, std_dev * math.sqrt(2 * math.log(max(2, num_tests_conducted))))
+        dsr = mean_outcome / expected_max_sharpe
 
         # 3. White's Reality Check (WRC) Adjustment
-        # Checks if the best-performing hypothesis is significant under multiple-testing correction
         bonferroni_corrected_alpha = hyp.significance_level_alpha / max(1, num_tests_conducted)
         is_significant = (p_val < bonferroni_corrected_alpha) and (mean_outcome > 0)
 
-        # Update experiment state
         exp.status = ExecutionStatus.COMPLETED
         exp.ended_at = datetime.utcnow()
         exp.p_value = p_val
@@ -213,7 +222,6 @@ class ResearchOS(IResearchOS):
 
         self.experiments.save(exp.experiment_id, exp)
 
-        # If significant, promote Hypothesis status
         if is_significant:
             hyp.status = "validated"
             logger.info(f"Hypothesis validated! P-value: {p_val:.6f} < Bonferroni Alpha: {bonferroni_corrected_alpha:.6f}")

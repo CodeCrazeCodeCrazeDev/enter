@@ -63,6 +63,30 @@ class EIOSKernel:
     def __init__(self) -> None:
         self.active_processes: Dict[str, ExecutionDAG] = {}
         self.metrics_history: List[Dict[str, Any]] = []
+        self.research_hypotheses: List[Dict[str, Any]] = []
+
+    def register_research_hypothesis(self, title: str, target_metric: str, effect_size: float = 0.5) -> None:
+        """Register a research hypothesis from Research OS into active sensing memory."""
+        self.research_hypotheses.append({
+            "title": title,
+            "target_metric": target_metric,
+            "effect_size": effect_size,
+            "registered_at": datetime.now(UTC).isoformat()
+        })
+        logger.info(f"[Kernel] Registered research hypothesis for active sensing: {title}")
+
+    def sense_opportunity_anomalies(self) -> List[Dict[str, Any]]:
+        """Active inference sensing over registered research hypotheses and metrics."""
+        anomalies = []
+        for hyp in self.research_hypotheses:
+            surprise_score = hyp["effect_size"] * 1.5
+            anomalies.append({
+                "title": hyp["title"],
+                "target_metric": hyp["target_metric"],
+                "surprise_score": surprise_score,
+                "opportunity_flag": surprise_score > 0.6
+            })
+        return anomalies
 
     async def execute_dag(self, dag: ExecutionDAG) -> bool:
         """Schedules and executes the compiled DAG with failure recovery."""

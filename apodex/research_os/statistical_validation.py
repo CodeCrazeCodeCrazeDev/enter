@@ -63,12 +63,12 @@ def standard_normal_cdf(x: float) -> float:
 
 def standard_normal_ppf(p: float) -> float:
     """Standard normal inverse cumulative distribution function (approximation)."""
-    # Winitzki approximation for inverse error function
-    if p <= 0.0 or p >= 1.0:
-        raise ValueError("Probability must be strictly between 0 and 1.")
+    # Clamp p to safe bounds [1e-12, 1 - 1e-12] to prevent float domain error at 0 or 1
+    eps = 1e-12
+    p_clamped = max(eps, min(1.0 - eps, p))
 
     # Map to [-1, 1] range for erf_inv
-    y = 2.0 * p - 1.0
+    y = 2.0 * p_clamped - 1.0
     a = 0.147
     if y == 0.0:
         return 0.0
@@ -122,8 +122,11 @@ def calculate_dsr(
         z_n = math.sqrt(2.0 * math.log(trials))
         z_n_e = math.sqrt(2.0 * math.log(trials / math.e))
 
+    # Zero-division and negative variance safety protection
+    safe_trials_variance = max(1e-12, trials_variance)
+
     # Expected maximum Sharpe Ratio under null
-    sr_0 = math.sqrt(trials_variance) * ((1.0 - euler_gamma) * z_n + euler_gamma * z_n_e)
+    sr_0 = math.sqrt(safe_trials_variance) * ((1.0 - euler_gamma) * z_n + euler_gamma * z_n_e)
 
     # Standard deviation of the estimated Sharpe Ratio (under non-normality)
     # Annualized Sharpe to daily Sharpe scale (approx) for standard error

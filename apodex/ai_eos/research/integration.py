@@ -420,6 +420,77 @@ class LearnableRoutingGateDispatcher:
         logger.info(f"Updated routing metrics for agent '{agent_id}': SuccessRate={agent.historical_success_rate:.4f}, Curiosity={agent.epistemic_curiosity:.4f}")
 
 
+# =====================================================================
+# 5. 200-Paper Corpus Transferable Engineering Principles Registry
+# =====================================================================
+
+REGISTERED_200_PAPER_PRINCIPLES: List[Dict[str, Any]] = []
+
+def register_200_paper_corpus_principles(yaml_db_path: Optional[str] = None) -> List[Dict[str, Any]]:
+    """
+    Parses AI_EOS_RESEARCH_DB.yaml (200 papers) and registers extracted transferable principles
+    into global registry for Research OS, AEAN, EOS, and EIOS dynamic querying.
+    """
+    global REGISTERED_200_PAPER_PRINCIPLES
+    if REGISTERED_200_PAPER_PRINCIPLES:
+        return REGISTERED_200_PAPER_PRINCIPLES
+
+    if yaml_db_path is None:
+        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+        yaml_db_path = os.path.join(base_dir, "docs", "research", "papers", "AI_EOS_RESEARCH_DB.yaml")
+
+    if not os.path.exists(yaml_db_path):
+        logger.warning(f"Research DB file not found at {yaml_db_path}. Returning empty registry.")
+        return []
+
+    try:
+        import yaml
+        with open(yaml_db_path, "r", encoding="utf-8") as f:
+            db_data = yaml.safe_load(f)
+
+        papers = db_data.get("papers", [])
+        principles = []
+
+        for p in papers:
+            pid = p.get("id")
+            meta = p.get("metadata", {})
+            title = meta.get("title", "")
+            domain = meta.get("domain", "")
+            tech_facts = p.get("technical_facts", {})
+            analysis = p.get("analysis", {})
+
+            problem = tech_facts.get("problem", "")
+            method = tech_facts.get("method", "")
+            relevance = analysis.get("ai_eos_relevance", "")
+
+            combined_str = f"{domain} {relevance}".lower()
+            if any(k in combined_str for k in ["multi-agent", "agent", "planning", "memory", "aean", "coordination", "swarm", "reasoning", "prompt", "llm"]):
+                subsystem = "AEAN"
+            elif any(k in combined_str for k in ["sensing", "eios", "anomaly", "perception", "real-time", "signal", "monitoring", "stream"]):
+                subsystem = "EIOS"
+            elif any(k in combined_str for k in ["hypothesis", "experiment", "statistical", "validation", "benchmark", "corpus", "research", "scientific"]):
+                subsystem = "ResearchOS"
+            else:
+                subsystem = "EOS"
+
+            principles.append({
+                "paper_id": pid,
+                "title": title,
+                "domain": domain,
+                "target_subsystem": subsystem,
+                "problem": problem,
+                "transferable_principle": method,
+                "system_impact": relevance
+            })
+
+        REGISTERED_200_PAPER_PRINCIPLES = principles
+        logger.info(f"Successfully registered {len(principles)} transferable principles from 200-paper corpus.")
+        return REGISTERED_200_PAPER_PRINCIPLES
+    except Exception as e:
+        logger.error(f"Failed to register 200-paper principles: {e}")
+        return []
+
+
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()

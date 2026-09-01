@@ -423,3 +423,98 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. Cross-Layer Active Inference Research-to-System Bridge
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Orchestrates cross-layer Active Inference state handoffs between:
+      - Layer 1: Research OS hypotheses & experiments
+      - Layer 2: EIOS Kernel sensing & EOS decision engine
+      - Layer 3: AEAN multi-agent strategy & HiveMind token bidding
+      - Layer 4: APODEX WorldModel entity & belief updates
+    """
+
+    def __init__(
+        self,
+        research_os: Optional[Any] = None,
+        eios_kernel: Optional[Any] = None,
+        eos_engine: Optional[Any] = None,
+        hive_mind: Optional[Any] = None,
+        world_model: Optional[Any] = None
+    ) -> None:
+        self.research_os = research_os
+        self.eios_kernel = eios_kernel
+        self.eos_engine = eos_engine
+        self.hive_mind = hive_mind
+        self.world_model = world_model
+
+    def bridge_hypothesis_to_eios_kernel(self, hypothesis: Any) -> bool:
+        """Handoff hypothesis from Layer 1 Research OS to Layer 2 EIOS Kernel for Active Inference EFE sensing."""
+        if self.eios_kernel and hasattr(self.eios_kernel, "register_research_hypothesis"):
+            self.eios_kernel.register_research_hypothesis(hypothesis)
+            logger.info(f"[ResearchBridge] Registered hypothesis '{getattr(hypothesis, 'title', 'N/A')}' into EIOS Kernel.")
+            return True
+        return False
+
+    def bridge_hypothesis_to_eos_engine(self, hypothesis: Any) -> bool:
+        """Handoff hypothesis from Layer 1 Research OS to Layer 2 EOS Engine for capital & strategy allocation."""
+        if self.eos_engine and hasattr(self.eos_engine, "ingest_validated_research"):
+            self.eos_engine.ingest_validated_research(hypothesis)
+            logger.info(f"[ResearchBridge] Ingested hypothesis '{getattr(hypothesis, 'title', 'N/A')}' into EOS Engine.")
+            return True
+        return False
+
+    def bridge_insight_to_aean_hivemind(self, insight: Dict[str, Any]) -> Optional[Any]:
+        """Handoff research insight from Layer 1/2 to Layer 3 AEAN HiveMind token bidding registry."""
+        if self.hive_mind and hasattr(self.hive_mind, "register_research_insight"):
+            bid = self.hive_mind.register_research_insight(insight)
+            logger.info(f"[ResearchBridge] Submitted research insight bid '{bid.task}' to AEAN HiveMind.")
+            return bid
+        return None
+
+    def bridge_validated_result_to_world_model(self, result: Dict[str, Any]) -> bool:
+        """Handoff validated empirical results to Layer 4 APODEX WorldModel entity and belief graph."""
+        if self.world_model and hasattr(self.world_model, "beliefs"):
+            node_id = str(result.get("hypothesis_id", uuid4()))
+            self.world_model.beliefs[node_id] = {
+                "title": result.get("title", "Validated Scientific Insight"),
+                "p_value": result.get("p_value", 0.01),
+                "posterior_confidence": result.get("posterior_confidence", 0.95),
+                "validated_at": time_now()
+            }
+            logger.info(f"[ResearchBridge] Updated APODEX WorldModel beliefs for node '{node_id}'.")
+            return True
+        return False
+
+    def execute_cross_layer_handoff(self, hypothesis: Any) -> Dict[str, Any]:
+        """Executes full 4-layer Active Inference state handoff for a given research hypothesis."""
+        k_res = self.bridge_hypothesis_to_eios_kernel(hypothesis)
+        e_res = self.bridge_hypothesis_to_eos_engine(hypothesis)
+
+        insight = {
+            "title": getattr(hypothesis, "title", "Validated Research"),
+            "priority": 0.9,
+            "expected_value": 0.85,
+            "token_cost": 15
+        }
+        h_res = self.bridge_insight_to_aean_hivemind(insight)
+
+        val_result = {
+            "hypothesis_id": getattr(hypothesis, "hypothesis_id", uuid4()),
+            "title": getattr(hypothesis, "title", "Validated Research"),
+            "p_value": getattr(hypothesis, "p_value", 0.01),
+            "posterior_confidence": getattr(hypothesis, "posterior_confidence", 0.95)
+        }
+        w_res = self.bridge_validated_result_to_world_model(val_result)
+
+        return {
+            "kernel_handoff": k_res,
+            "eos_handoff": e_res,
+            "hivemind_task_bid": h_res.task if h_res else None,
+            "world_model_handoff": w_res,
+            "status": "complete"
+        }

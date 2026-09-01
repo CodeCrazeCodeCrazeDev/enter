@@ -223,3 +223,32 @@ class ResearchOS(IResearchOS):
 
         self.hypotheses.save(hyp.hypothesis_id, hyp)
         return exp
+
+    # ------------------------------------------------------------------
+    # Cross-Subsystem Integration Handoffs
+    # ------------------------------------------------------------------
+    def export_validated_hypothesis_to_kernel(self, hypothesis_id: UUID, kernel: Any) -> bool:
+        """Exports validated research hypothesis from ResearchOS to EIOS Kernel for active inference sensing."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp:
+            logger.error(f"Cannot export missing hypothesis {hypothesis_id} to kernel.")
+            return False
+
+        if hasattr(kernel, "register_research_hypothesis"):
+            kernel.register_research_hypothesis(hyp)
+            logger.info(f"Exported hypothesis '{hyp.title}' to EIOS Kernel.")
+            return True
+        return False
+
+    def promote_hypothesis_to_eos(self, hypothesis_id: UUID, eos_engine: Any) -> bool:
+        """Promotes validated research hypothesis from ResearchOS directly to EOS decision engine."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp:
+            logger.error(f"Cannot promote missing hypothesis {hypothesis_id} to EOS.")
+            return False
+
+        if hasattr(eos_engine, "ingest_validated_research"):
+            eos_engine.ingest_validated_research(hyp)
+            logger.info(f"Promoted hypothesis '{hyp.title}' to EOS Decision Engine.")
+            return True
+        return False

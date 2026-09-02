@@ -63,27 +63,21 @@ def standard_normal_cdf(x: float) -> float:
 
 def standard_normal_ppf(p: float) -> float:
     """Standard normal inverse cumulative distribution function (approximation)."""
-    # Winitzki approximation for inverse error function
-    if p <= 0.0 or p >= 1.0:
-        raise ValueError("Probability must be strictly between 0 and 1.")
+    # Clamp extreme probability boundaries to prevent numerical overflow/underflow
+    p_clamped = max(1e-12, min(1.0 - 1e-12, p))
 
     # Map to [-1, 1] range for erf_inv
-    y = 2.0 * p - 1.0
+    y = 2.0 * p_clamped - 1.0
     a = 0.147
     if y == 0.0:
         return 0.0
 
-    # Calculate approximation for erf_inv
-    # Safe guard log arg to prevent log(0) or negative logs
+    # Calculate approximation for erf_inv with safe guards
     arg_log = max(1e-15, 1.0 - y**2)
     term1 = 2.0 / (math.pi * a) + math.log(arg_log) / 2.0
     term2 = math.log(arg_log) / a
-    inner = term1**2 - term2
-    if inner < 0:
-        inner = 0.0
-    inner2 = math.sqrt(inner) - term1
-    if inner2 < 0:
-        inner2 = 0.0
+    inner = max(0.0, term1**2 - term2)
+    inner2 = max(0.0, math.sqrt(inner) - term1)
     erf_inv_val = math.copysign(math.sqrt(inner2), y)
     return math.sqrt(2.0) * erf_inv_val
 
@@ -129,7 +123,7 @@ def calculate_dsr(
     # Annualized Sharpe to daily Sharpe scale (approx) for standard error
     sr_daily = sharpe / math.sqrt(252.0)
 
-    # Variance of estimated daily Sharpe ratio
+    # Variance of estimated daily Sharpe ratio with non-zero denominator protection
     denom = max(1, returns_length - 1)
     var_sr_daily = (1.0 - skewness * sr_daily + (kurtosis - 1.0) / 4.0 * sr_daily**2) / denom
     std_sr_daily = math.sqrt(max(1e-12, var_sr_daily))

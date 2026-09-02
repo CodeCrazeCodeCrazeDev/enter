@@ -116,11 +116,27 @@ class ResearchOS(IResearchOS):
     def conduct_literature_review(self, domain: str) -> Dict[str, Any]:
         """Automated literature synthesis and citation mapping over active scientific namespaces."""
         logger.info(f"Autonomous Science Engine conducting literature synthesis for domain: {domain}")
+        from .integration import (
+            ALPHAALGO_301_400_PRINCIPLES,
+        )
+
+        domain_principles = [
+            p for p in ALPHAALGO_301_400_PRINCIPLES
+            if domain.lower() in p["category"].lower() or domain.lower() in p["title"].lower() or domain == "all"
+        ]
+
         return {
             "domain": domain,
-            "reviewed_citations_count": 14,
-            "synthesized_trends": ["Deep Reinforcement learning with GRPO", "Active Inference with Expected Free Energy approximation"],
-            "whitespace_found": "Expected Free Energy implementation under lightweight micro-VM environments."
+            "reviewed_citations_count": len(ALPHAALGO_301_400_PRINCIPLES),
+            "matching_principles_count": len(domain_principles),
+            "principles": domain_principles,
+            "synthesized_trends": [
+                "Non-Gaussian Hawkes Self-Excitation Code Rewriting",
+                "Island MAP-Elites Dynamic Migration Gates",
+                "Trajectory Edit Path Penalized Direct Preference Optimization",
+                "Active Inference Causal Do-Calculus Task Routing",
+            ],
+            "whitespace_found": "Active Inference expected free energy routing with causal interventions under tight execution budget constraints."
         }
 
     def design_experiment(self, hypothesis_id: UUID) -> Dict[str, Any]:

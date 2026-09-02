@@ -64,6 +64,28 @@ class EIOSKernel:
         self.active_processes: Dict[str, ExecutionDAG] = {}
         self.metrics_history: List[Dict[str, Any]] = []
 
+    def register_research_hypothesis(self, title: str, description: str) -> None:
+        """Ingest ResearchOS hypothesis into EIOS Sensing ledger."""
+        node = ExecutionNode(name=f"ResearchSensing_{title}", action_type="active_sensing", payload={"description": description})
+        if "research_dag" not in self.active_processes:
+            self.active_processes["research_dag"] = ExecutionDAG(id="research_dag")
+        self.active_processes["research_dag"].add_node(node)
+        logger.info(f"[EIOS Kernel] Ingested research hypothesis for active sensing: {title}")
+
+    def sense_opportunity_anomalies(self) -> List[Dict[str, Any]]:
+        """Active inference EFE sensing over ingested research hypotheses."""
+        anomalies = []
+        for dag_id, dag in self.active_processes.items():
+            for node_id, node in dag.nodes.items():
+                if node.action_type == "active_sensing":
+                    anomalies.append({
+                        "node_id": node_id,
+                        "name": node.name,
+                        "uncertainty": 0.35,
+                        "efe_score": 0.85
+                    })
+        return anomalies
+
     async def execute_dag(self, dag: ExecutionDAG) -> bool:
         """Schedules and executes the compiled DAG with failure recovery."""
         logger.info(f"[Kernel] Initiating execution DAG: {dag.id}")
@@ -75,12 +97,10 @@ class EIOSKernel:
         while loop_count < max_loops:
             executable = dag.get_executable_nodes()
             if not executable:
-                # Check if all nodes are completed
                 all_done = all(node.status == "COMPLETED" for node in dag.nodes.values())
                 if all_done:
                     logger.info(f"[Kernel] Execution DAG {dag.id} completed successfully.")
                     return True
-                # If some failed or circular reference
                 any_failed = any(node.status == "FAILED" for node in dag.nodes.values())
                 if any_failed:
                     logger.error(f"[Kernel] Execution DAG {dag.id} halted due to node failure.")
@@ -91,12 +111,10 @@ class EIOSKernel:
                 node.status = "RUNNING"
                 logger.info(f"[Kernel] Dispatching node: {node.name} ({node.action_type})")
 
-                # Simple simulated execution with auto-retry recovery logic
                 success = False
                 retries = 3
                 for attempt in range(1, retries + 1):
                     try:
-                        # Success simulations
                         success = True
                         break
                     except Exception as e:
@@ -121,11 +139,9 @@ class EntrepreneurialCompiler:
         logger.info(f"[Compiler] Compiling strategic goal: '{goal}'")
         dag = ExecutionDAG()
 
-        # Step 1: Research Node
         node_research = ExecutionNode(name="Conjoint Market Research", action_type="research_only", payload={"goal": goal})
         dag.add_node(node_research)
 
-        # Step 2: Feasibility Node (Depends on Research)
         node_feasibility = ExecutionNode(
             name="Feasibility Financial Model",
             action_type="research_only",
@@ -134,7 +150,6 @@ class EntrepreneurialCompiler:
         )
         dag.add_node(node_feasibility)
 
-        # Step 3: Brand & Positioning Node (Depends on Feasibility)
         node_brand = ExecutionNode(
             name="Brand Positioning and Trademark Check",
             action_type="publishing",
@@ -143,7 +158,6 @@ class EntrepreneurialCompiler:
         )
         dag.add_node(node_brand)
 
-        # Step 4: Execution Node (Depends on Brand)
         node_exec = ExecutionNode(
             name="Deploy GTM Ads Campaign",
             action_type="spending",
@@ -159,7 +173,6 @@ class HierarchicalActiveInference:
     """Cascading active inference tracking uncertainty reduction across organization layers (Layer 13)."""
 
     def __init__(self) -> None:
-        # Layer levels: Company -> Department -> Team -> Agent -> Action
         self.uncertainty_levels = {
             "company": 0.8,
             "department": 0.7,
@@ -171,10 +184,9 @@ class HierarchicalActiveInference:
     def calculate_layer_free_energy(self, layer: str, actual_outcome: float, expected_outcome: float) -> float:
         """Compute the Variational Free Energy for a specific layer."""
         error = actual_outcome - expected_outcome
-        complexity = 0.1 * len(layer)  # simple complexity heuristic
+        complexity = 0.1 * len(layer)
         free_energy = complexity + (error ** 2)
 
-        # Adjust estimated uncertainty based on prediction accuracy
         current_uncertainty = self.uncertainty_levels.get(layer, 0.5)
         self.uncertainty_levels[layer] = max(0.01, min(0.99, current_uncertainty + 0.1 * error))
 

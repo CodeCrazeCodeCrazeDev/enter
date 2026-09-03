@@ -12,6 +12,7 @@ import random
 from typing import Any, Dict, List, Optional, Tuple, Set
 from uuid import UUID, uuid4
 from datetime import datetime
+from pydantic import BaseModel, Field
 
 from ...ai_eos.domain.models import VentureCell, Hypothesis, Evidence, Theory
 
@@ -457,6 +458,13 @@ class EvaluationFramework:
 # =====================================================================
 # 14. Coordinating EOSEngine (Orchestrator)
 # =====================================================================
+class IngestedOpportunity(BaseModel):
+    opportunity_id: str
+    description: str
+    priority: float
+    complexity: float
+
+
 class EOSEngine:
     """The continuous entrepreneurial operating orchestrator coupling all 13 subsystems."""
 
@@ -474,6 +482,29 @@ class EOSEngine:
         self.reinvention_engine = ReinventionEngine()
         self.memory = EntrepreneurialMemory()
         self.evaluator = EvaluationFramework()
+        self._validated_research: Dict[str, Dict[str, Any]] = {}
+        self.ingested_opportunities: Dict[str, IngestedOpportunity] = {}
+
+    def ingest_validated_research(self, hypothesis_data: Dict[str, Any]) -> None:
+        """Ingest validated research exported from Layer 1 Research OS."""
+        hyp_id = hypothesis_data.get("hypothesis_id", str(uuid4()))
+        self._validated_research[hyp_id] = hypothesis_data
+        logger.info(f"EOSEngine ingested validated research: {hyp_id}")
+
+    @property
+    def active_hypotheses(self) -> Dict[str, Dict[str, Any]]:
+        return self._validated_research
+
+    def ingest_opportunity_signal(self, signal: Dict[str, Any]) -> IngestedOpportunity:
+        """Ingests opportunity signal from Layer 2 EIOS Kernel sensing."""
+        opportunity = IngestedOpportunity(
+            opportunity_id=signal.get("opportunity_id", f"opp_{uuid4().hex[:8]}"),
+            description=signal.get("description", "Imported Opportunity Signal"),
+            priority=float(signal.get("priority", 0.5)),
+            complexity=float(signal.get("complexity", 0.5))
+        )
+        self.ingested_opportunities[opportunity.opportunity_id] = opportunity
+        return opportunity
 
     def run_continuous_sensing_cycle(self, cells: List[VentureCell], total_budget_cents: int) -> Dict[str, Any]:
         """Execute one complete hierarchical sensing, planning, allocation, and diagnostic loop."""

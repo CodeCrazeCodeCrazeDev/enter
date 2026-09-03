@@ -423,3 +423,92 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. Cross-Layer Active Inference ResearchToSystemBridge
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Orchestrates cross-layer active inference state handoffs between:
+    - Layer 1: Research OS (hypotheses, experiments, statistical validation)
+    - Layer 2: EIOS Kernel (active inference sensing) & EOS System (decisions)
+    - Layer 3: AEAN HiveMind (multi-agent token resource allocation)
+    - Layer 4: APODEX CognitiveBrain (world model entity and belief updates)
+    """
+
+    def __init__(
+        self,
+        research_os: Any,
+        eios_kernel: Optional[Any] = None,
+        eos_engine: Optional[Any] = None,
+        hive_mind: Optional[Any] = None,
+        brain: Optional[Any] = None,
+    ) -> None:
+        self.research_os = research_os
+        self.eios_kernel = eios_kernel
+        self.eos_engine = eos_engine
+        self.hive_mind = hive_mind
+        self.brain = brain
+
+    def propagate_validated_hypothesis(
+        self,
+        hypothesis_id: UUID,
+        ground_truth_yield: float = 2.5
+    ) -> Dict[str, Any]:
+        """
+        Executes end-to-end active inference handoff:
+        1. Layer 1 Research OS validates hypothesis via sandbox simulation.
+        2. Hand off to Layer 2 EIOS Kernel for sensing & EOS Engine for ingestion.
+        3. Hand off to Layer 3 AEAN HiveMind to generate token task bids.
+        4. Hand off to Layer 4 APODEX Brain to assert semantic facts & update causal world model.
+        """
+        results: Dict[str, Any] = {"hypothesis_id": str(hypothesis_id)}
+
+        # 1. Execute Sandbox Experiment in Research OS
+        exp = self.research_os.create_experiment(hypothesis_id)
+        validated_exp = self.research_os.execute_experiment_simulation(exp.experiment_id, ground_truth_yield)
+        results["experiment_id"] = str(validated_exp.experiment_id)
+        results["is_significant"] = validated_exp.is_statistically_significant
+
+        hyp = self.research_os.hypotheses.get(hypothesis_id)
+        results["status"] = hyp.status if hyp else "unknown"
+
+        # 2. Layer 2 Handoff: EIOS Kernel & EOS Engine
+        if self.eios_kernel:
+            kernel_payload = self.research_os.export_validated_hypothesis_to_kernel(hypothesis_id, self.eios_kernel)
+            results["kernel_exported"] = True
+            anomalies = self.eios_kernel.sense_opportunity_anomalies()
+            results["kernel_anomalies_sensed"] = len(anomalies)
+
+        if self.eos_engine:
+            eos_hyp = self.research_os.promote_hypothesis_to_eos(hypothesis_id, self.eos_engine)
+            results["eos_promoted"] = eos_hyp is not None
+
+        # 3. Layer 3 Handoff: AEAN HiveMind
+        if self.hive_mind and hyp:
+            bid = self.hive_mind.register_research_insight(
+                insight={"title": hyp.title, "statement": hyp.statement},
+                priority=0.85,
+                expected_value=0.95,
+                token_cost=15
+            )
+            grants = self.hive_mind.arbitrate([bid])
+            results["hive_mind_bid_granted"] = grants[0].granted if grants else False
+
+        # 4. Layer 4 Handoff: APODEX WorldModel / CognitiveBrain
+        if self.brain and hyp:
+            fact = self.brain.memory.assert_fact(
+                name=f"hypothesis_{hyp.title}",
+                concept_type="validated_research",
+                attributes={"status": hyp.status, "target_metric": hyp.target_metric},
+                confidence=0.95 if hyp.status == "validated" else 0.50
+            )
+            results["brain_fact_id"] = str(fact.id)
+
+            if hasattr(self.brain, "world_model"):
+                self.brain.world_model.add_variable(hyp.target_metric or "research_outcome", 10.0, 1.0)
+
+        logger.info(f"ResearchToSystemBridge propagation completed for hypothesis {hypothesis_id}")
+        return results

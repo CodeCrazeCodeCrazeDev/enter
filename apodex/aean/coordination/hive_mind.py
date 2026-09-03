@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import Dict, List
+from typing import Any, Dict, List
 
 logger = logging.getLogger("aean.hive_mind")
 
@@ -60,3 +60,21 @@ class HiveMind:
 
     def granted_tasks(self, grants: List[Grant]) -> Dict[str, bool]:
         return {g.task: g.granted for g in grants}
+
+    def register_research_insight(
+        self,
+        insight: Dict[str, Any],
+        priority: float = 0.8,
+        expected_value: float = 0.9,
+        token_cost: int = 10
+    ) -> TaskBid:
+        """Register a research insight into the HiveMind token bidding registry as an executable TaskBid."""
+        task_name = f"research_execution:{insight.get('title', 'insight')}"
+        bid = TaskBid(
+            task=task_name,
+            priority=priority,
+            expected_value=expected_value,
+            token_cost=token_cost
+        )
+        logger.info(f"[HiveMind] Registered research insight TaskBid '{task_name}' (Priority={priority}, EV={expected_value})")
+        return bid

@@ -223,3 +223,49 @@ class ResearchOS(IResearchOS):
 
         self.hypotheses.save(hyp.hypothesis_id, hyp)
         return exp
+
+    # ------------------------------------------------------------------
+    # Cross-Layer Integration Handlers
+    # ------------------------------------------------------------------
+    def export_validated_hypothesis_to_kernel(self, hypothesis_id: UUID, kernel: Any) -> Dict[str, Any]:
+        """Export a validated hypothesis to the EIOS Kernel for active inference sensing."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis '{hypothesis_id}' not found.")
+
+        payload = {
+            "hypothesis_id": str(hyp.hypothesis_id),
+            "title": hyp.title,
+            "statement": hyp.statement,
+            "target_metric": hyp.target_metric,
+            "status": hyp.status,
+            "exported_at": datetime.utcnow().isoformat(),
+        }
+
+        if hasattr(kernel, "register_research_hypothesis"):
+            kernel.register_research_hypothesis(payload)
+
+        logger.info(f"Exported hypothesis '{hyp.title}' to EIOS Kernel.")
+        return payload
+
+    def promote_hypothesis_to_eos(self, hypothesis_id: UUID, eos_engine: Any) -> Any:
+        """Promote a validated hypothesis into the EOS decision engine."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis '{hypothesis_id}' not found.")
+
+        payload = {
+            "hypothesis_id": str(hyp.hypothesis_id),
+            "title": hyp.title,
+            "statement": hyp.statement,
+            "domain": hyp.domain,
+            "target_metric": hyp.target_metric,
+            "status": hyp.status,
+        }
+
+        promoted = None
+        if hasattr(eos_engine, "ingest_validated_research"):
+            promoted = eos_engine.ingest_validated_research(payload)
+
+        logger.info(f"Promoted hypothesis '{hyp.title}' to EOS Engine.")
+        return promoted

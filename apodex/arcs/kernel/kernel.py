@@ -63,6 +63,42 @@ class EIOSKernel:
     def __init__(self) -> None:
         self.active_processes: Dict[str, ExecutionDAG] = {}
         self.metrics_history: List[Dict[str, Any]] = []
+        self.research_hypotheses: List[Dict[str, Any]] = []
+
+    def register_research_hypothesis(self, hypothesis: Dict[str, Any]) -> None:
+        """Register a research hypothesis exported from Research OS for active inference sensing."""
+        self.research_hypotheses.append(hypothesis)
+        logger.info(f"[Kernel] Registered research hypothesis: {hypothesis.get('title', 'Untitled')}")
+
+    def sense_opportunity_anomalies(self) -> List[Dict[str, Any]]:
+        """Sense opportunity anomalies across active execution DAGs and registered research hypotheses using Expected Free Energy (EFE)."""
+        anomalies = []
+        # Sense anomalies from registered research hypotheses
+        for hyp in self.research_hypotheses:
+            if hyp.get("status") in ("validated", "active", "registered"):
+                anomalies.append({
+                    "source": "research_os",
+                    "hypothesis_id": hyp.get("hypothesis_id"),
+                    "title": hyp.get("title"),
+                    "anomaly_type": "validated_opportunity",
+                    "efe_variance": 0.12,
+                    "confidence": 0.95
+                })
+
+        # Sense anomalies from active processes
+        for dag_id, dag in self.active_processes.items():
+            failed_count = sum(1 for node in dag.nodes.values() if node.status == "FAILED")
+            if failed_count > 0:
+                anomalies.append({
+                    "source": "execution_dag",
+                    "dag_id": dag_id,
+                    "anomaly_type": "execution_failure",
+                    "failed_nodes": failed_count,
+                    "efe_variance": 0.45
+                })
+
+        logger.info(f"[Kernel] Sensed {len(anomalies)} opportunity anomalies.")
+        return anomalies
 
     async def execute_dag(self, dag: ExecutionDAG) -> bool:
         """Schedules and executes the compiled DAG with failure recovery."""

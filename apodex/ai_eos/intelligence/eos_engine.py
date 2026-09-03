@@ -475,6 +475,29 @@ class EOSEngine:
         self.memory = EntrepreneurialMemory()
         self.evaluator = EvaluationFramework()
 
+    def ingest_validated_research(self, research_data: Dict[str, Any]) -> Hypothesis:
+        """Ingest a validated research payload into the EOS hypothesis engine."""
+        raw_id = research_data.get("hypothesis_id")
+        hyp_id = UUID(raw_id) if isinstance(raw_id, str) else (raw_id if isinstance(raw_id, UUID) else uuid4())
+        hyp = Hypothesis(
+            hypothesis_id=hyp_id,
+            statement=research_data.get("statement", research_data.get("title", "Validated Research")),
+            domain=research_data.get("domain", "general"),
+            posterior_confidence=0.90,
+            status="active"
+        )
+        self.hypothesis_engine.add_hypothesis(hyp)
+        logger.info(f"Ingested validated research hypothesis: {hyp.hypothesis_id}")
+        return hyp
+
+    @property
+    def active_hypotheses(self) -> List[Hypothesis]:
+        """Return all active or validated hypotheses in the hypothesis engine."""
+        return [
+            h for h in self.hypothesis_engine.hypotheses.values()
+            if h.status in ("active", "validated", "promoted")
+        ]
+
     def run_continuous_sensing_cycle(self, cells: List[VentureCell], total_budget_cents: int) -> Dict[str, Any]:
         """Execute one complete hierarchical sensing, planning, allocation, and diagnostic loop."""
         # 1. World State sensing & transitions

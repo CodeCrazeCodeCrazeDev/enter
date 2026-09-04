@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import Dict, List
+from typing import Dict, List, Optional, Any
 
 logger = logging.getLogger("aean.hive_mind")
 
@@ -41,6 +41,16 @@ class Grant:
 class HiveMind:
     token_budget: int = 100
     granted_history: List[Grant] = field(default_factory=list)
+    research_insights: Dict[str, Dict[str, Any]] = field(default_factory=dict)
+
+    def register_research_insight(self, insight_id: str, title: str, priority: float = 1.0) -> None:
+        """Registers a research insight from Research OS for token bidding arbitration."""
+        self.research_insights[insight_id] = {
+            "insight_id": insight_id,
+            "title": title,
+            "priority": priority
+        }
+        logger.info(f"[HiveMind] Registered research insight: {insight_id} - {title}")
 
     def arbitrate(self, bids: List[TaskBid]) -> List[Grant]:
         """Allocate tokens to the highest-scoring bids within budget."""

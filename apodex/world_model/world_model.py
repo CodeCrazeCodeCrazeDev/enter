@@ -32,6 +32,17 @@ class WorldModel(DirectedGraph[CausalNode, RelationEdge]):
         self.beliefs: Dict[str, Dict[str, Any]] = {}
         # Support for Perception-Knowledge Chain (PKC) trace logging
         self.pkc_traces: Dict[str, PerceptionKnowledgeChain] = {}
+        self.entities: Dict[str, Dict[str, Any]] = {}
+
+    def update_entity(self, entity_id: str, entity_type: str, attributes: Dict[str, Any]) -> None:
+        """Updates or registers entity state inside the WorldModel causal graph."""
+        self.entities[entity_id] = {
+            "entity_id": entity_id,
+            "entity_type": entity_type,
+            "attributes": attributes
+        }
+        node = CausalNode(node_id=entity_id, node_type=entity_type, properties=attributes)
+        self.add_node(node)
 
     def _make_placeholder_node(self, node_id: str) -> CausalNode:
         return CausalNode(node_id=node_id, node_type="unknown")

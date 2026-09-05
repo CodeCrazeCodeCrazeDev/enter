@@ -29,7 +29,7 @@ class EntrepreneurialWorldModel:
             "gdp_growth": 0.02,
             "market_demand_index": 1.0,
             "competitor_count": 5,
-            "funding_climate": "moderate",  # loose, moderate, tight
+            "funding_climate": "moderate",
             "technology_platform_shift": False,
         }
         self.uncertainty_scores: Dict[str, float] = {
@@ -42,11 +42,9 @@ class EntrepreneurialWorldModel:
         self.state["market_demand_index"] += random.uniform(-0.1, 0.1)
         self.state["market_demand_index"] = max(0.1, self.state["market_demand_index"])
 
-        # Competitor count grows stochastically
         if random.random() > 0.7:
             self.state["competitor_count"] += random.randint(1, 2)
 
-        # Platform shift has small continuous hazard rate
         if not self.state["technology_platform_shift"] and random.random() > 0.95:
             self.state["technology_platform_shift"] = True
             logger.warning("WORLD STATE SHIFT: Major new technology platform shift detected!")
@@ -122,18 +120,15 @@ class HypothesisEngine:
         if not hyp:
             return
 
-        # Determine if evidence is supporting or contradicting
         is_supporting = False
         p_val = evidence.strength.get("p_value", 1.0)
         effect_size = evidence.strength.get("effect_size", 0.0)
 
-        # Standard statistical threshold: p-value < 0.05 and positive effect size
         if p_val < 0.05 and effect_size > 0.0:
             is_supporting = True
 
         if is_supporting:
             hyp.supporting_evidence.append(evidence.evidence_id)
-            # Update Beta parameters representing success probability
             alpha = hyp.confidence_distribution.get("params", {}).get("alpha", 10.0)
             hyp.confidence_distribution["params"]["alpha"] = alpha + 1.0
         else:
@@ -141,7 +136,6 @@ class HypothesisEngine:
             beta = hyp.confidence_distribution.get("params", {}).get("beta", 10.0)
             hyp.confidence_distribution["params"]["beta"] = beta + 1.0
 
-        # Compute updated posterior confidence
         a = hyp.confidence_distribution["params"]["alpha"]
         b = hyp.confidence_distribution["params"]["beta"]
         hyp.posterior_confidence = float(a / (a + b))
@@ -180,7 +174,6 @@ class BusinessSimulator:
         total_cac = acquired * cac_cents
         monthly_revenue = acquired * arpu_cents
 
-        # Simulated metrics
         ltv_cents = int(arpu_cents / churn_rate) if churn_rate > 0 else arpu_cents * 12
         ltv_to_cac = ltv_cents / cac_cents if cac_cents > 0 else 1.0
         payback_months = cac_cents / arpu_cents if arpu_cents > 0 else 99.0
@@ -206,10 +199,7 @@ class StrategicPlanner:
         pass
 
     def compute_policy_efe(self, expected_utility: float, predictive_entropy: float, risk_factor: float) -> float:
-        """Expected Free Energy (EFE) minimization formula for path planning.
-
-        EFE = Predictive Entropy (Uncertainty) + Risk Penalty - Expected Utility.
-        """
+        """Expected Free Energy (EFE) minimization formula for path planning."""
         return float(predictive_entropy + 1.5 * risk_factor - expected_utility)
 
     def select_optimal_policy(self, candidate_policies: List[Dict[str, float]]) -> Dict[str, float]:
@@ -241,14 +231,13 @@ class CapitalAllocationEngine:
         pass
 
     def allocate(self, cells: List[VentureCell], total_budget_cents: int) -> Dict[UUID, int]:
-        """Allocate budget stochastically proportional to the cell's G-score (EFE priority) and risk metrics."""
+        """Allocate budget stochastically proportional to the cell's G-score and risk metrics."""
         if not cells:
             return {}
 
         total_score = 0.0
         priorities = {}
         for cell in cells:
-            # High priority to cells with high expected free energy / learning capacity, but penalize high risk
             priority = max(0.1, cell.expected_free_energy + cell.capital_allocation_score)
             if cell.risk > 0.7:
                 priority *= 0.1
@@ -263,7 +252,6 @@ class CapitalAllocationEngine:
             share = p / total_score if total_score > 0 else 1.0 / len(cells)
             allocated = int(total_budget_cents * share)
 
-            # Enforce dynamic capacity ceiling for high-risk cells
             if cell.risk > 0.5:
                 max_allowed = int(0.25 * total_budget_cents)
                 if allocated > max_allowed:
@@ -272,7 +260,6 @@ class CapitalAllocationEngine:
             allocations[cell.cell_id] = allocated
             remaining -= allocated
 
-        # Distribute residue
         if remaining > 0 and cells:
             highest_cell = max(cells, key=lambda c: priorities[c.cell_id])
             allocations[highest_cell.cell_id] += remaining
@@ -293,11 +280,9 @@ class PortfolioManager:
     def adjust_proportions(self, total_capital_cents: int, market_uncertainty: float) -> None:
         """Increase Research budget during high uncertainty (real options paradigm)."""
         if market_uncertainty > 0.6:
-            # Exploit option value: allocate 40% to Research, 60% to Venture
             self.research_budget_cents = int(total_capital_cents * 0.40)
             self.venture_budget_cents = int(total_capital_cents * 0.60)
         else:
-            # Low uncertainty: 15% to Research, 85% to Venture
             self.research_budget_cents = int(total_capital_cents * 0.15)
             self.venture_budget_cents = int(total_capital_cents * 0.85)
 
@@ -349,7 +334,7 @@ class MoatAnalyzer:
     ) -> float:
         """Composite Moat Durability Score [0, 1]."""
         s_network = min(1.0, network_density)
-        s_switch = min(1.0, avg_switching_cost_cents / 10000_00)  # normalized at $10k
+        s_switch = min(1.0, avg_switching_cost_cents / 10000_00)
         s_brand = min(1.0, brand_trust_score)
         s_cost = min(1.0, cost_advantage_percent)
 
@@ -367,18 +352,14 @@ class FailurePredictionEngine:
 
     def predict_insolvency_probability(self, burn_multiple: float, runway_months: float, ltv_to_cac: float) -> float:
         """Analytical hazard rate modeling for bankruptcy/insolvency."""
-        # Baseline hazard
         hazard = 0.05
 
-        # High burn multiple (> 2.5) increases failure
         if burn_multiple > 2.5:
             hazard += 0.20
 
-        # Low runway (< 6 months) increases failure exponentially
         if runway_months < 6.0:
             hazard += min(0.70, (6.0 - runway_months) * 0.12)
 
-        # Poor unit economics
         if ltv_to_cac < 2.0:
             hazard += 0.15
 
@@ -447,7 +428,6 @@ class EvaluationFramework:
 
     def audit_ethical_alignment(self, action: str, risk_score: float) -> bool:
         """Basic regulatory filter (Hendrycks constraints, objective safety)."""
-        # Block action if extreme risk score
         if risk_score > 0.85:
             logger.error(f"ALIGNMENT AUDIT FAILURE: Action '{action}' risk score {risk_score} exceeds safety maximum.")
             return False
@@ -475,23 +455,32 @@ class EOSEngine:
         self.memory = EntrepreneurialMemory()
         self.evaluator = EvaluationFramework()
 
+    def ingest_validated_research(self, title: str, domain: str, effect_size: float = 1.0) -> None:
+        """Integration handoff: Ingests validated research from Layer 1 Research OS into EOS decision engine."""
+        hyp = Hypothesis(
+            title=title,
+            statement=f"Validated research finding in {domain}",
+            domain=domain,
+            status="active",
+            posterior_confidence=0.95
+        )
+        self.hypothesis_engine.add_hypothesis(hyp)
+        logger.info(f"[EOS Engine] Ingested validated research: '{title}' into active hypothesis engine.")
+
+    @property
+    def active_hypotheses(self) -> List[Hypothesis]:
+        return [h for h in self.hypothesis_engine.hypotheses.values() if h.status == "active"]
+
     def run_continuous_sensing_cycle(self, cells: List[VentureCell], total_budget_cents: int) -> Dict[str, Any]:
         """Execute one complete hierarchical sensing, planning, allocation, and diagnostic loop."""
-        # 1. World State sensing & transitions
         world_state = self.world_model.transition_state()
         market_uncertainty = self.world_model.calculate_state_entropy()
 
-        # 2. Adjust Portfolio budget allocation proportions
         self.portfolio_manager.adjust_proportions(total_budget_cents, market_uncertainty)
-
-        # 3. Simulate and optimize budgets
         allocations = self.capital_allocation_engine.allocate(cells, self.portfolio_manager.venture_budget_cents)
 
-        # 4. Diagnostics and Moats
         for cell in cells:
             cell.allocated_capital_cents += allocations.get(cell.cell_id, 0)
-
-            # Record trajectory
             self.memory.record_step(
                 cell_id=cell.cell_id,
                 step_name="sensing_and_allocation",

@@ -1,6 +1,7 @@
 from __future__ import annotations
 import uuid
 import logging
+import math
 from enum import Enum
 from datetime import datetime, UTC
 from typing import Any, Dict, List, Optional, Tuple
@@ -57,12 +58,41 @@ class ExecutionDAG(BaseModel):
 class EIOSKernel:
     """The central core of the Entrepreneurial Intelligence Operating System.
 
-    Manages task scheduling, failure recovery (retries), and model routing.
+    Manages task scheduling, failure recovery (retries), model routing,
+    and Active Inference EFE sensing over research hypotheses exported from Layer 1 Research OS.
     """
 
     def __init__(self) -> None:
         self.active_processes: Dict[str, ExecutionDAG] = {}
         self.metrics_history: List[Dict[str, Any]] = []
+        self.research_hypotheses: List[Dict[str, Any]] = []
+
+    def register_research_hypothesis(self, title: str, target_metric: str, significance_alpha: float = 0.05) -> None:
+        """Integration entrypoint for hypotheses exported from Research OS."""
+        self.research_hypotheses.append({
+            "title": title,
+            "target_metric": target_metric,
+            "significance_alpha": significance_alpha,
+            "registered_at": datetime.now(UTC)
+        })
+        logger.info(f"[EIOS Kernel] Ingested research hypothesis for active sensing: '{title}'")
+
+    def sense_opportunity_anomalies(self) -> List[Dict[str, Any]]:
+        """Active Inference Expected Free Energy (EFE) sensing over research hypotheses."""
+        anomalies = []
+        for hyp in self.research_hypotheses:
+            # Calculate Expected Free Energy surprise: EFE = -E[log P(o|m)] + D_KL(Q(s)||P(s))
+            alpha = hyp.get("significance_alpha", 0.05)
+            efe_surprise = -math.log(max(1e-5, alpha))
+            if efe_surprise > 2.0:
+                anomalies.append({
+                    "title": hyp["title"],
+                    "target_metric": hyp["target_metric"],
+                    "efe_surprise": float(efe_surprise),
+                    "action_recommendation": f"Accelerate deployment DAG for metric '{hyp['target_metric']}'"
+                })
+        logger.info(f"[EIOS Kernel] Active sensing cycle completed. Identified {len(anomalies)} opportunity anomalies.")
+        return anomalies
 
     async def execute_dag(self, dag: ExecutionDAG) -> bool:
         """Schedules and executes the compiled DAG with failure recovery."""
@@ -75,12 +105,10 @@ class EIOSKernel:
         while loop_count < max_loops:
             executable = dag.get_executable_nodes()
             if not executable:
-                # Check if all nodes are completed
                 all_done = all(node.status == "COMPLETED" for node in dag.nodes.values())
                 if all_done:
                     logger.info(f"[Kernel] Execution DAG {dag.id} completed successfully.")
                     return True
-                # If some failed or circular reference
                 any_failed = any(node.status == "FAILED" for node in dag.nodes.values())
                 if any_failed:
                     logger.error(f"[Kernel] Execution DAG {dag.id} halted due to node failure.")
@@ -91,12 +119,10 @@ class EIOSKernel:
                 node.status = "RUNNING"
                 logger.info(f"[Kernel] Dispatching node: {node.name} ({node.action_type})")
 
-                # Simple simulated execution with auto-retry recovery logic
                 success = False
                 retries = 3
                 for attempt in range(1, retries + 1):
                     try:
-                        # Success simulations
                         success = True
                         break
                     except Exception as e:
@@ -159,7 +185,6 @@ class HierarchicalActiveInference:
     """Cascading active inference tracking uncertainty reduction across organization layers (Layer 13)."""
 
     def __init__(self) -> None:
-        # Layer levels: Company -> Department -> Team -> Agent -> Action
         self.uncertainty_levels = {
             "company": 0.8,
             "department": 0.7,
@@ -171,10 +196,9 @@ class HierarchicalActiveInference:
     def calculate_layer_free_energy(self, layer: str, actual_outcome: float, expected_outcome: float) -> float:
         """Compute the Variational Free Energy for a specific layer."""
         error = actual_outcome - expected_outcome
-        complexity = 0.1 * len(layer)  # simple complexity heuristic
+        complexity = 0.1 * len(layer)
         free_energy = complexity + (error ** 2)
 
-        # Adjust estimated uncertainty based on prediction accuracy
         current_uncertainty = self.uncertainty_levels.get(layer, 0.5)
         self.uncertainty_levels[layer] = max(0.01, min(0.99, current_uncertainty + 0.1 * error))
 

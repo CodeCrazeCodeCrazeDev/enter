@@ -423,3 +423,42 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. Principle Registration Registries (IDs 1-500 Corpus)
+# =====================================================================
+
+ALPHAALGO_301_500_PRINCIPLES: Dict[str, Dict[str, Any]] = {
+    "active_inference_efe": {
+        "papers": [301, 303, 312, 320, 326, 335, 340],
+        "subsystem_target": "EIOSKernel",
+        "description": "Variational Free Energy (VFE) and Expected Free Energy (EFE) minimization for epistemic curiosity and risk-sensitive active sensing."
+    },
+    "sycophancy_proof_multi_agent_consensus": {
+        "papers": [342, 345, 346, 355, 367, 376, 380],
+        "subsystem_target": "AEAN HiveMind",
+        "description": "Peer-review audit mechanisms, counterfactual credit assignment, and sycophancy-proof multi-agent debate protocols."
+    },
+    "causal_do_calculus_attribution": {
+        "papers": [381, 383, 387, 390, 394, 406, 412],
+        "subsystem_target": "EIOSKernel",
+        "description": "Structural Causal Models (SCMs), Pearl do-calculus interventions, and invariant risk minimization for counterfactual anomaly attribution."
+    },
+    "trajectory_dpo_process_supervision": {
+        "papers": [421, 424, 429, 433, 440, 443, 444],
+        "subsystem_target": "ResearchOS",
+        "description": "Direct Preference Optimization (DPO), trajectory-level advantage estimation, and verifiable process reward models (PRM)."
+    },
+    "map_elites_island_workflow_mutation": {
+        "papers": [462, 463, 467, 472, 477, 485, 500],
+        "subsystem_target": "AEAN Workflow Optimizer",
+        "description": "MAP-Elites quality-diversity illuminated search and isolated island population migration for continuous self-evolution."
+    }
+}
+
+
+def register_301_500_paper_corpus_principles() -> Dict[str, Dict[str, Any]]:
+    """Registers transferable engineering principles extracted across papers 301-500."""
+    logger.info("Registering transferable principles for papers 301-500 (AlphaAlgo 200-paper corpus).")
+    return ALPHAALGO_301_500_PRINCIPLES

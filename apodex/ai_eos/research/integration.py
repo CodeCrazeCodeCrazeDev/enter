@@ -423,3 +423,96 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. Cross-Layer Research-to-System Active Inference Bridge
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Cross-Layer Research-to-System Active Inference Bridge.
+    Orchestrates active inference state handoffs between:
+    - Layer 1: Research OS (scientific hypotheses, power analysis, statistical validation)
+    - Layer 2: EIOS Kernel (Active inference sensing, EFE DAG compilation) & EOS Engine (business strategy, moats)
+    - Layer 3: AEAN HiveMind (multi-agent token bidding, collective debate, multi-agent campaigns)
+    - Layer 4: APODEX World Model (causal graph, entity updates, recursive Bayesian belief updates) & Skills
+    """
+
+    def __init__(
+        self,
+        research_os: Any,
+        eios_kernel: Optional[Any] = None,
+        eos_engine: Optional[Any] = None,
+        hive_mind: Optional[Any] = None,
+        world_model: Optional[Any] = None
+    ) -> None:
+        self.research_os = research_os
+        self.kernel = eios_kernel
+        self.eos_engine = eos_engine
+        self.hive_mind = hive_mind
+        self.world_model = world_model
+        self.bridge_history: List[Dict[str, Any]] = []
+
+    def bridge_validated_hypothesis(
+        self,
+        hypothesis_id: UUID
+    ) -> Dict[str, Any]:
+        """
+        Executes a complete 4-layer handoff of a validated research hypothesis.
+        """
+        hyp = self.research_os.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis '{hypothesis_id}' not found in Research OS.")
+
+        handshake_record: Dict[str, Any] = {
+            "hypothesis_id": str(hypothesis_id),
+            "title": hyp.title,
+            "domain": hyp.domain,
+            "status": hyp.status,
+            "timestamp": time_now(),
+            "layers_notified": []
+        }
+
+        # 1. Layer 2 Handshake: EIOS Kernel Active Inference Sensing & EOS Strategic Engine
+        if self.kernel:
+            if hasattr(self.kernel, "register_research_hypothesis"):
+                self.kernel.register_research_hypothesis(handshake_record)
+            elif hasattr(self.kernel, "sense_opportunity_anomalies"):
+                self.kernel.sense_opportunity_anomalies([handshake_record])
+            handshake_record["layers_notified"].append("Layer2_EIOS_Kernel")
+
+        if self.eos_engine:
+            if hasattr(self.eos_engine, "ingest_validated_research"):
+                self.eos_engine.ingest_validated_research(handshake_record)
+            handshake_record["layers_notified"].append("Layer2_EOS_Engine")
+
+        # 2. Layer 3 Handshake: AEAN HiveMind Task Token Bidding & Multi-Agent Coordination
+        if self.hive_mind:
+            if hasattr(self.hive_mind, "register_research_insight"):
+                self.hive_mind.register_research_insight(
+                    topic=hyp.title,
+                    insight_summary=f"Validated hypothesis on domain {hyp.domain}: {hyp.description}",
+                    confidence=1.0 - getattr(hyp, "significance_level_alpha", 0.05)
+                )
+            handshake_record["layers_notified"].append("Layer3_AEAN_HiveMind")
+
+        # 3. Layer 4 Handshake: APODEX WorldModel Causal Nodes & Bayesian Belief Updates
+        if self.world_model:
+            if hasattr(self.world_model, "update_bayesian_belief"):
+                self.world_model.update_bayesian_belief(
+                    belief_key=f"hypothesis_{hyp.hypothesis_id}",
+                    new_evidence_weight=0.95,
+                    domain=hyp.domain
+                )
+            if hasattr(self.world_model, "add_causal_relation"):
+                self.world_model.add_causal_relation(
+                    source=hyp.domain,
+                    target="system_growth_rate",
+                    effect_size=getattr(hyp, "effect_size", 0.5)
+                )
+            handshake_record["layers_notified"].append("Layer4_APODEX_WorldModel")
+
+        self.bridge_history.append(handshake_record)
+        logger.info(f"ResearchToSystemBridge successfully orchestrated cross-layer handoff for {hyp.title} across {handshake_record['layers_notified']}")
+        return handshake_record

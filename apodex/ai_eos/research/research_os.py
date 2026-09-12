@@ -223,3 +223,49 @@ class ResearchOS(IResearchOS):
 
         self.hypotheses.save(hyp.hypothesis_id, hyp)
         return exp
+
+    # ------------------------------------------------------------------
+    # Cross-Subsystem Bridge Exports
+    # ------------------------------------------------------------------
+    def export_validated_hypothesis_to_kernel(self, hypothesis_id: UUID, kernel: Any) -> Dict[str, Any]:
+        """Export a validated Research OS hypothesis to EIOS Kernel for active inference sensing."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis {hypothesis_id} not found.")
+
+        export_record = {
+            "hypothesis_id": str(hyp.hypothesis_id),
+            "title": hyp.title,
+            "domain": hyp.domain,
+            "status": hyp.status,
+            "description": hyp.description,
+            "exported_at": datetime.utcnow().isoformat()
+        }
+
+        if hasattr(kernel, "register_research_hypothesis"):
+            kernel.register_research_hypothesis(export_record)
+        elif hasattr(kernel, "sense_opportunity_anomalies"):
+            kernel.sense_opportunity_anomalies([export_record])
+
+        logger.info(f"Exported hypothesis {hyp.title} [id={hypothesis_id}] to EIOS Kernel.")
+        return export_record
+
+    def promote_hypothesis_to_eos(self, hypothesis_id: UUID, eos_engine: Any) -> Dict[str, Any]:
+        """Promote a validated hypothesis to EOS decision engine for strategic execution."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis {hypothesis_id} not found.")
+
+        eos_record = {
+            "hypothesis_id": str(hyp.hypothesis_id),
+            "title": hyp.title,
+            "target_metric": hyp.target_metric,
+            "status": hyp.status,
+            "promoted_at": datetime.utcnow().isoformat()
+        }
+
+        if hasattr(eos_engine, "ingest_validated_research"):
+            eos_engine.ingest_validated_research(eos_record)
+
+        logger.info(f"Promoted hypothesis {hyp.title} [id={hypothesis_id}] to EOS decision engine.")
+        return eos_record

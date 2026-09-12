@@ -41,6 +41,44 @@ class Grant:
 class HiveMind:
     token_budget: int = 100
     granted_history: List[Grant] = field(default_factory=list)
+    research_registry: Dict[str, Dict[str, Any]] = field(default_factory=dict)
+    active_bids: Dict[str, List[Any]] = field(default_factory=dict)
+
+    def register_research_insight(
+        self,
+        topic: str,
+        insight_summary: str,
+        confidence: float = 0.95
+    ) -> None:
+        """Register research insight from Research OS for cross-layer multi-agent execution."""
+        self.research_registry[topic] = {
+            "topic": topic,
+            "summary": insight_summary,
+            "confidence": confidence
+        }
+        logger.info(f"[HiveMind] Registered research insight: {topic}")
+
+    def submit_bid(self, bid: Any) -> None:
+        """Submit a bid for a task auction."""
+        task_id = getattr(bid, "task_id", getattr(bid, "task", "default_task"))
+        self.active_bids.setdefault(task_id, []).append(bid)
+
+    def resolve_auction(self, task_id: str) -> Optional[Any]:
+        """Resolve task auction by selecting highest priority/lowest cost bid."""
+        bids = self.active_bids.get(task_id, [])
+        if not bids:
+            return None
+
+        # Sort by score or expected_value/bid_amount
+        def get_bid_score(b: Any) -> float:
+            if hasattr(b, "score"):
+                return float(b.score)
+            priority = getattr(b, "priority", 1.0)
+            amount = getattr(b, "bid_amount", 100.0)
+            return priority * 100.0 / max(1.0, amount)
+
+        sorted_bids = sorted(bids, key=get_bid_score, reverse=True)
+        return sorted_bids[0]
 
     def arbitrate(self, bids: List[TaskBid]) -> List[Grant]:
         """Allocate tokens to the highest-scoring bids within budget."""

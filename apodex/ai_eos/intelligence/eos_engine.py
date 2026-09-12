@@ -474,6 +474,16 @@ class EOSEngine:
         self.reinvention_engine = ReinventionEngine()
         self.memory = EntrepreneurialMemory()
         self.evaluator = EvaluationFramework()
+        self._active_hypotheses: List[Dict[str, Any]] = []
+
+    @property
+    def active_hypotheses(self) -> List[Dict[str, Any]]:
+        return self._active_hypotheses
+
+    def ingest_validated_research(self, research_payload: Dict[str, Any]) -> None:
+        """Ingest a validated research payload from Research OS into EOS active hypotheses."""
+        self._active_hypotheses.append(research_payload)
+        logger.info(f"[EOSEngine] Ingested research hypothesis: {research_payload.get('title')}")
 
     def run_continuous_sensing_cycle(self, cells: List[VentureCell], total_budget_cents: int) -> Dict[str, Any]:
         """Execute one complete hierarchical sensing, planning, allocation, and diagnostic loop."""

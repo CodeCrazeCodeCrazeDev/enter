@@ -116,11 +116,20 @@ class ResearchOS(IResearchOS):
     def conduct_literature_review(self, domain: str) -> Dict[str, Any]:
         """Automated literature synthesis and citation mapping over active scientific namespaces."""
         logger.info(f"Autonomous Science Engine conducting literature synthesis for domain: {domain}")
+        from .integration import register_301_500_paper_corpus_principles
+        principles = register_301_500_paper_corpus_principles()
+
+        matching = [p for p in principles if domain.lower() in p.get("subsystem", "").lower() or domain.lower() in p.get("title", "").lower()]
+        evaluated_principles = matching if matching else principles
+
+        synthesized_trends = [p["title"] for p in evaluated_principles[:5]]
+
         return {
             "domain": domain,
-            "reviewed_citations_count": 14,
-            "synthesized_trends": ["Deep Reinforcement learning with GRPO", "Active Inference with Expected Free Energy approximation"],
-            "whitespace_found": "Expected Free Energy implementation under lightweight micro-VM environments."
+            "reviewed_citations_count": len(evaluated_principles),
+            "synthesized_trends": synthesized_trends,
+            "whitespace_found": "Expected Free Energy implementation under lightweight micro-VM environments.",
+            "corpus_principles": [p["id"] for p in evaluated_principles]
         }
 
     def design_experiment(self, hypothesis_id: UUID) -> Dict[str, Any]:
@@ -223,3 +232,35 @@ class ResearchOS(IResearchOS):
 
         self.hypotheses.save(hyp.hypothesis_id, hyp)
         return exp
+
+    def export_validated_hypothesis_to_kernel(self, hypothesis_id: UUID, kernel: Any) -> Dict[str, Any]:
+        """Exports a validated scientific hypothesis to the EIOS Kernel for active inference sensing."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis '{hypothesis_id}' not found.")
+
+        hyp_data = {
+            "title": hyp.title,
+            "domain": hyp.domain,
+            "status": hyp.status,
+            "novelty": 0.8 if hyp.status == "validated" else 0.4,
+            "uncertainty": 0.2 if hyp.status == "validated" else 0.6
+        }
+        if hasattr(kernel, "register_research_hypothesis"):
+            kernel.register_research_hypothesis(hyp_data)
+
+        logger.info(f"[ResearchOS] Exported hypothesis '{hyp.title}' to EIOS Kernel.")
+        return {"exported": True, "hypothesis_id": str(hypothesis_id), "status": hyp.status}
+
+    def promote_hypothesis_to_eos(self, hypothesis_id: UUID, eos_engine: Any) -> Dict[str, Any]:
+        """Promotes a validated scientific hypothesis directly into the EOS Decision Engine."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis '{hypothesis_id}' not found.")
+
+        res = {}
+        if hasattr(eos_engine, "ingest_validated_research"):
+            res = eos_engine.ingest_validated_research(hyp)
+
+        logger.info(f"[ResearchOS] Promoted hypothesis '{hyp.title}' to EOS Engine.")
+        return res

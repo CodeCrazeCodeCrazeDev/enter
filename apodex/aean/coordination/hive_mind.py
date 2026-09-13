@@ -60,3 +60,15 @@ class HiveMind:
 
     def granted_tasks(self, grants: List[Grant]) -> Dict[str, bool]:
         return {g.task: g.granted for g in grants}
+
+    def register_research_insight(
+        self,
+        task_name: str,
+        priority: float = 0.8,
+        expected_value: float = 1.2,
+        token_cost: int = 10
+    ) -> Grant:
+        """Converts a Research OS insight into a priority task bid and executes second-price arbitration."""
+        bid = TaskBid(task=task_name, priority=priority, expected_value=expected_value, token_cost=token_cost)
+        grants = self.arbitrate([bid])
+        return grants[0] if grants else Grant(task_name, False, 0, 0.0)

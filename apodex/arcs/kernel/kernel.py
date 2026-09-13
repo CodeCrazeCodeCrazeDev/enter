@@ -57,12 +57,37 @@ class ExecutionDAG(BaseModel):
 class EIOSKernel:
     """The central core of the Entrepreneurial Intelligence Operating System.
 
-    Manages task scheduling, failure recovery (retries), and model routing.
+    Manages task scheduling, failure recovery (retries), active inference sensing, and model routing.
     """
 
     def __init__(self) -> None:
         self.active_processes: Dict[str, ExecutionDAG] = {}
         self.metrics_history: List[Dict[str, Any]] = []
+        self.registered_research_hypotheses: List[Dict[str, Any]] = []
+
+    def register_research_hypothesis(self, hypothesis_data: Dict[str, Any]) -> None:
+        """Registers research hypothesis for active inference sensing."""
+        self.registered_research_hypotheses.append(hypothesis_data)
+        logger.info(f"[EIOSKernel] Registered research hypothesis: {hypothesis_data.get('title', 'Untitled')}")
+
+    def sense_opportunity_anomalies(self, opportunities: Optional[List[Dict[str, Any]]] = None) -> List[Dict[str, Any]]:
+        """Senses market/research opportunity anomalies using Expected Free Energy (EFE) prediction error."""
+        items_to_sense = opportunities if opportunities else self.registered_research_hypotheses
+        anomalies = []
+        for item in items_to_sense:
+            # Active Inference anomaly scoring based on novelty and precision
+            title = item.get("title", "")
+            novelty = item.get("novelty", 0.7)
+            uncertainty = item.get("uncertainty", 0.3)
+            efe_score = novelty * uncertainty
+
+            if efe_score >= 0.15:
+                anomalies.append({
+                    "item": title,
+                    "efe_anomaly_score": float(efe_score),
+                    "action_required": "SCHEDULE_SANDBOX_EXPERIMENT"
+                })
+        return anomalies
 
     async def execute_dag(self, dag: ExecutionDAG) -> bool:
         """Schedules and executes the compiled DAG with failure recovery."""

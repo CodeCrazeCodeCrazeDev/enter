@@ -17,10 +17,58 @@ from typing import Any, Dict, List, Optional, Tuple, Set
 from uuid import UUID, uuid4
 from pydantic import BaseModel, Field
 
+from ...arcs.kernel.kernel import EIOSKernel, ExecutionNode
+
 logger = logging.getLogger("sero.research.integration")
 
 # =====================================================================
-# 1. Self-Referential Code Rewrite & Verification Engine (STOP / Gödel)
+# 1. ResearchToSystemBridge (Cross-Layer Active Inference State Handoff)
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """Orchestrates cross-layer active inference state handoffs between Layer 1 Research OS hypotheses,
+    Layer 2 EIOS Kernel sensing & EOS System decisions, Layer 3 AEAN multi-agent strategy execution,
+    and Layer 4 APODEX WorldModel entity and belief updates.
+    """
+
+    @staticmethod
+    def export_validated_hypothesis_to_kernel(
+        hypothesis: Any,
+        experiment: Any,
+        kernel: EIOSKernel
+    ) -> ExecutionNode:
+        """Promotes a validated scientific hypothesis from Layer 1 Research OS into a Layer 2 EIOS Kernel ExecutionNode."""
+        node_name = f"Research Hypothesis: {getattr(hypothesis, 'title', 'Validated Hypothesis')}"
+        node_payload = {
+            "hypothesis_id": str(getattr(hypothesis, "hypothesis_id", uuid4())),
+            "target_metric": getattr(hypothesis, "target_metric", "unknown"),
+            "effect_size": getattr(experiment, "effect_size", 0.0),
+            "p_value": getattr(experiment, "p_value", 0.0),
+            "deflated_sharpe_ratio": getattr(experiment, "deflated_sharpe_ratio", 0.0),
+            "is_statistically_significant": getattr(experiment, "is_statistically_significant", True)
+        }
+
+        exec_node = ExecutionNode(
+            name=node_name,
+            action_type="research_hypothesis",
+            payload=node_payload,
+            status="PENDING"
+        )
+        logger.info(f"Bridge promoted hypothesis '{hypothesis.title}' to EIOS ExecutionNode {exec_node.node_id}")
+        return exec_node
+
+    @staticmethod
+    def promote_hypothesis_to_eos(hypothesis: Any, eos_engine: Any) -> bool:
+        """Ingests validated Research OS hypothesis directly into EOSEngine hypothesis registry."""
+        if hasattr(eos_engine, "hypothesis_engine"):
+            eos_engine.hypothesis_engine.add_hypothesis(hypothesis)
+            logger.info(f"Bridge promoted hypothesis '{hypothesis.hypothesis_id}' to EOSEngine.")
+            return True
+        return False
+
+
+# =====================================================================
+# 2. Self-Referential Code Rewrite & Verification Engine (STOP / Gödel)
 # =====================================================================
 
 class RewriteProposal(BaseModel):
@@ -141,7 +189,7 @@ class CodeRewriteEngine:
 
 
 # =====================================================================
-# 2. Genetic Program Synthesis & Workflow Mutation (ShinkaEvolve)
+# 3. Genetic Program Synthesis & Workflow Mutation (ShinkaEvolve)
 # =====================================================================
 
 class ProgramGenome(BaseModel):
@@ -260,7 +308,7 @@ class GeneticWorkflowOptimizer:
 
 
 # =====================================================================
-# 3. Advantage Estimation & SFT/DPO Preference Collection (SIA L2)
+# 4. Advantage Estimation & SFT/DPO Preference Collection (SIA L2)
 # =====================================================================
 
 class TrajectoryStep(BaseModel):
@@ -328,7 +376,7 @@ class SFTPreferenceCollector:
 
 
 # =====================================================================
-# 4. Learnable Routing Gates & Budget-Bounded Dispatcher (Uno-Orchestra)
+# 5. Learnable Routing Gates & Budget-Bounded Dispatcher (Uno-Orchestra)
 # =====================================================================
 
 class SpecializedAgentProfile(BaseModel):

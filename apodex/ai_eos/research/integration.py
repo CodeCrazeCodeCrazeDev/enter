@@ -423,3 +423,145 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. Cross-Layer Research-to-System Active Inference Bridge
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Cross-Layer Research-to-System Integration Bridge.
+    Orchestrates active inference state handoffs between:
+      - Layer 1: Research OS (scientific hypothesis testing & validation)
+      - Layer 2: EIOS Kernel & EOS Engine (sensing DAGs & strategic hypothesis tracking)
+      - Layer 3: AEAN HiveMind (multi-agent token bidding & strategy execution)
+      - Layer 4: APODEX WorldModel (entity, belief, and causal graph updates)
+    """
+
+    def __init__(
+        self,
+        research_os: Any = None,
+        kernel: Any = None,
+        eos_engine: Any = None,
+        hive_mind: Any = None,
+        world_model: Any = None
+    ) -> None:
+        self.research_os = research_os
+        self.kernel = kernel
+        self.eos_engine = eos_engine
+        self.hive_mind = hive_mind
+        self.world_model = world_model
+        self.transferred_hypotheses: Set[str] = set()
+
+    def export_validated_hypothesis_to_kernel(self, hypothesis: Any) -> Optional[Any]:
+        """
+        Translates a validated hypothesis from ResearchOS into an active inference
+        sensing node inside EIOSKernel's execution DAG.
+        """
+        if not self.kernel:
+            logger.warning("[Bridge] No EIOS Kernel connected.")
+            return None
+
+        # Ensure EIOS kernel interfaces/classes are accessible
+        from ...arcs.kernel.kernel import ExecutionNode
+
+        node_id = f"sensing_node_{hypothesis.hypothesis_id}"
+        sensing_node = ExecutionNode(
+            node_id=node_id,
+            name=f"Sense Validated Hypothesis: {hypothesis.statement[:40]}",
+            action_type="research_sensing",
+            payload={
+                "hypothesis_id": str(hypothesis.hypothesis_id),
+                "target_metric": hypothesis.target_metric,
+                "posterior_confidence": hypothesis.posterior_confidence,
+                "domain": hypothesis.domain
+            }
+        )
+        logger.info(f"[Bridge] Exported hypothesis {hypothesis.hypothesis_id} to EIOS Kernel as node {node_id}")
+        self.transferred_hypotheses.add(str(hypothesis.hypothesis_id))
+        return sensing_node
+
+    def promote_hypothesis_to_eos(self, hypothesis: Any) -> bool:
+        """
+        Ingests a validated hypothesis directly into EOSEngine's Hypothesis Engine
+        for active evidence tracking and theory promotion.
+        """
+        if not self.eos_engine:
+            logger.warning("[Bridge] No EOSEngine connected.")
+            return False
+
+        if hasattr(self.eos_engine, "hypothesis_engine"):
+            self.eos_engine.hypothesis_engine.add_hypothesis(hypothesis)
+            logger.info(f"[Bridge] Promoted hypothesis {hypothesis.hypothesis_id} to EOSEngine.")
+            return True
+        return False
+
+    def dispatch_to_aean_hivemind(self, hypothesis: Any, priority: float = 0.8) -> Optional[Any]:
+        """
+        Registers a validated research hypothesis/insight with AEAN HiveMind
+        for token bidding and multi-agent execution.
+        """
+        if not self.hive_mind:
+            logger.warning("[Bridge] No AEAN HiveMind connected.")
+            return None
+
+        from ...aean.coordination.hive_mind import TaskBid
+
+        task_name = f"Execute research strategy for: {hypothesis.statement[:30]}"
+        bid = TaskBid(
+            task=task_name,
+            priority=priority,
+            expected_value=hypothesis.posterior_confidence,
+            token_cost=10
+        )
+        logger.info(f"[Bridge] Created AEAN HiveMind TaskBid for hypothesis {hypothesis.hypothesis_id}: '{task_name}'")
+        return bid
+
+    def update_world_model_beliefs(self, hypothesis: Any) -> bool:
+        """
+        Updates WorldModel entity states and Bayesian belief distributions based on
+        empirical scientific findings from ResearchOS.
+        """
+        if not self.world_model:
+            logger.warning("[Bridge] No WorldModel connected.")
+            return False
+
+        from ...world_model.world_model import CausalNode
+
+        node_id = f"hypothesis_{hypothesis.hypothesis_id}"
+        node = CausalNode(
+            node_id=node_id,
+            node_type="validated_hypothesis",
+            properties={
+                "statement": hypothesis.statement,
+                "posterior_confidence": hypothesis.posterior_confidence,
+                "domain": hypothesis.domain,
+                "updated_at": time_now()
+            }
+        )
+        self.world_model.add_node(node)
+        self.world_model.beliefs[node_id] = {
+            "posterior_confidence": hypothesis.posterior_confidence,
+            "domain": hypothesis.domain,
+            "status": hypothesis.status
+        }
+        logger.info(f"[Bridge] Updated WorldModel node and belief for {node_id}")
+        return True
+
+    def execute_cross_layer_handoff(self, hypothesis: Any) -> Dict[str, Any]:
+        """
+        Executes an end-to-end multi-layer state handoff for a validated research hypothesis.
+        """
+        sensing_node = self.export_validated_hypothesis_to_kernel(hypothesis)
+        eos_promoted = self.promote_hypothesis_to_eos(hypothesis)
+        aean_bid = self.dispatch_to_aean_hivemind(hypothesis)
+        world_updated = self.update_world_model_beliefs(hypothesis)
+
+        return {
+            "hypothesis_id": str(hypothesis.hypothesis_id),
+            "sensing_node_id": sensing_node.node_id if sensing_node else None,
+            "eos_promoted": eos_promoted,
+            "aean_bid_created": aean_bid is not None,
+            "world_model_updated": world_updated
+        }

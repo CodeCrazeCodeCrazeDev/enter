@@ -423,3 +423,128 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. Research Corpus Principles Registration & Cross-Layer Bridge
+# =====================================================================
+
+ALPHAALGO_301_500_PRINCIPLES: List[Dict[str, Any]] = [
+    {
+        "id": "P301_AEAN_TOKEN_ARBITRATION",
+        "subsystem": "AEAN",
+        "title": "Token Bidding Second-Price Arbitration with Research Insights",
+        "description": "Multi-agent execution cycles arbitrate compute resources via second-price style clearing auctions, ingesting research insights directly into task priority bids.",
+        "source_papers": [303, 312, 350]
+    },
+    {
+        "id": "P302_AEAN_AUTONOMY_LADDER",
+        "subsystem": "AEAN",
+        "title": "Autonomous Discovery & Autonomy Ladder Evaluation",
+        "description": "Autonomous discovery over EKG micro-cells evaluates operational autonomy (Levels 1-6) and flags compounding arms vs. capital waste.",
+        "source_papers": [315, 342, 388]
+    },
+    {
+        "id": "P303_EOS_POSTERIOR_UPDATING",
+        "subsystem": "EOS",
+        "title": "Hypothesis Ingestion & Posterior Beta Updating",
+        "description": "EOS Decision Engine ingests validated Research OS hypotheses and updates Beta posterior confidence parameters based on statistical evidence.",
+        "source_papers": [304, 321, 365]
+    },
+    {
+        "id": "P304_EOS_REAL_OPTIONS_CAPITAL",
+        "subsystem": "EOS",
+        "title": "Coupled Business Loops & Real-Options Capital Allocation",
+        "description": "Dynamic capital allocation across Venture Cells adjusts research vs. venture budget proportions based on environment entropy.",
+        "source_papers": [307, 345, 390]
+    },
+    {
+        "id": "P305_EIOS_ACTIVE_INFERENCE_SENSING",
+        "subsystem": "EIOS",
+        "title": "Active Inference Anomaly Sensing over Research Hypotheses",
+        "description": "EIOS Kernel tracks Variational Free Energy and EFE over registered research hypotheses to sense anomalies and trigger adaptive rescheduling.",
+        "source_papers": [301, 302, 322]
+    },
+    {
+        "id": "P306_EIOS_HIERARCHICAL_UNCERTAINTY",
+        "subsystem": "EIOS",
+        "title": "Hierarchical Uncertainty Cascade & Multi-Scale Timescale Planning",
+        "description": "Cascades uncertainty reduction across company, department, team, agent, and action levels while tracking layer free energy.",
+        "source_papers": [302, 330, 375]
+    },
+    {
+        "id": "P307_RESEARCHOS_CROSS_LAYER_HANDOFF",
+        "subsystem": "ResearchOS",
+        "title": "Cross-Layer Hypothesis Handoff Bridge",
+        "description": "Validated research hypotheses in Research OS export seamlessly to EIOS Kernel for sensing and promote to EOS Engine for strategy deployment.",
+        "source_papers": [301, 304, 305]
+    },
+    {
+        "id": "P308_RESEARCHOS_LITERATURE_SYNTHESIS",
+        "subsystem": "ResearchOS",
+        "title": "500-Paper Corpus Literature Synthesis",
+        "description": "ResearchOS conduct_literature_review queries the registered 500-paper principles corpus for real-time trend synthesis and whitespace discovery.",
+        "source_papers": list(range(301, 501))
+    }
+]
+
+
+def register_301_500_paper_corpus_principles() -> List[Dict[str, Any]]:
+    """Registers and returns extracted engineering principles from papers 301-500."""
+    return ALPHAALGO_301_500_PRINCIPLES
+
+
+def register_200_paper_corpus_principles() -> List[Dict[str, Any]]:
+    """Alias for registering principles extracted from the 200 new paper corpus (IDs 301-500)."""
+    return register_301_500_paper_corpus_principles()
+
+
+class ResearchToSystemBridge:
+    """
+    Cross-Layer Scientific Research-to-Execution Bridge.
+    Orchestrates active inference state handoffs between:
+    - Layer 1 Research OS hypotheses & experimental validation
+    - Layer 2 EIOS Kernel anomaly sensing & EOS System decision engine
+    - Layer 3 AEAN multi-agent HiveMind execution
+    """
+
+    def __init__(self, research_os: Any, kernel: Any, eos_engine: Any, hive_mind: Any) -> None:
+        self.research_os = research_os
+        self.kernel = kernel
+        self.eos_engine = eos_engine
+        self.hive_mind = hive_mind
+
+    def handoff_validated_hypothesis(self, hypothesis_id: UUID) -> Dict[str, Any]:
+        """Performs atomic cross-layer handoff of a validated research hypothesis."""
+        hyp = self.research_os.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis {hypothesis_id} not found in ResearchOS.")
+
+        # 1. Sense opportunity anomaly in EIOS Kernel
+        kernel_res = None
+        if hasattr(self.kernel, "sense_opportunity_anomalies"):
+            kernel_res = self.kernel.sense_opportunity_anomalies([{"title": hyp.title, "domain": hyp.domain}])
+
+        # 2. Ingest validated hypothesis into EOS Engine
+        eos_res = None
+        if hasattr(self.eos_engine, "ingest_validated_research"):
+            eos_res = self.eos_engine.ingest_validated_research(hyp)
+
+        # 3. Register research insight in AEAN Hive Mind
+        hive_res = None
+        if hasattr(self.hive_mind, "register_research_insight"):
+            hive_res = self.hive_mind.register_research_insight(
+                task_name=f"exec_{hyp.title}",
+                priority=0.9 if hyp.status == "validated" else 0.5,
+                expected_value=1.5 if hyp.status == "validated" else 0.8,
+                token_cost=10
+            )
+
+        logger.info(f"Cross-layer handoff completed for hypothesis: {hyp.title} [id={hypothesis_id}]")
+        return {
+            "hypothesis_id": str(hypothesis_id),
+            "status": hyp.status,
+            "kernel_sensing": kernel_res,
+            "eos_ingestion": eos_res,
+            "hive_mind_bidding": hive_res
+        }

@@ -505,3 +505,20 @@ class EOSEngine:
             "research_portfolio_cents": self.portfolio_manager.research_budget_cents,
             "venture_portfolio_cents": self.portfolio_manager.venture_budget_cents
         }
+
+    def ingest_validated_research(self, hypothesis: Hypothesis) -> Dict[str, Any]:
+        """Ingests a validated research hypothesis from Research OS into the EOS Hypothesis Engine."""
+        self.hypothesis_engine.add_hypothesis(hypothesis)
+        promoted = self.hypothesis_engine.evaluate_promotions()
+        logger.info(f"[EOSEngine] Ingested hypothesis {hypothesis.hypothesis_id} - Promoted list: {promoted}")
+        return {
+            "ingested_id": str(hypothesis.hypothesis_id),
+            "status": hypothesis.status,
+            "posterior_confidence": hypothesis.posterior_confidence,
+            "promoted": hypothesis.hypothesis_id in promoted
+        }
+
+    @property
+    def active_hypotheses(self) -> List[Hypothesis]:
+        """Returns all currently active hypotheses in the decision engine."""
+        return [h for h in self.hypothesis_engine.hypotheses.values() if h.status in {"active", "validated"}]

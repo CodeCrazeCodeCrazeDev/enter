@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 integration.py: Multi-paradigm scientific research-to-code integration layer.
-Incorporates transferable engineering principles extracted from the 200-paper corpus,
-directly resolving high-priority research debt in AI-EOS, AEAN, and Research OS.
+Incorporates transferable engineering principles extracted from the 500-paper corpus,
+directly resolving high-priority research debt in AI-EOS, AEAN, EIOS, and Research OS.
 """
 
 from __future__ import annotations
@@ -18,6 +18,48 @@ from uuid import UUID, uuid4
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger("sero.research.integration")
+
+# =====================================================================
+# 0. Transferable Engineering Principles Registry (Papers 1-500)
+# =====================================================================
+
+ALPHAALGO_301_500_PRINCIPLES: List[Dict[str, Any]] = [
+    {
+        "principle_id": "P_301_500_01",
+        "title": "Active Inference Expected Free Energy (EFE) Sensing",
+        "target_subsystem": "EIOS Kernel & Research OS",
+        "description": "Evaluates expected free energy across scientific hypotheses, minimizing epistemic surprise while respecting pragmatic cost bounds.",
+        "applicable_papers": [301, 302, 304, 315, 332, 423, 442]
+    },
+    {
+        "principle_id": "P_301_500_02",
+        "title": "First-Principles Strategy Loop Ingestion",
+        "target_subsystem": "EOS Engine",
+        "description": "Scientific research validation automatically promotes validated hypotheses into active strategy decision trees.",
+        "applicable_papers": [429, 434, 439, 444, 458]
+    },
+    {
+        "principle_id": "P_301_500_03",
+        "title": "Market-Based Token Bidding Registry for Multi-Agent Execution",
+        "target_subsystem": "AEAN HiveMind",
+        "description": "Sub-agents compete for task execution based on domain specialty, historical success rate, and token bidding.",
+        "applicable_papers": [342, 350, 351, 362, 371, 433, 443, 453]
+    },
+    {
+        "principle_id": "P_301_500_04",
+        "title": "Island MAP-Elites Crossover & AST Code Vetoes",
+        "target_subsystem": "Self-Evolving Code & Genetic Workflow Optimizer",
+        "description": "Evolutionary workflow optimization requires island-based population diversity gated by AST static security linting.",
+        "applicable_papers": [381, 382, 384, 389, 393, 394, 403, 408, 411]
+    }
+]
+
+
+def register_301_500_paper_corpus_principles() -> List[Dict[str, Any]]:
+    """Registers transferable engineering principles extracted from papers 301-500."""
+    logger.info(f"Registered {len(ALPHAALGO_301_500_PRINCIPLES)} transferable engineering principles for papers 301-500.")
+    return ALPHAALGO_301_500_PRINCIPLES
+
 
 # =====================================================================
 # 1. Self-Referential Code Rewrite & Verification Engine (STOP / Gödel)
@@ -52,7 +94,6 @@ class CodeRewriteEngine:
     ) -> RewriteProposal:
         """Proposes a code rewrite with security rules check."""
         full_path = os.path.abspath(filepath)
-        # Ensure path is within allowed boundaries
         if not any(full_path.startswith(allowed) for allowed in self.allowed_paths):
             raise PermissionError(f"Security Veto: Path '{filepath}' is outside allowed research boundaries.")
 
@@ -68,10 +109,8 @@ class CodeRewriteEngine:
     def verify_proposal_ast(self, proposal: RewriteProposal) -> bool:
         """AST syntax validation and static security linting."""
         try:
-            # Parse the proposed snippet to ensure it is valid Python code
             parsed_proposal = ast.parse(proposal.proposed_snippet)
 
-            # Static analysis checks: block dangerous calls like eval, exec, os.system
             for node in ast.walk(parsed_proposal):
                 if isinstance(node, ast.Call):
                     if isinstance(node.func, ast.Name):
@@ -93,7 +132,6 @@ class CodeRewriteEngine:
             return False
 
         try:
-            # Verify the original snippet is actually present in the file (if file exists)
             if os.path.exists(proposal.target_filepath):
                 with open(proposal.target_filepath, "r", encoding="utf-8") as f:
                     content = f.read()
@@ -101,11 +139,9 @@ class CodeRewriteEngine:
                     logger.warning(f"Original snippet not found inside target file: {proposal.target_filepath}")
                     return False
 
-                # Simulate replacement in temporary environment
                 simulated_content = content.replace(proposal.original_snippet, proposal.proposed_snippet)
                 ast.parse(simulated_content)
             else:
-                # If target is new, just parse the proposed code
                 ast.parse(proposal.proposed_snippet)
 
             logger.info("Dry run simulation successful: Rewrite proposal is syntactically sound.")
@@ -121,7 +157,6 @@ class CodeRewriteEngine:
             return False
 
         try:
-            # Read, replace, and write back
             if os.path.exists(proposal.target_filepath):
                 with open(proposal.target_filepath, "r", encoding="utf-8") as f:
                     content = f.read()
@@ -166,14 +201,12 @@ class GeneticWorkflowOptimizer:
     def initialize_population(self, base_template: str, base_params: Dict[str, Any]) -> None:
         """Initializes diverse genomes inside the local island."""
         self.population = []
-        # Add elite base seed
         self.population.append(ProgramGenome(
             prompt_template=base_template,
             parameters=base_params.copy(),
             generation=0
         ))
 
-        # Mutate to create diverse population
         for _ in range(self.pop_size - 1):
             mutated_params = self._mutate_parameters(base_params)
             mutated_template = self._mutate_prompt(base_template)
@@ -188,7 +221,6 @@ class GeneticWorkflowOptimizer:
         mutated = params.copy()
         for k, v in mutated.items():
             if isinstance(v, (int, float)):
-                # Apply Gaussian mutation
                 noise = random.gauss(0.0, 0.1 * abs(v) if v != 0 else 0.1)
                 mutated[k] = type(v)(v + noise)
             elif isinstance(v, bool):
@@ -211,11 +243,9 @@ class GeneticWorkflowOptimizer:
     def evaluate_generation(self, simulated_scoring_fn: Any) -> List[ProgramGenome]:
         """Evaluates genomes against target criteria, mapping fitness scores."""
         for genome in self.population:
-            # Fitness scoring based on multi-criteria utility
             score = simulated_scoring_fn(genome)
             genome.fitness_score = float(score)
 
-        # Sort by fitness descending
         self.population.sort(key=lambda x: x.fitness_score, reverse=True)
         return self.population
 
@@ -224,7 +254,6 @@ class GeneticWorkflowOptimizer:
         if len(self.population) < 2:
             return
 
-        # Elitism: Keep top 20%
         elite_count = max(1, int(self.pop_size * 0.2))
         elites = self.population[:elite_count]
 
@@ -232,20 +261,16 @@ class GeneticWorkflowOptimizer:
         current_gen_num = elites[0].generation + 1
 
         while len(next_gen) < self.pop_size:
-            # Selection
             parent_a = random.choice(elites)
             parent_b = random.choice(self.population)
 
-            # Crossover parameters
             child_params = {}
             for k in set(parent_a.parameters.keys()).union(parent_b.parameters.keys()):
                 child_params[k] = random.choice([parent_a, parent_b]).parameters.get(k, parent_a.parameters.get(k))
 
-            # Mutate child params
             if random.random() < self.mutation_rate:
                 child_params = self._mutate_parameters(child_params)
 
-            # Crossover prompt templates
             child_template = parent_a.prompt_template if random.random() < 0.5 else parent_b.prompt_template
             child_template = self._mutate_prompt(child_template)
 
@@ -284,15 +309,12 @@ class SFTPreferenceCollector:
         """Calculates temporal-difference advantage values for the trajectory."""
         advantages = []
         for i, step in enumerate(steps):
-            # Baseline expectation is modeled as value function approximation V(s)
             expectation = step.predicted_expectation
 
-            # Empirical Return G_t
             discounted_return = 0.0
             for j, future_step in enumerate(steps[i:]):
                 discounted_return += (self.gamma ** j) * future_step.reward
 
-            # Advantage A_t = G_t - V(s)
             advantage = discounted_return - expectation
             advantages.append(float(advantage))
         return advantages
@@ -307,7 +329,6 @@ class SFTPreferenceCollector:
         adv_a = sum(self.compute_advantages(steps_run_a))
         adv_b = sum(self.compute_advantages(steps_run_b))
 
-        # Chosen response is the one that yielded higher cumulative advantage
         if adv_a >= adv_b:
             chosen_steps, rejected_steps = steps_run_a, steps_run_b
             chosen_adv, rejected_adv = adv_a, adv_b
@@ -365,17 +386,12 @@ class LearnableRoutingGateDispatcher:
         best_routing_score = -float("inf")
 
         for agent_id, agent in self.agents.items():
-            # Check budget constraints
             estimated_cost = task_complexity * agent.cost_per_token
             if self.budget_spent + estimated_cost > self.budget_limit:
-                # Disqualify agents that exceed remaining financial resources
                 continue
 
-            # expected utility = reward - epistemic surprise (EFE approximation)
-            # Match domain specialty
             domain_multiplier = 1.5 if agent.domain_specialty == domain else 0.8
 
-            # Active Inference EFE Score = Epistemic Value (curiosity) + Pragmatic Value (historical success) - Financial Cost
             epistemic_value = agent.epistemic_curiosity * (1.0 - agent.historical_success_rate)
             pragmatic_value = agent.historical_success_rate * domain_multiplier
             cost_penalty = estimated_cost * 2.0
@@ -387,7 +403,6 @@ class LearnableRoutingGateDispatcher:
                 selected_agent_id = agent_id
 
         if not selected_agent_id:
-            # Greedy backup fallback to cheapest available agent
             cheapest_agent = min(self.agents.values(), key=lambda x: x.cost_per_token)
             selected_agent_id = cheapest_agent.agent_id
             logger.warning(f"Financial safety trigger: falling back to cheapest agent '{selected_agent_id}' due to budget boundaries.")
@@ -402,7 +417,6 @@ class LearnableRoutingGateDispatcher:
 
         self.budget_spent += cost_incurred
 
-        # Bayesian beta-style smoothing update for historical success rate
         alpha_prior = agent.historical_success_rate * 10
         beta_prior = (1.0 - agent.historical_success_rate) * 10
 
@@ -414,8 +428,6 @@ class LearnableRoutingGateDispatcher:
             beta_new = beta_prior + 1
 
         agent.historical_success_rate = alpha_new / (alpha_new + beta_new)
-
-        # Exponential decay of curiosity as success increases (epistemic uncertainty reduction)
         agent.epistemic_curiosity = max(0.1, agent.epistemic_curiosity * 0.95)
         logger.info(f"Updated routing metrics for agent '{agent_id}': SuccessRate={agent.historical_success_rate:.4f}, Curiosity={agent.epistemic_curiosity:.4f}")
 

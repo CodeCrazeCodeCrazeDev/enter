@@ -10,6 +10,8 @@ from typing import Dict, Any, List, Tuple, Optional, Set
 from uuid import UUID, uuid4
 from pydantic import BaseModel, Field
 
+from .fourteen_layer_engine import FourteenLayerEntrepreneurialEngine
+
 logger = logging.getLogger("sero.computational_architecture")
 
 
@@ -227,3 +229,12 @@ class EntrepreneurialIntelligenceOrchestrator:
             "intervention_performed": f"do({intervention_var} = 1.5)",
             "propagated_state": inter_state
         }
+
+
+__all__ = [
+    "Opportunity",
+    "AdvancedCausalEngine",
+    "ActiveInferencePlanner",
+    "EntrepreneurialIntelligenceOrchestrator",
+    "FourteenLayerEntrepreneurialEngine",
+]

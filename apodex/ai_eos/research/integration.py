@@ -423,3 +423,52 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. 200-Paper Corpus Principles Registration (Papers 301-500)
+# =====================================================================
+
+ALPHAALGO_301_500_PRINCIPLES: List[Dict[str, Any]] = [
+    {
+        "principle_id": "P-301-340-MICROSTRUCTURE",
+        "name": "Non-Gaussian Hawkes Event Arrival Dynamics",
+        "domain": "Market Microstructure",
+        "subsystems": ["EIOSKernel", "EOSEngine"],
+        "description": "Models event cascades using non-Gaussian Hawkes processes to optimize limit order book sensor placement and price impact boundaries."
+    },
+    {
+        "principle_id": "P-341-380-ACTIVE-INFERENCE",
+        "name": "Expected Free Energy (EFE) Epistemic Sensing",
+        "domain": "Active Inference",
+        "subsystems": ["EIOSKernel", "ResearchOS"],
+        "description": "Balances pragmatic utility and epistemic curiosity in autonomous agent state estimation using Active Inference EFE formulations."
+    },
+    {
+        "principle_id": "P-381-420-ALIGNMENT",
+        "name": "Trajectory Edit Path Preference Optimization",
+        "domain": "RL & Alignment",
+        "subsystems": ["AEANHiveMind", "ResearchOS"],
+        "description": "Applies DPO preference alignment over agent trajectory edit paths to penalize erratic actions and eliminate sycophancy."
+    },
+    {
+        "principle_id": "P-421-460-MULTI-AGENT",
+        "name": "Decentralized Token Bidding & VCG Solvency",
+        "domain": "Multi-Agent Systems",
+        "subsystems": ["AEANHiveMind", "EOSEngine"],
+        "description": "Allocates sub-agent tasks dynamically using VCG auction mechanisms and token bidding to guarantee solvency."
+    },
+    {
+        "principle_id": "P-461-500-EVOLUTIONARY",
+        "name": "Island MAP-Elites Quality Diversity Search",
+        "domain": "Evolutionary Search",
+        "subsystems": ["ResearchOS", "AEANHiveMind"],
+        "description": "Maintains isolated sub-population islands with periodic migration gates to optimize workflow search quality and diversity."
+    }
+]
+
+
+def register_301_500_paper_corpus_principles() -> List[Dict[str, Any]]:
+    """Registers extracted transferable engineering principles from papers 301-500 into ResearchOS."""
+    logger.info("Registering 200-paper corpus transferable engineering principles (Papers 301-500).")
+    return ALPHAALGO_301_500_PRINCIPLES

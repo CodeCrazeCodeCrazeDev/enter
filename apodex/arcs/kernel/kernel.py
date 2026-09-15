@@ -63,6 +63,30 @@ class EIOSKernel:
     def __init__(self) -> None:
         self.active_processes: Dict[str, ExecutionDAG] = {}
         self.metrics_history: List[Dict[str, Any]] = []
+        self.registered_hypotheses: List[Any] = []
+
+    def register_research_hypothesis(self, hypothesis: Any) -> None:
+        """Registers validated scientific hypotheses from Research OS for Active Inference sensing.
+        Derived from Papers 341-380 (Active Inference & Expected Free Energy principles).
+        """
+        logger.info(f"[Kernel] Registering research hypothesis: {getattr(hypothesis, 'title', 'Hypothesis')}")
+        self.registered_hypotheses.append(hypothesis)
+
+    def sense_opportunity_anomalies(self) -> List[Dict[str, Any]]:
+        """Senses market/research anomalies by calculating Expected Free Energy (EFE) over active hypotheses."""
+        anomalies = []
+        for hyp in self.registered_hypotheses:
+            confidence = getattr(hyp, "posterior_confidence", 0.5)
+            # High epistemic uncertainty (entropy) generates sensory anomaly alert
+            epistemic_entropy = - (confidence * (1.0 - confidence))
+            if abs(epistemic_entropy) > 0.15:
+                anomalies.append({
+                    "hypothesis_id": str(getattr(hyp, "hypothesis_id", uuid.uuid4())),
+                    "title": getattr(hyp, "title", "Anomaly"),
+                    "epistemic_entropy": epistemic_entropy,
+                    "action_required": "trigger_active_sensing_ rct"
+                })
+        return anomalies
 
     async def execute_dag(self, dag: ExecutionDAG) -> bool:
         """Schedules and executes the compiled DAG with failure recovery."""

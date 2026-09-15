@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import Dict, List
+from typing import Dict, List, Any
 
 logger = logging.getLogger("aean.hive_mind")
 
@@ -60,3 +60,14 @@ class HiveMind:
 
     def granted_tasks(self, grants: List[Grant]) -> Dict[str, bool]:
         return {g.task: g.granted for g in grants}
+
+    def register_research_insight(self, insight: Dict[str, Any]) -> None:
+        """Integrates Research OS scientific insights into HiveMind token bidding policies.
+        Derived from Papers 381-460 (RL Alignment & Multi-Agent Token Bidding principles).
+        """
+        logger.info(f"HiveMind registered research insight: {insight.get('name', 'Generic Insight')}")
+        # Boost token budget or priority based on validated research confidence
+        confidence = insight.get("confidence", 0.1)
+        if confidence > 0.8:
+            self.token_budget = int(self.token_budget * 1.1)
+            logger.info(f"HiveMind token budget adjusted upward to {self.token_budget} due to high-confidence research insight.")

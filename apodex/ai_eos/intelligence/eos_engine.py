@@ -475,6 +475,22 @@ class EOSEngine:
         self.memory = EntrepreneurialMemory()
         self.evaluator = EvaluationFramework()
 
+    def ingest_validated_research(self, hypothesis: Any) -> None:
+        """Ingests validated research hypotheses directly from Research OS into EOS Engine state.
+        Derived from Papers 421-460 (Capital Allocation & VCG Mechanism Design principles).
+        """
+        logger.info(f"EOSEngine ingested validated research hypothesis: {getattr(hypothesis, 'title', 'Hypothesis')}")
+        self.opportunity_graph.add_opportunity(
+            op_id=str(getattr(hypothesis, "hypothesis_id", uuid4())),
+            name=getattr(hypothesis, "title", "Hypothesis"),
+            value_cents=1000000,
+            keywords=[getattr(hypothesis, "domain", "research")]
+        )
+
+    @property
+    def active_hypotheses(self) -> Dict[UUID, Hypothesis]:
+        return self.hypothesis_engine.hypotheses
+
     def run_continuous_sensing_cycle(self, cells: List[VentureCell], total_budget_cents: int) -> Dict[str, Any]:
         """Execute one complete hierarchical sensing, planning, allocation, and diagnostic loop."""
         # 1. World State sensing & transitions

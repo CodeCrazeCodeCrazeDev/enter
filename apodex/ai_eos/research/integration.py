@@ -15,7 +15,7 @@ import sys
 import os
 from typing import Any, Dict, List, Optional, Tuple, Set
 from uuid import UUID, uuid4
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 logger = logging.getLogger("sero.research.integration")
 
@@ -423,3 +423,120 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. Research To System Bridge (Cross-Layer Active Inference State Handoff)
+# =====================================================================
+
+class ResearchToSystemBridge(BaseModel):
+    """
+    ResearchToSystemBridge: Cross-layer bridge orchestrating state handoffs between
+    Layer 1 (Research OS), Layer 2 (EIOS Kernel & EOS Engine), Layer 3 (AEAN HiveMind),
+    and Layer 4 (APODEX WorldModel / WorldGraph).
+    """
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    bridge_id: UUID = Field(default_factory=uuid4)
+    active_handoffs: List[Dict[str, Any]] = Field(default_factory=list)
+
+    def handoff_validated_hypothesis(
+        self,
+        hypothesis: Any,
+        research_os: Optional[Any] = None,
+        eios_kernel: Optional[Any] = None,
+        eos_engine: Optional[Any] = None,
+        hive_mind: Optional[Any] = None,
+        world_model: Optional[Any] = None,
+    ) -> Dict[str, Any]:
+        """
+        Executes cross-layer state handoff for a validated research hypothesis across all 4 OS layers:
+        - Layer 1 (Research OS): Ingests/confirms research hypothesis status.
+        - Layer 2 (EIOS/EOS): Registers Active Inference sensing targets and EOS decision engine state.
+        - Layer 3 (AEAN): Submits TaskBid to HiveMind token bidding pool for multi-agent execution.
+        - Layer 4 (APODEX): Updates WorldGraph causal nodes and Bayesian belief state.
+        """
+        hyp_id = getattr(hypothesis, "hypothesis_id", getattr(hypothesis, "id", str(uuid4())))
+        title = getattr(hypothesis, "title", getattr(hypothesis, "statement", "Validated Hypothesis"))
+        target_metric = getattr(hypothesis, "target_metric", getattr(hypothesis, "domain", "general"))
+        p_val = getattr(hypothesis, "p_value", 0.01)
+        effect_size = getattr(hypothesis, "effect_size", 0.5)
+
+        record = {
+            "hypothesis_id": str(hyp_id),
+            "title": title,
+            "target_metric": target_metric,
+            "p_value": p_val,
+            "effect_size": effect_size,
+            "layer1_research_os": "VALIDATED",
+            "layer2_eios": None,
+            "layer2_eos": None,
+            "layer3_aean": None,
+            "layer4_world_model": None,
+            "timestamp": time_now()
+        }
+
+        # Layer 1 -> Layer 2: EIOS Kernel Sensing & Active Inference
+        if eios_kernel is not None:
+            if hasattr(eios_kernel, "register_research_hypothesis"):
+                eios_kernel.register_research_hypothesis(hyp_id, title, target_metric)
+                record["layer2_eios"] = "HYPOTHESIS_REGISTERED"
+            elif hasattr(eios_kernel, "active_processes"):
+                record["layer2_eios"] = "ACTIVE_INFERENCE_READY"
+
+        # Layer 1 -> Layer 2: EOS Engine Opportunity/Hypothesis Engine
+        if eos_engine is not None:
+            if hasattr(eos_engine, "hypothesis_engine"):
+                from ..domain.models import Hypothesis as EOSHypothesis
+                eos_hyp = EOSHypothesis(
+                    hypothesis_id=hyp_id if isinstance(hyp_id, UUID) else uuid4(),
+                    statement=title,
+                    domain=target_metric,
+                    title=title,
+                    posterior_confidence=0.90 if p_val < 0.05 else 0.50,
+                    status="active"
+                )
+                eos_engine.hypothesis_engine.add_hypothesis(eos_hyp)
+                record["layer2_eos"] = "PROMOTED_TO_EOS_ENGINE"
+            elif hasattr(eos_engine, "opportunity_graph"):
+                eos_engine.opportunity_graph.add_opportunity(
+                    op_id=f"op_{hyp_id}",
+                    name=title,
+                    value_cents=10000_00,
+                    keywords=[target_metric, "research_validated"]
+                )
+                record["layer2_eos"] = "OPPORTUNITY_GRAPH_UPDATED"
+
+        # Layer 1 -> Layer 3: AEAN HiveMind Token Bidding
+        if hive_mind is not None:
+            if hasattr(hive_mind, "arbitrate"):
+                from ...aean.coordination.hive_mind import TaskBid
+                bid = TaskBid(
+                    task=f"execute_research_strategy_{title}",
+                    priority=0.90,
+                    expected_value=effect_size,
+                    token_cost=10
+                )
+                grants = hive_mind.arbitrate([bid])
+                record["layer3_aean"] = f"HIVEMIND_BID_ARBITRATED_GRANTED_{grants[0].granted if grants else False}"
+
+        # Layer 1 -> Layer 4: APODEX WorldModel & Causal Graph Update
+        if world_model is not None:
+            if hasattr(world_model, "add_node"):
+                from ...world_model.world_model import CausalNode
+                cnode = CausalNode(
+                    node_id=f"research_hyp_{hyp_id}",
+                    node_type="validated_hypothesis",
+                    properties={"title": title, "p_value": p_val, "effect_size": effect_size}
+                )
+                world_model.add_node(cnode)
+                if hasattr(world_model, "beliefs"):
+                    world_model.beliefs[f"belief_{hyp_id}"] = {
+                        "statement": title,
+                        "probability": float(1.0 - min(1.0, p_val)),
+                        "validated": True
+                    }
+                record["layer4_world_model"] = "CAUSAL_NODE_AND_BELIEF_UPDATED"
+
+        self.active_handoffs.append(record)
+        return record

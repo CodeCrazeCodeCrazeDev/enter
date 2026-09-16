@@ -55,6 +55,7 @@ from ..ai_eos.research.integration import (
     GeneticWorkflowOptimizer,
     SFTPreferenceCollector,
     LearnableRoutingGateDispatcher,
+    ResearchToSystemBridge,
 )
 
 __all__ = [
@@ -62,6 +63,7 @@ __all__ = [
     "GeneticWorkflowOptimizer",
     "SFTPreferenceCollector",
     "LearnableRoutingGateDispatcher",
+    "ResearchToSystemBridge",
     "IHypothesisRegistry",
     "IDatasetRegistry",
     "IFeatureRegistry",

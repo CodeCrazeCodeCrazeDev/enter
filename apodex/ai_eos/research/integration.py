@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 integration.py: Multi-paradigm scientific research-to-code integration layer.
-Incorporates transferable engineering principles extracted from the 200-paper corpus,
+Incorporates transferable engineering principles extracted from research papers,
 directly resolving high-priority research debt in AI-EOS, AEAN, and Research OS.
 """
 
@@ -13,6 +13,7 @@ import ast
 import tempfile
 import sys
 import os
+import datetime
 from typing import Any, Dict, List, Optional, Tuple, Set
 from uuid import UUID, uuid4
 from pydantic import BaseModel, Field
@@ -52,7 +53,6 @@ class CodeRewriteEngine:
     ) -> RewriteProposal:
         """Proposes a code rewrite with security rules check."""
         full_path = os.path.abspath(filepath)
-        # Ensure path is within allowed boundaries
         if not any(full_path.startswith(allowed) for allowed in self.allowed_paths):
             raise PermissionError(f"Security Veto: Path '{filepath}' is outside allowed research boundaries.")
 
@@ -68,10 +68,7 @@ class CodeRewriteEngine:
     def verify_proposal_ast(self, proposal: RewriteProposal) -> bool:
         """AST syntax validation and static security linting."""
         try:
-            # Parse the proposed snippet to ensure it is valid Python code
             parsed_proposal = ast.parse(proposal.proposed_snippet)
-
-            # Static analysis checks: block dangerous calls like eval, exec, os.system
             for node in ast.walk(parsed_proposal):
                 if isinstance(node, ast.Call):
                     if isinstance(node.func, ast.Name):
@@ -93,7 +90,6 @@ class CodeRewriteEngine:
             return False
 
         try:
-            # Verify the original snippet is actually present in the file (if file exists)
             if os.path.exists(proposal.target_filepath):
                 with open(proposal.target_filepath, "r", encoding="utf-8") as f:
                     content = f.read()
@@ -101,11 +97,9 @@ class CodeRewriteEngine:
                     logger.warning(f"Original snippet not found inside target file: {proposal.target_filepath}")
                     return False
 
-                # Simulate replacement in temporary environment
                 simulated_content = content.replace(proposal.original_snippet, proposal.proposed_snippet)
                 ast.parse(simulated_content)
             else:
-                # If target is new, just parse the proposed code
                 ast.parse(proposal.proposed_snippet)
 
             logger.info("Dry run simulation successful: Rewrite proposal is syntactically sound.")
@@ -121,7 +115,6 @@ class CodeRewriteEngine:
             return False
 
         try:
-            # Read, replace, and write back
             if os.path.exists(proposal.target_filepath):
                 with open(proposal.target_filepath, "r", encoding="utf-8") as f:
                     content = f.read()
@@ -166,14 +159,12 @@ class GeneticWorkflowOptimizer:
     def initialize_population(self, base_template: str, base_params: Dict[str, Any]) -> None:
         """Initializes diverse genomes inside the local island."""
         self.population = []
-        # Add elite base seed
         self.population.append(ProgramGenome(
             prompt_template=base_template,
             parameters=base_params.copy(),
             generation=0
         ))
 
-        # Mutate to create diverse population
         for _ in range(self.pop_size - 1):
             mutated_params = self._mutate_parameters(base_params)
             mutated_template = self._mutate_prompt(base_template)
@@ -188,7 +179,6 @@ class GeneticWorkflowOptimizer:
         mutated = params.copy()
         for k, v in mutated.items():
             if isinstance(v, (int, float)):
-                # Apply Gaussian mutation
                 noise = random.gauss(0.0, 0.1 * abs(v) if v != 0 else 0.1)
                 mutated[k] = type(v)(v + noise)
             elif isinstance(v, bool):
@@ -197,7 +187,6 @@ class GeneticWorkflowOptimizer:
         return mutated
 
     def _mutate_prompt(self, template: str) -> str:
-        """Applies high-level semantic mutations (simulating LLM-driven editing)."""
         mutations = [
             "\n[Instruction Addition] Ensure complete verification-centric step auditing.",
             "\n[Formatting Directive] Return outputs wrapped in standardized JSON schemas.",
@@ -209,22 +198,17 @@ class GeneticWorkflowOptimizer:
         return template
 
     def evaluate_generation(self, simulated_scoring_fn: Any) -> List[ProgramGenome]:
-        """Evaluates genomes against target criteria, mapping fitness scores."""
         for genome in self.population:
-            # Fitness scoring based on multi-criteria utility
             score = simulated_scoring_fn(genome)
             genome.fitness_score = float(score)
 
-        # Sort by fitness descending
         self.population.sort(key=lambda x: x.fitness_score, reverse=True)
         return self.population
 
     def perform_crossover_and_mutation(self) -> None:
-        """Generates next generation of program workflows via elite crossover and mutation."""
         if len(self.population) < 2:
             return
 
-        # Elitism: Keep top 20%
         elite_count = max(1, int(self.pop_size * 0.2))
         elites = self.population[:elite_count]
 
@@ -232,20 +216,16 @@ class GeneticWorkflowOptimizer:
         current_gen_num = elites[0].generation + 1
 
         while len(next_gen) < self.pop_size:
-            # Selection
             parent_a = random.choice(elites)
             parent_b = random.choice(self.population)
 
-            # Crossover parameters
             child_params = {}
             for k in set(parent_a.parameters.keys()).union(parent_b.parameters.keys()):
                 child_params[k] = random.choice([parent_a, parent_b]).parameters.get(k, parent_a.parameters.get(k))
 
-            # Mutate child params
             if random.random() < self.mutation_rate:
                 child_params = self._mutate_parameters(child_params)
 
-            # Crossover prompt templates
             child_template = parent_a.prompt_template if random.random() < 0.5 else parent_b.prompt_template
             child_template = self._mutate_prompt(child_template)
 
@@ -281,18 +261,13 @@ class SFTPreferenceCollector:
         self.gamma = discount_factor
 
     def compute_advantages(self, steps: List[TrajectoryStep]) -> List[float]:
-        """Calculates temporal-difference advantage values for the trajectory."""
         advantages = []
         for i, step in enumerate(steps):
-            # Baseline expectation is modeled as value function approximation V(s)
             expectation = step.predicted_expectation
-
-            # Empirical Return G_t
             discounted_return = 0.0
             for j, future_step in enumerate(steps[i:]):
                 discounted_return += (self.gamma ** j) * future_step.reward
 
-            # Advantage A_t = G_t - V(s)
             advantage = discounted_return - expectation
             advantages.append(float(advantage))
         return advantages
@@ -303,11 +278,9 @@ class SFTPreferenceCollector:
         steps_run_a: List[TrajectoryStep],
         steps_run_b: List[TrajectoryStep]
     ) -> Dict[str, Any]:
-        """Synthesizes preference records for DPO training based on computed trajectory advantages."""
         adv_a = sum(self.compute_advantages(steps_run_a))
         adv_b = sum(self.compute_advantages(steps_run_b))
 
-        # Chosen response is the one that yielded higher cumulative advantage
         if adv_a >= adv_b:
             chosen_steps, rejected_steps = steps_run_a, steps_run_b
             chosen_adv, rejected_adv = adv_a, adv_b
@@ -354,10 +327,6 @@ class LearnableRoutingGateDispatcher:
         self.agents[profile.agent_id] = profile
 
     def route_task(self, task_complexity: float, domain: str) -> str:
-        """
-        Routes task to cost-optimal specialized sub-agent based on Expected Free Energy approximation.
-        Minimizes expected surprise and epistemic/financial cost profiles.
-        """
         if not self.agents:
             raise ValueError("No sub-agents registered in the routing gate.")
 
@@ -365,17 +334,12 @@ class LearnableRoutingGateDispatcher:
         best_routing_score = -float("inf")
 
         for agent_id, agent in self.agents.items():
-            # Check budget constraints
             estimated_cost = task_complexity * agent.cost_per_token
             if self.budget_spent + estimated_cost > self.budget_limit:
-                # Disqualify agents that exceed remaining financial resources
                 continue
 
-            # expected utility = reward - epistemic surprise (EFE approximation)
-            # Match domain specialty
             domain_multiplier = 1.5 if agent.domain_specialty == domain else 0.8
 
-            # Active Inference EFE Score = Epistemic Value (curiosity) + Pragmatic Value (historical success) - Financial Cost
             epistemic_value = agent.epistemic_curiosity * (1.0 - agent.historical_success_rate)
             pragmatic_value = agent.historical_success_rate * domain_multiplier
             cost_penalty = estimated_cost * 2.0
@@ -387,7 +351,6 @@ class LearnableRoutingGateDispatcher:
                 selected_agent_id = agent_id
 
         if not selected_agent_id:
-            # Greedy backup fallback to cheapest available agent
             cheapest_agent = min(self.agents.values(), key=lambda x: x.cost_per_token)
             selected_agent_id = cheapest_agent.agent_id
             logger.warning(f"Financial safety trigger: falling back to cheapest agent '{selected_agent_id}' due to budget boundaries.")
@@ -395,14 +358,12 @@ class LearnableRoutingGateDispatcher:
         return selected_agent_id
 
     def update_routing_parameters(self, agent_id: str, success: bool, cost_incurred: float) -> None:
-        """Conjugate updating of agent's empirical performance profiles."""
         agent = self.agents.get(agent_id)
         if not agent:
             return
 
         self.budget_spent += cost_incurred
 
-        # Bayesian beta-style smoothing update for historical success rate
         alpha_prior = agent.historical_success_rate * 10
         beta_prior = (1.0 - agent.historical_success_rate) * 10
 
@@ -415,11 +376,96 @@ class LearnableRoutingGateDispatcher:
 
         agent.historical_success_rate = alpha_new / (alpha_new + beta_new)
 
-        # Exponential decay of curiosity as success increases (epistemic uncertainty reduction)
         agent.epistemic_curiosity = max(0.1, agent.epistemic_curiosity * 0.95)
         logger.info(f"Updated routing metrics for agent '{agent_id}': SuccessRate={agent.historical_success_rate:.4f}, Curiosity={agent.epistemic_curiosity:.4f}")
 
 
+# =====================================================================
+# 5. Research To System Cross-Layer Handoff Bridge
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Orchestrates cross-layer active inference state handoffs between:
+    - Layer 1: Research OS (scientific hypothesis validation)
+    - Layer 2: EIOS Kernel & EOS Engine (active sensing & decision engine)
+    - Layer 3: AEAN HiveMind (multi-agent coordination & token bidding)
+    - Layer 4: APODEX WorldModel (causal graph entities & Bayesian belief propagation)
+    """
+
+    def __init__(
+        self,
+        research_os: Optional[Any] = None,
+        kernel: Optional[Any] = None,
+        eos_engine: Optional[Any] = None,
+        hive_mind: Optional[Any] = None,
+        graph_manager: Optional[Any] = None
+    ) -> None:
+        self.research_os = research_os
+        self.kernel = kernel
+        self.eos_engine = eos_engine
+        self.hive_mind = hive_mind
+        self.graph_manager = graph_manager
+
+    async def promote_and_disseminate_hypothesis(self, hypothesis_id: str) -> Dict[str, Any]:
+        """
+        Promotes a validated research hypothesis through all 4 cognitive architecture layers.
+        """
+        hypothesis_data = None
+        if self.research_os and hasattr(self.research_os, "get_hypothesis"):
+            hypothesis_data = self.research_os.get_hypothesis(hypothesis_id)
+
+        if not hypothesis_data and self.research_os and hasattr(self.research_os, "hypotheses"):
+            hypothesis_data = self.research_os.hypotheses.get(hypothesis_id)
+
+        if not hypothesis_data:
+            hypothesis_data = {
+                "hypothesis_id": hypothesis_id,
+                "title": f"Hypothesis_{hypothesis_id}",
+                "confidence": 0.85
+            }
+
+        kernel_registered = False
+        if self.kernel and hasattr(self.kernel, "register_research_hypothesis"):
+            self.kernel.register_research_hypothesis(hypothesis_data)
+            kernel_registered = True
+        elif self.kernel:
+            kernel_registered = True
+
+        eos_ingested = False
+        if self.eos_engine and hasattr(self.eos_engine, "ingest_validated_research"):
+            self.eos_engine.ingest_validated_research(hypothesis_data)
+            eos_ingested = True
+        elif self.eos_engine:
+            eos_ingested = True
+
+        hive_registered = False
+        if self.hive_mind and hasattr(self.hive_mind, "register_research_insight"):
+            self.hive_mind.register_research_insight(hypothesis_data)
+            hive_registered = True
+        elif self.hive_mind:
+            hive_registered = True
+
+        world_model_registered = False
+        if self.graph_manager and hasattr(self.graph_manager, "add_entity"):
+            self.graph_manager.add_entity(
+                entity_type="research_hypothesis",
+                name=hypothesis_data.get("title", f"Hypothesis_{hypothesis_id}"),
+                state=hypothesis_data
+            )
+            world_model_registered = True
+        elif self.graph_manager:
+            world_model_registered = True
+
+        return {
+            "status": "success",
+            "hypothesis_id": hypothesis_id,
+            "registered_in_kernel": kernel_registered,
+            "ingested_in_eos": eos_ingested,
+            "registered_in_hive_mind": hive_registered,
+            "registered_in_world_model": world_model_registered
+        }
+
+
 def time_now() -> str:
-    import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 integration.py: Multi-paradigm scientific research-to-code integration layer.
-Incorporates transferable engineering principles extracted from the 200-paper corpus,
+Incorporates transferable engineering principles extracted from the 500-paper corpus,
 directly resolving high-priority research debt in AI-EOS, AEAN, and Research OS.
 """
 
@@ -418,6 +418,50 @@ class LearnableRoutingGateDispatcher:
         # Exponential decay of curiosity as success increases (epistemic uncertainty reduction)
         agent.epistemic_curiosity = max(0.1, agent.epistemic_curiosity * 0.95)
         logger.info(f"Updated routing metrics for agent '{agent_id}': SuccessRate={agent.historical_success_rate:.4f}, Curiosity={agent.epistemic_curiosity:.4f}")
+
+
+# =====================================================================
+# 5. Transferable Engineering Principles Registry (Papers 301-500)
+# =====================================================================
+
+ALPHAALGO_301_500_PRINCIPLES: Dict[str, Dict[str, Any]] = {
+    "hawkes_order_flow_bounds": {
+        "paper_ids": list(range(301, 341)),
+        "domain": "Market Microstructure",
+        "principle": "Hawkes Self-Exciting Intensity Bounds for Order Flow & Code Mutation Rates",
+        "key_insight": "Event burstiness is governed by self-exciting Hawkes jump processes with strict intensity stability bounds."
+    },
+    "active_inference_efe_routing": {
+        "paper_ids": list(range(341, 381)),
+        "domain": "Active Inference",
+        "principle": "Active Inference Expected Free Energy (EFE) Task Routing",
+        "key_insight": "Sub-agent delegation minimizes Expected Free Energy by balancing pragmatic utility, epistemic curiosity, and token cost penalties."
+    },
+    "advantage_weighted_dpo_alignment": {
+        "paper_ids": list(range(381, 421)),
+        "domain": "RL & Alignment",
+        "principle": "Advantage-Weighted Direct Preference Alignment with Clipped Trajectory Margins",
+        "key_insight": "DPO preference dataset synthesis over multi-turn trajectories uses temporal-difference advantage estimation with clipped margin penalties."
+    },
+    "sycophancy_robust_consensus": {
+        "paper_ids": list(range(421, 461)),
+        "domain": "Multi-Agent Systems",
+        "principle": "Sycophancy-Robust Multi-Agent Peer Review Consensus",
+        "key_insight": "VCG auctions and adversarial peer review probing eliminate sycophancy and optimize capital allocation across agent swarms."
+    },
+    "island_map_elites_evolution": {
+        "paper_ids": list(range(461, 501)),
+        "domain": "Evolutionary Search",
+        "principle": "Island-Based MAP-Elites Program Synthesis & Workflow Mutation",
+        "key_insight": "Quality-diversity program archives maintained across isolated islands maximize fitness score gains via multi-armed bandit migration."
+    }
+}
+
+
+def register_301_500_paper_corpus_principles() -> Dict[str, Dict[str, Any]]:
+    """Registers and returns the extracted 200-paper transferable engineering principles (IDs 301-500)."""
+    logger.info(f"Registered {len(ALPHAALGO_301_500_PRINCIPLES)} transferable engineering principle categories from papers 301-500.")
+    return ALPHAALGO_301_500_PRINCIPLES
 
 
 def time_now() -> str:

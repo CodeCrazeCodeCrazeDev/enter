@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import Dict, List
+from typing import Dict, List, Any, Optional
 
 logger = logging.getLogger("aean.hive_mind")
 
@@ -23,10 +23,14 @@ class TaskBid:
     priority: float  # 0..1 strategic priority
     expected_value: float  # relative EV of running the task this cycle
     token_cost: int  # tokens required to run
+    epistemic_curiosity: float = 0.5  # Active Inference curiosity
 
     @property
     def score(self) -> float:
-        return self.priority * (0.5 + self.expected_value)
+        # Expected Free Energy composite score: Pragmatic Value + Epistemic Value
+        pragmatic_value = self.priority * (0.5 + self.expected_value)
+        epistemic_value = 0.2 * self.epistemic_curiosity
+        return pragmatic_value + epistemic_value
 
 
 @dataclass
@@ -41,9 +45,15 @@ class Grant:
 class HiveMind:
     token_budget: int = 100
     granted_history: List[Grant] = field(default_factory=list)
+    research_insights: List[Dict[str, Any]] = field(default_factory=list)
+
+    def register_research_insight(self, insight: Dict[str, Any]) -> None:
+        """Integrates validated Research OS insights directly into HiveMind bidding registry."""
+        self.research_insights.append(insight)
+        logger.info(f"[HiveMind] Registered research insight: {insight.get('title', 'Untitled')}")
 
     def arbitrate(self, bids: List[TaskBid]) -> List[Grant]:
-        """Allocate tokens to the highest-scoring bids within budget."""
+        """Allocate tokens to the highest-scoring bids within budget using EFE arbitration."""
         ordered = sorted(bids, key=lambda b: b.score, reverse=True)
         remaining = self.token_budget
         grants: List[Grant] = []

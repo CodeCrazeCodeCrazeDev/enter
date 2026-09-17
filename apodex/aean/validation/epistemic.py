@@ -22,7 +22,7 @@ meets the threshold.
 from __future__ import annotations
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional, Sequence
 
 from ..governance import ConstitutionalFilter
@@ -137,8 +137,10 @@ class EpistemicFirewall:
         return ok, 1.0 if ok else 0.0
 
     def _temporal_decay(self, signal: DemandSignal, now: Optional[datetime], notes: List[str]) -> float:
-        now = now or datetime.utcnow()
-        age = max(0.0, (now - signal.detected_at).total_seconds())
+        now = now or datetime.now(timezone.utc)
+        now_naive = now.replace(tzinfo=None)
+        detected_naive = signal.detected_at.replace(tzinfo=None)
+        age = max(0.0, (now_naive - detected_naive).total_seconds())
         if self.max_staleness_seconds <= 0:
             return 1.0
         decay = max(0.0, 1.0 - age / self.max_staleness_seconds)

@@ -423,3 +423,61 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. Research To System Bridge (Cross-Layer Active Inference State Handoff)
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Cross-layer state bridge connecting Layer 1 (Research OS), Layer 2 (EIOS Kernel & EOS Engine),
+    Layer 3 (AEAN HiveMind), and Layer 4 (APODEX WorldModel).
+    """
+
+    def __init__(self) -> None:
+        self.registered_bridge_events: List[Dict[str, Any]] = []
+        self.hypotheses_in_transit: Dict[str, Dict[str, Any]] = {}
+
+    def handshake_hypothesis_to_execution(
+        self,
+        hypothesis_id: str,
+        title: str,
+        deflated_sharpe_ratio: float,
+        p_value: float,
+        economic_rationale: str
+    ) -> Dict[str, Any]:
+        """
+        Executes active inference state handshake promoting Layer 1 validated scientific hypothesis
+        into Layer 2 EIOS Kernel active inference sensing and Layer 3 AEAN task bidding.
+        """
+        is_promotable = deflated_sharpe_ratio >= 1.0 and p_value <= 0.05
+        handshake_record = {
+            "hypothesis_id": hypothesis_id,
+            "title": title,
+            "deflated_sharpe_ratio": float(deflated_sharpe_ratio),
+            "p_value": float(p_value),
+            "economic_rationale": economic_rationale,
+            "is_promotable": is_promotable,
+            "handshake_status": "PROMOTED_TO_EIOS" if is_promotable else "REJECTED_LOW_SIGNIFICANCE",
+            "timestamp": time_now()
+        }
+        self.hypotheses_in_transit[hypothesis_id] = handshake_record
+        self.registered_bridge_events.append(handshake_record)
+        logger.info(f"Cross-layer handshake executed for hypothesis '{hypothesis_id}': status={handshake_record['handshake_status']}")
+        return handshake_record
+
+    def serialize_bridge_state(self) -> Dict[str, Any]:
+        """
+        Serializes current cross-layer state handoffs and active trajectory metrics
+        for APODEX WorldModel state sync and telemetry auditing.
+        """
+        promoted_count = sum(1 for e in self.registered_bridge_events if e.get("is_promotable"))
+        rejected_count = len(self.registered_bridge_events) - promoted_count
+        return {
+            "total_handshakes": len(self.registered_bridge_events),
+            "promoted_count": promoted_count,
+            "rejected_count": rejected_count,
+            "hypotheses_in_transit": list(self.hypotheses_in_transit.keys()),
+            "last_event_timestamp": self.registered_bridge_events[-1]["timestamp"] if self.registered_bridge_events else None
+        }

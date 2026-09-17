@@ -1,5 +1,5 @@
 from __future__ import annotations
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
 from uuid import UUID, uuid4
 from pydantic import BaseModel, Field
@@ -11,7 +11,7 @@ class Belief(BaseModel):
     target_id: UUID  # Reference to Entity or Relationship being evaluated
     probability: float = Field(default=1.0, ge=0.0, le=1.0)  # P(Belief) Bayesian confidence score
     evidence: List[str] = Field(default_factory=list)  # Evidence hashes or source strings
-    last_validated: datetime = Field(default_factory=datetime.utcnow)
+    last_validated: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     def update_confidence(self, likelihood: float, prior_probability: float) -> None:
         """Update probability using a simple Bayesian recursive rule."""
@@ -20,4 +20,4 @@ class Belief(BaseModel):
         evidence_probability = likelihood * prior_probability + 0.5 * (1.0 - prior_probability)
         if evidence_probability > 0:
             self.probability = (likelihood * prior_probability) / evidence_probability
-        self.last_validated = datetime.utcnow()
+        self.last_validated = datetime.now(timezone.utc)

@@ -420,6 +420,112 @@ class LearnableRoutingGateDispatcher:
         logger.info(f"Updated routing metrics for agent '{agent_id}': SuccessRate={agent.historical_success_rate:.4f}, Curiosity={agent.epistemic_curiosity:.4f}")
 
 
+# =====================================================================
+# 5. Cross-Layer Active Inference Research-To-System Bridge
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Unified Cross-Layer Active Inference Bridge orchestrating state handoffs
+    across Layer 1 Research OS, Layer 2 EIOS/EOS Engine, Layer 3 AEAN HiveMind,
+    and Layer 4 APODEX WorldModel.
+    """
+
+    def __init__(
+        self,
+        research_os: Any = None,
+        eios_kernel: Any = None,
+        eos_engine: Any = None,
+        hive_mind: Any = None,
+        world_model: Any = None,
+    ) -> None:
+        self.research_os = research_os
+        self.eios_kernel = eios_kernel
+        self.eos_engine = eos_engine
+        self.hive_mind = hive_mind
+        self.world_model = world_model
+        self.active_handoffs: List[Dict[str, Any]] = []
+
+    def propagate_validated_hypothesis(
+        self,
+        hypothesis_id: UUID,
+        title: str,
+        target_metric: str,
+        p_value: float,
+        effect_size: float,
+        commercial_value: float = 1000.0,
+    ) -> Dict[str, Any]:
+        """
+        Propagates validated Layer 1 research hypothesis down to Layer 2 execution (EIOS/EOS),
+        Layer 3 AEAN multi-agent bidding (HiveMind), and Layer 4 APODEX WorldModel graph updates.
+        """
+        handoff_record: Dict[str, Any] = {
+            "hypothesis_id": str(hypothesis_id),
+            "title": title,
+            "target_metric": target_metric,
+            "p_value": p_value,
+            "effect_size": effect_size,
+            "layers_updated": [],
+            "timestamp": time_now(),
+        }
+
+        # 1. Layer 2: EIOS Kernel Anomaly Sensing & EOS Engine State Ingestion
+        if self.eios_kernel and hasattr(self.eios_kernel, "register_research_hypothesis"):
+            self.eios_kernel.register_research_hypothesis(
+                str(hypothesis_id), title, target_metric, p_value
+            )
+            handoff_record["layers_updated"].append("L2_EIOS_Kernel")
+
+        if self.eos_engine and hasattr(self.eos_engine, "ingest_validated_research"):
+            self.eos_engine.ingest_validated_research(
+                hypothesis_id=str(hypothesis_id),
+                title=title,
+                effect_size=effect_size,
+                commercial_value=commercial_value,
+            )
+            handoff_record["layers_updated"].append("L2_EOS_Engine")
+
+        # 2. Layer 3: AEAN HiveMind Token Bidding
+        if self.hive_mind and hasattr(self.hive_mind, "register_research_insight"):
+            self.hive_mind.register_research_insight(
+                title=title,
+                domain=target_metric,
+                confidence=max(0.0, 1.0 - p_value),
+            )
+            handoff_record["layers_updated"].append("L3_AEAN_HiveMind")
+
+        # 3. Layer 4: APODEX WorldModel Causal Graph Node & Bayesian Belief
+        if self.world_model:
+            node_id = f"hyp_{hypothesis_id}"
+            if hasattr(self.world_model, "add_node"):
+                from apodex.world_model.world_model import CausalNode
+                self.world_model.add_node(
+                    CausalNode(
+                        node_id=node_id,
+                        node_type="hypothesis",
+                        properties={
+                            "title": title,
+                            "metric": target_metric,
+                            "p_value": p_value,
+                            "effect_size": effect_size,
+                            "status": "validated",
+                        },
+                    )
+                )
+            if hasattr(self.world_model, "beliefs"):
+                self.world_model.beliefs[node_id] = {
+                    "posterior_probability": max(0.0, min(1.0, 1.0 - p_value)),
+                    "last_validated": time_now(),
+                }
+            handoff_record["layers_updated"].append("L4_APODEX_WorldModel")
+
+        self.active_handoffs.append(handoff_record)
+        logger.info(
+            f"Propagated research hypothesis '{title}' across layers: {handoff_record['layers_updated']}"
+        )
+        return handoff_record
+
+
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()

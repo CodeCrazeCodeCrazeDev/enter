@@ -15,7 +15,7 @@ import sys
 import os
 from typing import Any, Dict, List, Optional, Tuple, Set
 from uuid import UUID, uuid4
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 logger = logging.getLogger("sero.research.integration")
 
@@ -423,3 +423,115 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. Research-To-System Bridge (5-Layer Cross-Layer Orchestration)
+# =====================================================================
+
+class ResearchToSystemBridge(BaseModel):
+    """
+    Unified Cross-Layer Research-to-System Orchestrator.
+    Executes state handoffs across:
+    - Layer 1: Research OS (Hypothesis generation & empirical validation)
+    - Layer 2: EIOS Kernel & EOS Engine (Active Inference EFE sensing & Continuous Decision Engine)
+    - Layer 3: AEAN HiveMind (Token bidding & Multi-Agent strategy execution)
+    - Layer 4: APODEX WorldModel & Cognitive Brain (Causal SCM & Bayesian belief updating)
+    """
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    research_os: Any = Field(default_factory=lambda: None)
+    eos_engine: Any = Field(default_factory=lambda: None)
+    hive_mind: Any = Field(default_factory=lambda: None)
+    world_model: Any = Field(default_factory=lambda: None)
+
+    def orchestrate_validated_hypothesis_handoff(
+        self,
+        title: str,
+        description: str,
+        target_metric: str,
+        ground_truth_yield: float = 2.5,
+        commercial_value: float = 100_000.0
+    ) -> Dict[str, Any]:
+        """
+        Executes an end-to-end multi-layer state handoff:
+        1. Layer 1: Registers hypothesis & executes experiment validation in Research OS.
+        2. Layer 2: Promotes validated hypothesis to EOS Engine as active opportunity node.
+        3. Layer 3: Registers research insight with AEAN HiveMind for agent token bidding.
+        4. Layer 4: Updates APODEX WorldModel causal SCM and Bayesian belief state.
+        """
+        # Step 1: Layer 1 Research OS Hypothesis Registration & Validation
+        if self.research_os is None:
+            from apodex.ai_eos.research.research_os import ResearchOS
+            self.research_os = ResearchOS()
+
+        hyp = self.research_os.register_hypothesis(
+            title=title,
+            description=description,
+            null_hypothesis="Effect <= 0.0",
+            target_metric=target_metric,
+            significance_alpha=0.05
+        )
+        exp = self.research_os.create_experiment(hypothesis_id=hyp.hypothesis_id, seed=42)
+        exp_result = self.research_os.execute_experiment_simulation(
+            experiment_id=exp.experiment_id,
+            ground_truth_yield=ground_truth_yield
+        )
+
+        # Step 2: Layer 2 EOS Engine Promotion
+        if self.eos_engine is None:
+            from apodex.ai_eos.intelligence.eos_engine import FirstPrinciplesEOSEngine
+            self.eos_engine = FirstPrinciplesEOSEngine()
+
+        priority_score = self.research_os.score_opportunity(
+            commercial_value=commercial_value,
+            expected_info_gain=exp_result.effect_size,
+            option_value=exp_result.deflated_sharpe_ratio,
+            alpha=0.5,
+            beta=0.3,
+            gamma=0.2
+        )
+
+        eos_promoted = False
+        if hasattr(self.eos_engine, "ingest_validated_research"):
+            self.eos_engine.ingest_validated_research({
+                "hypothesis_id": str(hyp.hypothesis_id),
+                "title": hyp.title,
+                "priority_score": priority_score,
+                "status": hyp.status
+            })
+            eos_promoted = True
+
+        # Step 3: Layer 3 AEAN HiveMind Insight Registration
+        hive_registered = False
+        if self.hive_mind is not None and hasattr(self.hive_mind, "register_research_insight"):
+            self.hive_mind.register_research_insight(
+                title=hyp.title,
+                priority_score=priority_score,
+                effect_size=exp_result.effect_size
+            )
+            hive_registered = True
+
+        # Step 4: Layer 4 APODEX WorldModel Causal & Bayesian Updates
+        world_updated = False
+        if self.world_model is not None:
+            if hasattr(self.world_model, "add_causal_relation"):
+                self.world_model.add_causal_relation("research_validation", target_metric, priority_score)
+            if hasattr(self.world_model, "update_bayesian_belief"):
+                trials = 10
+                successes = 8 if exp_result.is_statistically_significant else 2
+                self.world_model.update_bayesian_belief(target_metric, trials, successes)
+            world_updated = True
+
+        return {
+            "hypothesis_id": str(hyp.hypothesis_id),
+            "hypothesis_status": hyp.status,
+            "experiment_id": str(exp.experiment_id),
+            "p_value": exp_result.p_value,
+            "effect_size": exp_result.effect_size,
+            "is_significant": exp_result.is_statistically_significant,
+            "priority_score": priority_score,
+            "eos_promoted": eos_promoted,
+            "hive_registered": hive_registered,
+            "world_updated": world_updated
+        }

@@ -39,3 +39,11 @@ class WorldModel(DirectedGraph[CausalNode, RelationEdge]):
     def register_pkc_trace(self, trace: PerceptionKnowledgeChain) -> None:
         """Register a search or reasoning trace with the World Model."""
         self.pkc_traces[str(trace.trace_id)] = trace
+
+    def add_edge(self, edge: RelationEdge) -> None:
+        """Alias for add_relation for consistency across graph models."""
+        self.add_relation(edge)
+
+    def contains_node(self, node_id: str) -> bool:
+        """Checks if a node ID exists in the World Model graph."""
+        return node_id in self.nodes

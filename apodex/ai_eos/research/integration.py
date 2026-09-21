@@ -423,3 +423,82 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. Research To System Bridge (Cross-Layer Active Inference State Handoffs)
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Cross-Layer Active Inference Bridge orchestrating state handoffs between:
+    - Layer 1: Research OS (hypothesis creation & statistical validation)
+    - Layer 2: EIOS Kernel (Active Inference sensing & DAG execution) and EOS Engine (opportunity decisions)
+    - Layer 3: AEAN (multi-agent strategy token arbitration)
+    - Layer 4: APODEX WorldModel & Cognitive Brain (causal graph & Bayesian belief updates)
+    """
+
+    def __init__(
+        self,
+        research_os: Any,
+        kernel: Any,
+        compiler: Any,
+        eos_engine: Any,
+        hive_mind: Any,
+        world_model: Any
+    ) -> None:
+        self.ros = research_os
+        self.kernel = kernel
+        self.compiler = compiler
+        self.eos = eos_engine
+        self.hive_mind = hive_mind
+        self.wm = world_model
+
+    async def execute_full_research_pipeline_handoff(
+        self,
+        title: str,
+        description: str,
+        null_hypothesis: str,
+        target_metric: str,
+        ground_truth_yield: float = 1.2
+    ) -> Dict[str, Any]:
+        """
+        Executes a complete end-to-end active inference research handoff across all 5 layers:
+        1. Register hypothesis and execute statistical validation in Research OS.
+        2. Compile & execute active inference DAG on EIOS Kernel.
+        3. Ingest validated opportunity into EOS Engine.
+        4. Submit compute token task bids to AEAN HiveMind.
+        5. Ingest causal node and Bayesian beliefs into APODEX WorldModel.
+        """
+        # Step 1: Research OS
+        hyp = self.ros.register_hypothesis(
+            title=title,
+            description=description,
+            null_hypothesis=null_hypothesis,
+            target_metric=target_metric
+        )
+        exp = self.ros.create_experiment(hyp.hypothesis_id)
+        validated_exp = self.ros.execute_experiment_simulation(exp.experiment_id, ground_truth_yield)
+
+        # Step 2: EIOS Kernel DAG execution
+        dag = self.ros.export_validated_hypothesis_to_kernel(hyp.hypothesis_id, self.kernel, self.compiler)
+        kernel_success = await self.kernel.execute_dag(dag)
+
+        # Step 3: EOS Engine Opportunity promotion
+        eos_res = self.ros.promote_hypothesis_to_eos(hyp.hypothesis_id, self.eos)
+
+        # Step 4: AEAN HiveMind Token Bidding
+        grants = self.ros.export_hypothesis_to_aean_hive_mind(hyp.hypothesis_id, self.hive_mind)
+
+        # Step 5: APODEX WorldModel Causal & Belief Ingestion
+        node_id = self.ros.export_hypothesis_to_world_model(hyp.hypothesis_id, self.wm)
+
+        return {
+            "hypothesis_id": str(hyp.hypothesis_id),
+            "hypothesis_status": hyp.status,
+            "experiment_statistically_significant": validated_exp.is_statistically_significant,
+            "kernel_execution_success": kernel_success,
+            "eos_promotion_result": eos_res,
+            "hive_mind_grants": len(grants),
+            "world_model_node_id": node_id
+        }

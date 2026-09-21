@@ -475,6 +475,38 @@ class EOSEngine:
         self.memory = EntrepreneurialMemory()
         self.evaluator = EvaluationFramework()
 
+    @property
+    def active_hypotheses(self) -> List[Hypothesis]:
+        """Returns all hypotheses currently in active status."""
+        return [h for h in self.hypothesis_engine.hypotheses.values() if h.status == "active"]
+
+    def ingest_validated_research(self, hypothesis_dict: Dict[str, Any]) -> Hypothesis:
+        """Ingests validated research hypotheses from Research OS into the EOS Hypothesis Engine."""
+        title = hypothesis_dict.get("title", "Research Ingested Opportunity Hypothesis")
+        domain = hypothesis_dict.get("domain", "research_validated")
+        description = hypothesis_dict.get("description", "Ingested from Research OS")
+
+        hyp = Hypothesis(
+            hypothesis_id=uuid4(),
+            statement=description,
+            domain=domain,
+            posterior_confidence=0.85,
+            status="active"
+        )
+        self.hypothesis_engine.add_hypothesis(hyp)
+
+        # Add corresponding opportunity node to Opportunity Graph
+        op_id = f"op_{uuid4().hex[:8]}"
+        self.opportunity_graph.add_opportunity(
+            op_id=op_id,
+            name=title,
+            value_cents=500000_00,
+            keywords=[domain, "research_validated", "active_inference"]
+        )
+
+        logger.info(f"[EOS Engine] Ingested research hypothesis '{title}' [Hyp ID={hyp.hypothesis_id}] and created Opportunity Node {op_id}.")
+        return hyp
+
     def run_continuous_sensing_cycle(self, cells: List[VentureCell], total_budget_cents: int) -> Dict[str, Any]:
         """Execute one complete hierarchical sensing, planning, allocation, and diagnostic loop."""
         # 1. World State sensing & transitions

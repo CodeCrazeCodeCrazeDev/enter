@@ -57,12 +57,44 @@ class ExecutionDAG(BaseModel):
 class EIOSKernel:
     """The central core of the Entrepreneurial Intelligence Operating System.
 
-    Manages task scheduling, failure recovery (retries), and model routing.
+    Manages task scheduling, active inference sensing, research hypothesis integration,
+    failure recovery (retries), and model routing.
     """
 
     def __init__(self) -> None:
         self.active_processes: Dict[str, ExecutionDAG] = {}
         self.metrics_history: List[Dict[str, Any]] = []
+        self.research_hypotheses: Dict[str, Dict[str, Any]] = {}
+        self.sensed_anomalies: List[Dict[str, Any]] = []
+
+    def register_research_hypothesis(self, hypothesis_dict: Dict[str, Any]) -> None:
+        """Ingests and registers validated research hypotheses from Research OS for active inference sensing."""
+        hyp_id = str(hypothesis_dict.get("hypothesis_id", uuid.uuid4().hex[:8]))
+        self.research_hypotheses[hyp_id] = hypothesis_dict
+        logger.info(f"[Kernel] Ingested research hypothesis '{hypothesis_dict.get('title', hyp_id)}' into EIOS Kernel state.")
+
+    def sense_opportunity_anomalies(self, sensory_stream: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Active inference expected free energy sensing over sensory stream data."""
+        detected_anomalies = []
+        for observation in sensory_stream:
+            # Calculate Expected Free Energy (EFE) = Pragmatic Cost + Epistemic Uncertainty
+            pragmatic_cost = float(observation.get("pragmatic_cost", 0.1))
+            epistemic_uncertainty = float(observation.get("epistemic_uncertainty", 0.5))
+            efe_score = pragmatic_cost + epistemic_uncertainty
+
+            # Anomaly trigger threshold (EFE > 0.6)
+            if efe_score > 0.6:
+                anomaly_record = {
+                    "anomaly_id": f"anom_{uuid.uuid4().hex[:8]}",
+                    "observation": observation,
+                    "efe_score": float(efe_score),
+                    "timestamp": datetime.now(UTC).isoformat()
+                }
+                detected_anomalies.append(anomaly_record)
+                self.sensed_anomalies.append(anomaly_record)
+
+        logger.info(f"[Kernel] Active inference sensing identified {len(detected_anomalies)} anomalies out of {len(sensory_stream)} observations.")
+        return detected_anomalies
 
     async def execute_dag(self, dag: ExecutionDAG) -> bool:
         """Schedules and executes the compiled DAG with failure recovery."""

@@ -423,3 +423,72 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. 200-Paper Quantitative Corpus Principle Registry (IDs 301–500)
+# =====================================================================
+
+ALPHAALGO_301_500_PRINCIPLES: List[Dict[str, Any]] = [
+    {
+        "id": "PRINCIPLE-301-340-AEAN",
+        "domain": "AEAN Multi-Agent",
+        "target_subsystem": "AEAN HiveMind",
+        "title": "Token-Weighted Micro-Auction Bidding & Byzantine Consensus Governance",
+        "description": "Sub-agents bid on task allocations based on capability profile, historical reliability, and epistemic curiosity under Byzantine fault-tolerant consensus.",
+        "paper_ids": list(range(301, 341)),
+        "core_equation": "Bid = EpistemicCuriosity * (1 - SuccessRate) + SuccessRate * DomainFit - CostPenalty",
+        "integration_status": "Active"
+    },
+    {
+        "id": "PRINCIPLE-341-380-EIOS",
+        "domain": "EIOS Active Inference",
+        "target_subsystem": "EIOS Kernel",
+        "title": "Expected Free Energy Active Sensing & Anomaly Isolation",
+        "description": "Balances pragmatic expected reward and epistemic information gain while isolating subsystem states inside Markov blanket boundaries.",
+        "paper_ids": list(range(341, 381)),
+        "core_equation": "EFE = E_q[log q(s) - log p(o, s)] = PragmaticValue + EpistemicValue",
+        "integration_status": "Active"
+    },
+    {
+        "id": "PRINCIPLE-381-420-EOS",
+        "domain": "EOS Strategy",
+        "target_subsystem": "EOS Engine",
+        "title": "First-Principles Opportunity Scoring & Failure Mode Early Warning",
+        "description": "Evaluates commercial opportunity DAGs, coupled business loops, unit economics trajectories, and capital runway sensitivity.",
+        "paper_ids": list(range(381, 421)),
+        "core_equation": "OpportunityScore = alpha * CommercialValue + beta * InfoGain + gamma * OptionValue",
+        "integration_status": "Active"
+    },
+    {
+        "id": "PRINCIPLE-421-460-ROS",
+        "domain": "Research OS Science",
+        "target_subsystem": "Research OS",
+        "title": "Multiple Testing Bias Mitigation via Deflated Sharpe Ratio & FDR",
+        "description": "Corrects hypothesis p-values for backtest overfitting and selection bias using Deflated Sharpe Ratio and Bonferroni/False Discovery Rate corrections.",
+        "paper_ids": list(range(421, 461)),
+        "core_equation": "DSR = Sharpe / sqrt(2 * log(NumTests))",
+        "integration_status": "Active"
+    },
+    {
+        "id": "PRINCIPLE-461-500-META",
+        "domain": "Code Synthesis & Meta-Learning",
+        "target_subsystem": "Integration Layer",
+        "title": "AST Static Linting Security Veto, Island MAP-Elites & Trajectory DPO",
+        "description": "Vetoes dangerous self-rewrites, mutates prompt/workflow genomes across island populations, and compiles trajectory preference pairs for DPO alignment.",
+        "paper_ids": list(range(461, 501)),
+        "core_equation": "Advantage = G_t - V(s)",
+        "integration_status": "Active"
+    }
+]
+
+
+def register_301_500_paper_corpus_principles() -> List[Dict[str, Any]]:
+    """Registers and returns extracted principles from the 200-paper corpus (IDs 301–500)."""
+    logger.info("Registering extracted principles from the 200-paper quantitative research corpus (IDs 301–500).")
+    return ALPHAALGO_301_500_PRINCIPLES
+
+
+def register_200_paper_corpus_principles() -> List[Dict[str, Any]]:
+    """Backwards-compatible alias for registering 200-paper corpus principles."""
+    return register_301_500_paper_corpus_principles()

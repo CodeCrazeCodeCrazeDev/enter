@@ -10,7 +10,7 @@ import random
 import logging
 from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid4
-from datetime import datetime
+from datetime import datetime, timezone
 
 from ..domain.models import Hypothesis, Experiment, ExecutionStatus
 from ..interfaces.services import IResearchOS
@@ -152,8 +152,105 @@ class ResearchOS(IResearchOS):
         return {
             "needs_refinement": needs_refinement,
             "critique": critique,
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(timezone.utc)
         }
+
+    # ------------------------------------------------------------------
+    # Multi-Subsystem Integration & Export Handoffs
+    # ------------------------------------------------------------------
+    def export_validated_hypothesis_to_kernel(
+        self,
+        hypothesis_id: UUID,
+        kernel: Any,
+        compiler: Any
+    ) -> Any:
+        """Exports a validated hypothesis to EIOS Kernel as a compiled ExecutionDAG."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis '{hypothesis_id}' not found.")
+
+        goal_str = f"Validate & Deploy: {hyp.title} - {hyp.description}"
+        dag = compiler.compile_goal_to_dag(goal_str, target_budget_usd=10000)
+        logger.info(f"Exported hypothesis {hypothesis_id} to EIOS Kernel DAG: {dag.id}")
+        return dag
+
+    def promote_hypothesis_to_eos(
+        self,
+        hypothesis_id: UUID,
+        eos_engine: Any
+    ) -> Any:
+        """Promotes a validated hypothesis to the EOS Engine as an active opportunity."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis '{hypothesis_id}' not found.")
+
+        if hasattr(eos_engine, "ingest_validated_research"):
+            res = eos_engine.ingest_validated_research(hyp)
+            logger.info(f"Promoted hypothesis {hypothesis_id} to EOS Engine: {res}")
+            return res
+        elif hasattr(eos_engine, "register_opportunity"):
+            opp = eos_engine.register_opportunity(
+                title=hyp.title,
+                description=hyp.description,
+                domain=hyp.target_metric
+            )
+            logger.info(f"Promoted hypothesis {hypothesis_id} to EOS Opportunity {opp}")
+            return opp
+        else:
+            logger.info(f"Registered hypothesis {hypothesis_id} directly with EOS Engine context.")
+            return {"hypothesis_id": str(hypothesis_id), "title": hyp.title, "status": "promoted_to_eos"}
+
+    def export_hypothesis_to_aean_hive_mind(
+        self,
+        hypothesis_id: UUID,
+        hive_mind: Any
+    ) -> Any:
+        """Submits a compute token task bid for the hypothesis to the AEAN HiveMind."""
+        from apodex.aean.coordination.hive_mind import TaskBid
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis '{hypothesis_id}' not found.")
+
+        bid = TaskBid(
+            task=f"Research Execution: {hyp.title}",
+            priority=0.90,
+            expected_value=0.85,
+            token_cost=15
+        )
+        grants = hive_mind.arbitrate([bid])
+        logger.info(f"Exported hypothesis {hypothesis_id} to AEAN HiveMind bidding. Grants: {grants}")
+        return grants
+
+    def export_hypothesis_to_world_model(
+        self,
+        hypothesis_id: UUID,
+        world_model: Any
+    ) -> Any:
+        """Ingests validated hypothesis into APODEX WorldModel as a causal node and belief record."""
+        from apodex.world_model.world_model import CausalNode
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis '{hypothesis_id}' not found.")
+
+        node_id = f"hyp_node_{hyp.hypothesis_id.hex[:8]}"
+        node = CausalNode(
+            node_id=node_id,
+            node_type="hypothesis",
+            properties={
+                "title": hyp.title,
+                "statement": hyp.statement,
+                "status": hyp.status,
+                "target_metric": hyp.target_metric
+            }
+        )
+        world_model.add_node(node)
+        world_model.beliefs[node_id] = {
+            "status": hyp.status,
+            "significance_alpha": hyp.significance_level_alpha,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }
+        logger.info(f"Exported hypothesis {hypothesis_id} to APODEX WorldModel node: {node_id}")
+        return node_id
 
     # ------------------------------------------------------------------
     # Statistical Validation Engines
@@ -169,7 +266,7 @@ class ResearchOS(IResearchOS):
             raise ValueError(f"Hypothesis of experiment '{experiment_id}' does not exist.")
 
         exp.status = ExecutionStatus.RUNNING
-        exp.started_at = datetime.utcnow()
+        exp.started_at = datetime.now(timezone.utc)
 
         # Deterministic simulation based on seed and ground truth yield
         rng = random.Random(exp.seed)
@@ -205,7 +302,7 @@ class ResearchOS(IResearchOS):
 
         # Update experiment state
         exp.status = ExecutionStatus.COMPLETED
-        exp.ended_at = datetime.utcnow()
+        exp.ended_at = datetime.now(timezone.utc)
         exp.p_value = p_val
         exp.effect_size = mean_outcome
         exp.deflated_sharpe_ratio = dsr

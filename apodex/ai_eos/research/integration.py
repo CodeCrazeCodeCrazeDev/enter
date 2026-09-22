@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 integration.py: Multi-paradigm scientific research-to-code integration layer.
-Incorporates transferable engineering principles extracted from the 200-paper corpus,
-directly resolving high-priority research debt in AI-EOS, AEAN, and Research OS.
+Incorporates transferable engineering principles extracted from the 500-paper corpus,
+directly resolving high-priority research debt in AI-EOS, AEAN, EIOS, and Research OS.
 """
 
 from __future__ import annotations
@@ -18,6 +18,60 @@ from uuid import UUID, uuid4
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger("sero.research.integration")
+
+# =====================================================================
+# Extracted Engineering Principles Registry (Papers 301 - 500)
+# =====================================================================
+
+ALPHAALGO_301_500_PRINCIPLES: Dict[int, Dict[str, Any]] = {
+    301: {
+        "paper_id": 301,
+        "paper_title": "Swarm-CoOP: Cooperative Multi-Agent Learning for Swarm Navigation and Execution",
+        "target_subsystem": "aean",
+        "category": "Multi-Agent Systems",
+        "extracted_principle": "Hierarchical token-bidding and dynamic consensus thresholding prevent deadlocks in asynchronous swarm networks.",
+        "impl_module": "apodex.aean.coordination.hive_mind"
+    },
+    351: {
+        "paper_id": 351,
+        "paper_title": "Competitive Advantage and Sustainable Firm Performance",
+        "target_subsystem": "eos",
+        "category": "Entrepreneurial Sensing",
+        "extracted_principle": "Systemic venture moats must be evaluated as dynamic capability graphs combining switching cost elasticity and resource rareness.",
+        "impl_module": "apodex.ai_eos.intelligence.eos_first_principles"
+    },
+    401: {
+        "paper_id": 401,
+        "paper_title": "Active Inference: The Free Energy Principle in Mind, Brain, and Behavior",
+        "target_subsystem": "eios",
+        "category": "Active Inference Sensing",
+        "extracted_principle": "Autonomous sensing minimize expected free energy (EFE) by balancing pragmatic value exploitation with epistemic curiosity exploration.",
+        "impl_module": "apodex.arcs.kernel.kernel"
+    },
+    451: {
+        "paper_id": 451,
+        "paper_title": "Self-Referential Self-Improvement via AST Code Rewrites",
+        "target_subsystem": "researchos",
+        "category": "Program Synthesis & Code Rewriting",
+        "extracted_principle": "Self-improving code synthesis requires AST-level static security verification and dry-run compilation before committing rewrites.",
+        "impl_module": "apodex.ai_eos.research.integration"
+    },
+    454: {
+        "paper_id": 454,
+        "paper_title": "Policy Gradient Optimization under Clipped Advantage Margins",
+        "target_subsystem": "researchos",
+        "category": "RL & Trajectory Alignment",
+        "extracted_principle": "Trajectory preference compilers for DPO/SFT must clip advantage margins to mitigate reward scale inflation across multi-step execution traces.",
+        "impl_module": "apodex.ai_eos.research.integration"
+    }
+}
+
+
+def register_301_500_paper_corpus_principles() -> Dict[int, Dict[str, Any]]:
+    """Registers and returns the extracted principles from research papers 301-500."""
+    logger.info(f"Registered {len(ALPHAALGO_301_500_PRINCIPLES)} principles from AlphaAlgo papers 301-500.")
+    return ALPHAALGO_301_500_PRINCIPLES
+
 
 # =====================================================================
 # 1. Self-Referential Code Rewrite & Verification Engine (STOP / Gödel)

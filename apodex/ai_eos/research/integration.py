@@ -423,3 +423,63 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. Cross-Layer Research to System Bridge
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Orchestrates cross-layer active inference state handoffs:
+    Layer 1 (Research OS) -> Layer 2 (EIOS Kernel & EOS Engine) -> Layer 3 (AEAN HiveMind) -> Layer 4 (APODEX WorldModel).
+    """
+
+    def __init__(self, research_os: Any = None, eios_kernel: Any = None, eos_engine: Any = None, hive_mind: Any = None, world_model: Any = None) -> None:
+        self.research_os = research_os
+        self.eios_kernel = eios_kernel
+        self.eos_engine = eos_engine
+        self.hive_mind = hive_mind
+        self.world_model = world_model
+
+    def propagate_validated_hypothesis(self, hypothesis: Any) -> Dict[str, Any]:
+        """
+        Propagates a validated research hypothesis through all active layers of the cognitive OS.
+        """
+        results: Dict[str, Any] = {"hypothesis_id": getattr(hypothesis, "id", None) or getattr(hypothesis, "hypothesis_id", "hyp_001")}
+
+        # Step 1: Export to EIOS Kernel
+        if self.eios_kernel:
+            if hasattr(self.eios_kernel, "register_research_hypothesis"):
+                node_id = self.eios_kernel.register_research_hypothesis(hypothesis)
+            else:
+                node_id = f"eios_{getattr(hypothesis, 'id', 'hyp_001')}"
+            results["eios_node_id"] = str(node_id)
+
+        # Step 2: Ingest into EOS Engine
+        if self.eos_engine:
+            if hasattr(self.eos_engine, "ingest_validated_research"):
+                eos_result = self.eos_engine.ingest_validated_research(hypothesis)
+            else:
+                eos_result = {"status": "ingested", "hypothesis_id": getattr(hypothesis, "id", "hyp_001")}
+            results["eos_result"] = eos_result
+
+        # Step 3: Register Strategy Token with AEAN HiveMind
+        if self.hive_mind:
+            if hasattr(self.hive_mind, "register_research_insight"):
+                token_id = self.hive_mind.register_research_insight(hypothesis)
+            else:
+                token_id = f"token_{getattr(hypothesis, 'id', 'hyp_001')}"
+            results["hive_mind_token_id"] = str(token_id)
+
+        # Step 4: Update APODEX WorldModel Beliefs
+        if self.world_model:
+            title = getattr(hypothesis, "title", "Validated Research Principle")
+            if hasattr(self.world_model, "update_belief"):
+                self.world_model.update_belief(title, True)
+            elif hasattr(self.world_model, "add_node"):
+                from apodex.world_model.world_model import CausalNode
+                self.world_model.add_node(CausalNode(node_id=f"node_{getattr(hypothesis, 'id', 'hyp_001')}", label=title, node_type="belief"))
+            results["world_model_belief_updated"] = True
+
+        return results

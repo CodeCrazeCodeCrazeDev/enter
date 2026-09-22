@@ -60,3 +60,21 @@ class HiveMind:
 
     def granted_tasks(self, grants: List[Grant]) -> Dict[str, bool]:
         return {g.task: g.granted for g in grants}
+
+    def register_research_insight(self, hypothesis: Any) -> str:
+        """
+        Registers a research insight from Research OS into the Hive Mind bidding pipeline.
+        Converts research hypotheses into strategic bids for swarm execution.
+        """
+        import uuid
+        token_id = str(uuid.uuid4())
+        task_name = f"research_execution_{getattr(hypothesis, 'id', token_id[:8])}"
+        bid = TaskBid(
+            task=task_name,
+            priority=getattr(hypothesis, "confidence_score", 0.85),
+            expected_value=getattr(hypothesis, "expected_sharpe", 1.5) / 2.0,
+            token_cost=10
+        )
+        self.arbitrate([bid])
+        logger.info(f"HiveMind registered research insight '{task_name}' [TokenID: {token_id}]")
+        return token_id

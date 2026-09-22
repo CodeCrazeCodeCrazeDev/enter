@@ -223,3 +223,39 @@ class ResearchOS(IResearchOS):
 
         self.hypotheses.save(hyp.hypothesis_id, hyp)
         return exp
+
+    # ------------------------------------------------------------------
+    # Integration Bridge Helper Methods
+    # ------------------------------------------------------------------
+    def export_validated_hypothesis_to_kernel(self, hypothesis_id: UUID) -> Dict[str, Any]:
+        """Export a validated hypothesis into payload format suitable for EIOS Kernel DAG execution."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis '{hypothesis_id}' not found.")
+        if hyp.status != "validated":
+            logger.warning(f"Hypothesis '{hypothesis_id}' status is '{hyp.status}', not 'validated'. Exporting anyway.")
+
+        return {
+            "hypothesis_id": str(hyp.hypothesis_id),
+            "title": hyp.title,
+            "target_metric": hyp.target_metric,
+            "status": hyp.status,
+            "significance_alpha": hyp.significance_level_alpha
+        }
+
+    def promote_hypothesis_to_eos(self, hypothesis_id: UUID, eos_engine: Any) -> bool:
+        """Promote validated hypothesis directly into the active hypothesis pool of an EOSEngine instance."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis '{hypothesis_id}' not found.")
+
+        if hasattr(eos_engine, "ingest_validated_research"):
+            eos_engine.ingest_validated_research(
+                hypothesis_id=str(hyp.hypothesis_id),
+                title=hyp.title,
+                domain=hyp.domain or hyp.target_metric,
+                description=hyp.description
+            )
+            logger.info(f"Promoted Research OS hypothesis '{hyp.title}' directly to EOS Engine.")
+            return True
+        return False

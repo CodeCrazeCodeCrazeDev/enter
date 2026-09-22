@@ -423,3 +423,94 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. ResearchToSystemBridge: Active Inference Cross-Layer Integration
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Cross-Layer Active Inference State Handoff Bridge.
+    Seamlessly orchestrates information flow across:
+      Layer 1: Research OS (Hypothesis validation & literature synthesis)
+      Layer 2: EIOS Kernel (DAG execution & anomaly sensing) & EOS System (Capital allocation & sensing)
+      Layer 3: AEAN HiveMind (Token-based multi-agent strategy arbitration)
+      Layer 4: APODEX WorldModel (Causal graph & Bayesian belief updating)
+    """
+
+    def __init__(
+        self,
+        research_os: Any,
+        eios_kernel: Any,
+        eos_engine: Any,
+        hive_mind: Any,
+        world_model_graph: Optional[Any] = None
+    ) -> None:
+        self.research_os = research_os
+        self.eios_kernel = eios_kernel
+        self.eos_engine = eos_engine
+        self.hive_mind = hive_mind
+        self.world_model_graph = world_model_graph
+
+    def process_and_propagate_hypothesis(self, hypothesis_id: UUID, ground_truth_yield: float = 2.5) -> Dict[str, Any]:
+        """
+        Runs full cross-layer active inference state propagation cycle:
+          1. Validates research hypothesis in Research OS simulator.
+          2. Exports validated hypothesis payload to EIOS Kernel & EOS Engine.
+          3. Evaluates EFE opportunity anomalies in EIOS Kernel.
+          4. Registers task bid in AEAN HiveMind for agent execution arbitration.
+          5. Updates APODEX WorldModel causal entities & Bayesian beliefs if attached.
+        """
+        # Step 1: Execute simulation in Research OS
+        exp = self.research_os.create_experiment(hypothesis_id=hypothesis_id)
+        validated_exp = self.research_os.execute_experiment_simulation(
+            experiment_id=exp.experiment_id,
+            ground_truth_yield=ground_truth_yield
+        )
+
+        hyp_data = self.research_os.export_validated_hypothesis_to_kernel(hypothesis_id=hypothesis_id)
+
+        # Step 2: Register in EIOS Kernel and EOS Engine
+        if hasattr(self.eios_kernel, "register_research_hypothesis"):
+            self.eios_kernel.register_research_hypothesis(hyp_data)
+
+        if hasattr(self.research_os, "promote_hypothesis_to_eos"):
+            self.research_os.promote_hypothesis_to_eos(hypothesis_id=hypothesis_id, eos_engine=self.eos_engine)
+
+        # Step 3: Sense EFE anomalies
+        anomalies = []
+        if hasattr(self.eios_kernel, "sense_opportunity_anomalies"):
+            anomalies = self.eios_kernel.sense_opportunity_anomalies()
+
+        # Step 4: Register research insight in AEAN HiveMind
+        task_bid = None
+        if hasattr(self.hive_mind, "register_research_insight"):
+            task_bid = self.hive_mind.register_research_insight(
+                insight_name=hyp_data["title"],
+                priority=0.95 if validated_exp.is_statistically_significant else 0.40,
+                expected_value=validated_exp.effect_size
+            )
+
+        # Step 5: Update APODEX WorldModel if present
+        wm_status = "unattached"
+        if self.world_model_graph is not None:
+            wm_status = "updated"
+            if hasattr(self.world_model_graph, "add_node"):
+                self.world_model_graph.add_node(
+                    node_id=str(hypothesis_id),
+                    name=hyp_data["title"],
+                    properties={"status": hyp_data["status"], "p_value": validated_exp.p_value}
+                )
+
+        logger.info(f"[ResearchToSystemBridge] Successfully propagated hypothesis '{hyp_data['title']}' across all system layers.")
+
+        return {
+            "hypothesis_id": str(hypothesis_id),
+            "is_significant": validated_exp.is_statistically_significant,
+            "p_value": validated_exp.p_value,
+            "effect_size": validated_exp.effect_size,
+            "anomalies_sensed": len(anomalies),
+            "hive_mind_task_bid": task_bid.task if task_bid else None,
+            "world_model_status": wm_status
+        }

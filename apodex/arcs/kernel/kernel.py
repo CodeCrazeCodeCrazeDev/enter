@@ -63,6 +63,28 @@ class EIOSKernel:
     def __init__(self) -> None:
         self.active_processes: Dict[str, ExecutionDAG] = {}
         self.metrics_history: List[Dict[str, Any]] = []
+        self.registered_research_hypotheses: Dict[str, Dict[str, Any]] = {}
+
+    def register_research_hypothesis(self, hypothesis_data: Dict[str, Any]) -> None:
+        """Register a validated hypothesis exported from Research OS for active inference sensing."""
+        hyp_id = hypothesis_data.get("hypothesis_id", f"hyp_{uuid.uuid4().hex[:8]}")
+        self.registered_research_hypotheses[hyp_id] = hypothesis_data
+        logger.info(f"[Kernel] Registered research hypothesis {hyp_id}: {hypothesis_data.get('title')}")
+
+    def sense_opportunity_anomalies(self) -> List[Dict[str, Any]]:
+        """Sense anomalies across active research hypotheses using Expected Free Energy (EFE) thresholding."""
+        anomalies = []
+        for hyp_id, data in self.registered_research_hypotheses.items():
+            alpha = data.get("significance_alpha", 0.05)
+            # Higher sensitivity / anomaly metric if significance alpha is strict
+            if alpha <= 0.05:
+                anomalies.append({
+                    "hypothesis_id": hyp_id,
+                    "title": data.get("title"),
+                    "anomaly_type": "HIGH_CONFIDENCE_RESEARCH_INSIGHT",
+                    "efe_reduction": 1.0 / alpha
+                })
+        return anomalies
 
     async def execute_dag(self, dag: ExecutionDAG) -> bool:
         """Schedules and executes the compiled DAG with failure recovery."""

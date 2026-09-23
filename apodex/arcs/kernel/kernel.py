@@ -57,12 +57,40 @@ class ExecutionDAG(BaseModel):
 class EIOSKernel:
     """The central core of the Entrepreneurial Intelligence Operating System.
 
-    Manages task scheduling, failure recovery (retries), and model routing.
+    Manages task scheduling, failure recovery (retries), research hypothesis registration, and model routing.
     """
 
     def __init__(self) -> None:
         self.active_processes: Dict[str, ExecutionDAG] = {}
         self.metrics_history: List[Dict[str, Any]] = []
+        self.research_hypotheses: List[Dict[str, Any]] = []
+
+    def register_research_hypothesis(self, title: str, description: str, efe_priority: float = 0.5) -> Dict[str, Any]:
+        """Principle 9/10: Register research hypotheses exported from Research OS for active sensing."""
+        hyp_record = {
+            "hypothesis_id": f"eios_hyp_{uuid.uuid4().hex[:8]}",
+            "title": title,
+            "description": description,
+            "efe_priority": efe_priority,
+            "timestamp": datetime.now(UTC).isoformat()
+        }
+        self.research_hypotheses.append(hyp_record)
+        logger.info(f"[EIOS Kernel] Registered research hypothesis: {title} [EFE Priority={efe_priority:.2f}]")
+        return hyp_record
+
+    def sense_opportunity_anomalies(self) -> List[Dict[str, Any]]:
+        """Principle 9: Expected Free Energy sensing over active research hypotheses to detect market anomalies."""
+        anomalies = []
+        for hyp in self.research_hypotheses:
+            if hyp.get("efe_priority", 0.0) > 0.4:
+                anomalies.append({
+                    "anomaly_type": "epistemic_opportunity",
+                    "source_hypothesis": hyp["title"],
+                    "efe_score": hyp["efe_priority"],
+                    "status": "active"
+                })
+        logger.info(f"[EIOS Kernel] Sensed {len(anomalies)} opportunity anomalies from active research hypotheses.")
+        return anomalies
 
     async def execute_dag(self, dag: ExecutionDAG) -> bool:
         """Schedules and executes the compiled DAG with failure recovery."""
@@ -75,12 +103,10 @@ class EIOSKernel:
         while loop_count < max_loops:
             executable = dag.get_executable_nodes()
             if not executable:
-                # Check if all nodes are completed
                 all_done = all(node.status == "COMPLETED" for node in dag.nodes.values())
                 if all_done:
                     logger.info(f"[Kernel] Execution DAG {dag.id} completed successfully.")
                     return True
-                # If some failed or circular reference
                 any_failed = any(node.status == "FAILED" for node in dag.nodes.values())
                 if any_failed:
                     logger.error(f"[Kernel] Execution DAG {dag.id} halted due to node failure.")
@@ -91,12 +117,10 @@ class EIOSKernel:
                 node.status = "RUNNING"
                 logger.info(f"[Kernel] Dispatching node: {node.name} ({node.action_type})")
 
-                # Simple simulated execution with auto-retry recovery logic
                 success = False
                 retries = 3
                 for attempt in range(1, retries + 1):
                     try:
-                        # Success simulations
                         success = True
                         break
                     except Exception as e:
@@ -121,11 +145,9 @@ class EntrepreneurialCompiler:
         logger.info(f"[Compiler] Compiling strategic goal: '{goal}'")
         dag = ExecutionDAG()
 
-        # Step 1: Research Node
         node_research = ExecutionNode(name="Conjoint Market Research", action_type="research_only", payload={"goal": goal})
         dag.add_node(node_research)
 
-        # Step 2: Feasibility Node (Depends on Research)
         node_feasibility = ExecutionNode(
             name="Feasibility Financial Model",
             action_type="research_only",
@@ -134,7 +156,6 @@ class EntrepreneurialCompiler:
         )
         dag.add_node(node_feasibility)
 
-        # Step 3: Brand & Positioning Node (Depends on Feasibility)
         node_brand = ExecutionNode(
             name="Brand Positioning and Trademark Check",
             action_type="publishing",
@@ -143,7 +164,6 @@ class EntrepreneurialCompiler:
         )
         dag.add_node(node_brand)
 
-        # Step 4: Execution Node (Depends on Brand)
         node_exec = ExecutionNode(
             name="Deploy GTM Ads Campaign",
             action_type="spending",
@@ -159,7 +179,6 @@ class HierarchicalActiveInference:
     """Cascading active inference tracking uncertainty reduction across organization layers (Layer 13)."""
 
     def __init__(self) -> None:
-        # Layer levels: Company -> Department -> Team -> Agent -> Action
         self.uncertainty_levels = {
             "company": 0.8,
             "department": 0.7,
@@ -171,10 +190,9 @@ class HierarchicalActiveInference:
     def calculate_layer_free_energy(self, layer: str, actual_outcome: float, expected_outcome: float) -> float:
         """Compute the Variational Free Energy for a specific layer."""
         error = actual_outcome - expected_outcome
-        complexity = 0.1 * len(layer)  # simple complexity heuristic
+        complexity = 0.1 * len(layer)
         free_energy = complexity + (error ** 2)
 
-        # Adjust estimated uncertainty based on prediction accuracy
         current_uncertainty = self.uncertainty_levels.get(layer, 0.5)
         self.uncertainty_levels[layer] = max(0.01, min(0.99, current_uncertainty + 0.1 * error))
 

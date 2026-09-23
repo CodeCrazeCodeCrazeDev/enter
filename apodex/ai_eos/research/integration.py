@@ -420,6 +420,98 @@ class LearnableRoutingGateDispatcher:
         logger.info(f"Updated routing metrics for agent '{agent_id}': SuccessRate={agent.historical_success_rate:.4f}, Curiosity={agent.epistemic_curiosity:.4f}")
 
 
+# =====================================================================
+# 5. Cross-Layer Active Inference State Handoff Bridge
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Stateless Cross-Layer Active Inference Handoff Bridge.
+    Orchestrates state handoffs between:
+    - Layer 1: Research OS (Hypothesis validation & paper principles)
+    - Layer 2: EIOS / EOS (Kernel active inference sensing & capital allocation decisions)
+    - Layer 3: AEAN (Multi-agent HiveMind strategy execution & token bidding)
+    - Layer 4: APODEX (WorldModel multi-graph state updates & CMOS memory)
+    """
+
+    def __init__(
+        self,
+        research_os: Optional[Any] = None,
+        eios_kernel: Optional[Any] = None,
+        eos_engine: Optional[Any] = None,
+        hive_mind: Optional[Any] = None,
+        world_model: Optional[Any] = None
+    ) -> None:
+        self.research_os = research_os
+        self.eios_kernel = eios_kernel
+        self.eos_engine = eos_engine
+        self.hive_mind = hive_mind
+        self.world_model = world_model
+        self.handoff_history: List[Dict[str, Any]] = []
+
+    def promote_hypothesis_to_kernel(self, hypothesis: Dict[str, Any]) -> Dict[str, Any]:
+        """Promotes a Layer 1 validated scientific hypothesis into Layer 2 EIOS Kernel active inference sensing state."""
+        record = {
+            "handoff_id": str(uuid4()),
+            "source_layer": "Layer 1: Research OS",
+            "target_layer": "Layer 2: EIOS Kernel / EOS Engine",
+            "payload": hypothesis,
+            "timestamp": time_now()
+        }
+        if self.eios_kernel and hasattr(self.eios_kernel, "register_research_hypothesis"):
+            self.eios_kernel.register_research_hypothesis(hypothesis)
+        if self.eos_engine and hasattr(self.eos_engine, "ingest_validated_research"):
+            self.eos_engine.ingest_validated_research(hypothesis)
+
+        self.handoff_history.append(record)
+        logger.info(f"Promoted hypothesis '{hypothesis.get('title', 'Unknown')}' from Research OS to EIOS Kernel & EOS Engine.")
+        return record
+
+    def dispatch_dag_to_hivemind(self, task_id: str, task_description: str, budget_tokens: float) -> Dict[str, Any]:
+        """Dispatches a Layer 2 compiled opportunity step into Layer 3 AEAN HiveMind token bidding registry."""
+        record = {
+            "handoff_id": str(uuid4()),
+            "source_layer": "Layer 2: EIOS / EOS",
+            "target_layer": "Layer 3: AEAN HiveMind",
+            "task_id": task_id,
+            "description": task_description,
+            "budget_tokens": budget_tokens,
+            "timestamp": time_now()
+        }
+        if self.hive_mind and hasattr(self.hive_mind, "register_research_insight"):
+            self.hive_mind.register_research_insight(
+                title=f"Task Directives: {task_id}",
+                summary=task_description,
+                source="EIOS_EOS_Kernel"
+            )
+
+        self.handoff_history.append(record)
+        logger.info(f"Dispatched task '{task_id}' from EOS Engine to AEAN HiveMind.")
+        return record
+
+    def update_world_model_state(self, entity_id: str, action: str, outcome: float, belief_confidence: float) -> Dict[str, Any]:
+        """Propagates Layer 3 multi-agent action results into Layer 4 APODEX WorldModel multi-graph state."""
+        record = {
+            "handoff_id": str(uuid4()),
+            "source_layer": "Layer 3: AEAN Multi-Agent Execution",
+            "target_layer": "Layer 4: APODEX WorldModel",
+            "entity_id": entity_id,
+            "action": action,
+            "outcome": outcome,
+            "confidence": belief_confidence,
+            "timestamp": time_now()
+        }
+        if self.world_model:
+            if hasattr(self.world_model, "observe_entity"):
+                self.world_model.observe_entity(entity_id, {"last_action": action, "outcome": outcome})
+            if hasattr(self.world_model, "update_belief"):
+                self.world_model.update_belief(entity_id, outcome, belief_confidence)
+
+        self.handoff_history.append(record)
+        logger.info(f"Updated WorldModel entity '{entity_id}' post-execution.")
+        return record
+
+
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()

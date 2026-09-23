@@ -2,7 +2,7 @@ from __future__ import annotations
 import uuid
 import logging
 from enum import Enum
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 from pydantic import BaseModel, Field
 
@@ -57,12 +57,32 @@ class ExecutionDAG(BaseModel):
 class EIOSKernel:
     """The central core of the Entrepreneurial Intelligence Operating System.
 
-    Manages task scheduling, failure recovery (retries), and model routing.
+    Manages task scheduling, failure recovery (retries), model routing, and active inference sensing.
     """
 
     def __init__(self) -> None:
         self.active_processes: Dict[str, ExecutionDAG] = {}
+        self.registered_hypotheses: List[Dict[str, Any]] = []
         self.metrics_history: List[Dict[str, Any]] = []
+
+    def register_research_hypothesis(self, hypothesis_record: Dict[str, Any]) -> None:
+        """Ingest a validated research hypothesis from Layer 1 Research OS for active inference sensing."""
+        self.registered_hypotheses.append(hypothesis_record)
+        logger.info(f"[Kernel] Registered research hypothesis: {hypothesis_record.get('title')}")
+
+    def sense_opportunity_anomalies(self) -> List[Dict[str, Any]]:
+        """Sense market anomalies and compute Expected Free Energy (EFE) across registered hypotheses."""
+        anomalies = []
+        for hyp in self.registered_hypotheses:
+            efe_score = 0.35 if hyp.get("status") == "validated" else 0.75
+            anomalies.append({
+                "hypothesis_id": hyp.get("hypothesis_id"),
+                "title": hyp.get("title"),
+                "domain": hyp.get("domain"),
+                "expected_free_energy": efe_score,
+                "sensed_at": datetime.now(timezone.utc).isoformat()
+            })
+        return anomalies
 
     async def execute_dag(self, dag: ExecutionDAG) -> bool:
         """Schedules and executes the compiled DAG with failure recovery."""

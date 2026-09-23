@@ -11,7 +11,7 @@ import logging
 import random
 from typing import Any, Dict, List, Optional, Tuple, Set
 from uuid import UUID, uuid4
-from datetime import datetime
+from datetime import datetime, timezone
 
 from ...ai_eos.domain.models import VentureCell, Hypothesis, Evidence, Theory
 
@@ -145,7 +145,7 @@ class HypothesisEngine:
         a = hyp.confidence_distribution["params"]["alpha"]
         b = hyp.confidence_distribution["params"]["beta"]
         hyp.posterior_confidence = float(a / (a + b))
-        hyp.last_updated = datetime.utcnow()
+        hyp.last_updated = datetime.now(timezone.utc)
 
     def evaluate_promotions(self) -> List[UUID]:
         """Promote high-confidence hypotheses (posterior > 0.8) to active or theory-ready."""
@@ -424,7 +424,7 @@ class EntrepreneurialMemory:
             "cell_id": cell_id,
             "step": step_name,
             "metrics": metrics,
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(timezone.utc)
         })
 
     def retrieve_matching_trajectories(self, key_metric: str, threshold_val: float) -> List[Dict[str, Any]]:
@@ -474,6 +474,38 @@ class EOSEngine:
         self.reinvention_engine = ReinventionEngine()
         self.memory = EntrepreneurialMemory()
         self.evaluator = EvaluationFramework()
+
+    def ingest_validated_research(self, hypothesis_record: Dict[str, Any]) -> None:
+        """Ingest a validated research hypothesis record from Research OS into the active pool."""
+        hyp_id = hypothesis_record.get("hypothesis_id")
+        title = hypothesis_record.get("title", "Research Hypothesis")
+        domain = hypothesis_record.get("domain", "general")
+
+        hyp_uuid = UUID(hyp_id) if isinstance(hyp_id, str) else (hyp_id or uuid4())
+        hyp_obj = Hypothesis(
+            hypothesis_id=hyp_uuid,
+            statement=hypothesis_record.get("statement", title),
+            domain=domain,
+            title=title,
+            status="active"
+        )
+        self.hypothesis_engine.add_hypothesis(hyp_obj)
+        logger.info(f"[EOSEngine] Ingested validated research hypothesis: {title} ({hyp_uuid})")
+
+    @property
+    def active_hypotheses(self) -> List[Dict[str, Any]]:
+        """List active hypotheses ingested into the EOS Engine."""
+        return [
+            {
+                "hypothesis_id": str(h.hypothesis_id),
+                "title": getattr(h, "title", h.statement),
+                "domain": h.domain,
+                "status": h.status,
+                "posterior_confidence": h.posterior_confidence
+            }
+            for h in self.hypothesis_engine.hypotheses.values()
+            if h.status in ("active", "validated", "proposed")
+        ]
 
     def run_continuous_sensing_cycle(self, cells: List[VentureCell], total_budget_cents: int) -> Dict[str, Any]:
         """Execute one complete hierarchical sensing, planning, allocation, and diagnostic loop."""

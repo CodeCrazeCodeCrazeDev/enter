@@ -423,3 +423,71 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. Research to System Cross-Layer State Handoff Bridge
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """Orchestrates cross-layer active inference state handoffs between:
+    - Layer 1: Research OS (scientific hypothesis validation)
+    - Layer 2: EIOS Kernel (active inference DAG sensing) & EOS System (business decisions)
+    - Layer 3: AEAN HiveMind (multi-agent token bidding)
+    - Layer 4: APODEX WorldModel (causal graph and belief updates)
+    """
+
+    def __init__(self, research_os: Any, kernel: Any, eos_engine: Any, hive_mind: Any, world_model: Any) -> None:
+        self.research_os = research_os
+        self.kernel = kernel
+        self.eos_engine = eos_engine
+        self.hive_mind = hive_mind
+        self.world_model = world_model
+
+    def execute_full_research_pipeline(
+        self,
+        title: str,
+        description: str,
+        target_metric: str,
+        ground_truth_yield: float = 1.2
+    ) -> Dict[str, Any]:
+        """Runs complete end-to-end multi-layer state handoff across Research OS, EIOS, EOS, AEAN, and World Model."""
+        # 1. Register & run experiment in Research OS
+        hyp = self.research_os.register_hypothesis(
+            title=title,
+            description=description,
+            null_hypothesis=f"{target_metric} <= 0",
+            target_metric=target_metric
+        )
+        exp = self.research_os.create_experiment(hyp.hypothesis_id)
+        executed_exp = self.research_os.execute_experiment_simulation(exp.experiment_id, ground_truth_yield)
+
+        # 2. Layer 1 -> Layer 2 Handoff: EIOS Kernel Active Inference Sensing & EOS Ingestion
+        kernel_record = self.research_os.export_validated_hypothesis_to_kernel(hyp.hypothesis_id, self.kernel)
+        eos_record = self.research_os.promote_hypothesis_to_eos(hyp.hypothesis_id, self.eos_engine)
+
+        # 3. Layer 1 -> Layer 3 Handoff: AEAN HiveMind Token Bidding Registration
+        hive_insight = self.research_os.export_insight_to_hive_mind(hyp.hypothesis_id, self.hive_mind)
+
+        # 4. Layer 1/2/3 -> Layer 4 Handoff: APODEX WorldModel Causal Graph Ingestion
+        event_payload = {
+            "hypothesis_id": str(hyp.hypothesis_id),
+            "title": hyp.title,
+            "target_metric": target_metric,
+            "is_validated": executed_exp.is_statistically_significant,
+            "p_value": executed_exp.p_value,
+            "effect_size": executed_exp.effect_size
+        }
+        if hasattr(self.world_model, "ingest_cross_layer_event"):
+            self.world_model.ingest_cross_layer_event("research_validation", event_payload)
+
+        return {
+            "hypothesis_id": str(hyp.hypothesis_id),
+            "status": hyp.status,
+            "p_value": executed_exp.p_value,
+            "is_validated": executed_exp.is_statistically_significant,
+            "kernel_record": kernel_record,
+            "eos_record": eos_record,
+            "hive_insight": hive_insight,
+            "world_model_updated": hasattr(self.world_model, "ingest_cross_layer_event")
+        }

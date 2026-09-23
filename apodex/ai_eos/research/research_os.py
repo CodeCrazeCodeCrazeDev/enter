@@ -10,7 +10,7 @@ import random
 import logging
 from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid4
-from datetime import datetime
+from datetime import datetime, timezone
 
 from ..domain.models import Hypothesis, Experiment, ExecutionStatus
 from ..interfaces.services import IResearchOS
@@ -152,8 +152,64 @@ class ResearchOS(IResearchOS):
         return {
             "needs_refinement": needs_refinement,
             "critique": critique,
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(timezone.utc)
         }
+
+    # ------------------------------------------------------------------
+    # Cross-Subsystem Integration Export Bridges
+    # ------------------------------------------------------------------
+    def export_validated_hypothesis_to_kernel(self, hypothesis_id: UUID, kernel: Any) -> Dict[str, Any]:
+        """Export a validated hypothesis to EIOS Kernel for active inference sensing and execution."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis '{hypothesis_id}' not found.")
+
+        record = {
+            "hypothesis_id": str(hyp.hypothesis_id),
+            "title": hyp.title,
+            "statement": hyp.statement,
+            "domain": hyp.domain,
+            "status": hyp.status,
+            "exported_at": datetime.now(timezone.utc).isoformat()
+        }
+        if hasattr(kernel, "register_research_hypothesis"):
+            kernel.register_research_hypothesis(record)
+        return record
+
+    def promote_hypothesis_to_eos(self, hypothesis_id: UUID, eos_engine: Any) -> Dict[str, Any]:
+        """Promote a validated hypothesis into the EOS Engine active hypothesis pool."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis '{hypothesis_id}' not found.")
+
+        record = {
+            "hypothesis_id": str(hyp.hypothesis_id),
+            "title": hyp.title,
+            "statement": hyp.statement,
+            "domain": hyp.domain,
+            "status": hyp.status,
+            "promoted_at": datetime.now(timezone.utc).isoformat()
+        }
+        if hasattr(eos_engine, "ingest_validated_research"):
+            eos_engine.ingest_validated_research(record)
+        return record
+
+    def export_insight_to_hive_mind(self, hypothesis_id: UUID, hive_mind: Any) -> Dict[str, Any]:
+        """Export hypothesis research insights to AEAN HiveMind for agent task bidding."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis '{hypothesis_id}' not found.")
+
+        insight = {
+            "hypothesis_id": str(hyp.hypothesis_id),
+            "title": hyp.title,
+            "domain": hyp.domain,
+            "priority": 0.9 if hyp.status == "validated" else 0.5,
+            "exported_at": datetime.now(timezone.utc).isoformat()
+        }
+        if hasattr(hive_mind, "register_research_insight"):
+            hive_mind.register_research_insight(insight)
+        return insight
 
     # ------------------------------------------------------------------
     # Statistical Validation Engines
@@ -169,7 +225,7 @@ class ResearchOS(IResearchOS):
             raise ValueError(f"Hypothesis of experiment '{experiment_id}' does not exist.")
 
         exp.status = ExecutionStatus.RUNNING
-        exp.started_at = datetime.utcnow()
+        exp.started_at = datetime.now(timezone.utc)
 
         # Deterministic simulation based on seed and ground truth yield
         rng = random.Random(exp.seed)
@@ -205,7 +261,7 @@ class ResearchOS(IResearchOS):
 
         # Update experiment state
         exp.status = ExecutionStatus.COMPLETED
-        exp.ended_at = datetime.utcnow()
+        exp.ended_at = datetime.now(timezone.utc)
         exp.p_value = p_val
         exp.effect_size = mean_outcome
         exp.deflated_sharpe_ratio = dsr

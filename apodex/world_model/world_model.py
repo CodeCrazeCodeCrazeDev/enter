@@ -39,3 +39,29 @@ class WorldModel(DirectedGraph[CausalNode, RelationEdge]):
     def register_pkc_trace(self, trace: PerceptionKnowledgeChain) -> None:
         """Register a search or reasoning trace with the World Model."""
         self.pkc_traces[str(trace.trace_id)] = trace
+
+    def ingest_cross_layer_event(self, event_type: str, payload: Dict[str, Any]) -> None:
+        """Ingest a cross-layer active inference event into the Causal Graph and update beliefs."""
+        hyp_id = payload.get("hypothesis_id", "hyp_unknown")
+        title = payload.get("title", event_type)
+
+        node = CausalNode(
+            node_id=f"research_hyp_{hyp_id}",
+            node_type="research_hypothesis",
+            properties={
+                "title": title,
+                "event_type": event_type,
+                "is_validated": payload.get("is_validated", False),
+                "p_value": payload.get("p_value", 1.0),
+                "effect_size": payload.get("effect_size", 0.0)
+            }
+        )
+        self.add_node(node)
+
+        # Update Bayesian belief record
+        self.beliefs[hyp_id] = {
+            "title": title,
+            "validated": payload.get("is_validated", False),
+            "posterior_probability": 0.95 if payload.get("is_validated") else 0.10,
+            "p_value": payload.get("p_value", 1.0)
+        }

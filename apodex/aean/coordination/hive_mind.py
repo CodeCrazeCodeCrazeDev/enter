@@ -5,14 +5,13 @@ organism wants to run each cycle (sense demand, engineer narratives, produce
 creative, run funnels, rebalance capital). Engines/tasks submit bids expressing
 priority and expected value; the Hive Mind runs a simple second-price-style
 arbitration to decide execution order and grants, providing graceful
-degradation when tokens are scarce. This models the token-based resource
-arbitration described in the AEAN spec without requiring a real message bus.
+degradation when tokens are scarce.
 """
 from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import Dict, List
+from typing import Dict, List, Any
 
 logger = logging.getLogger("aean.hive_mind")
 
@@ -41,6 +40,13 @@ class Grant:
 class HiveMind:
     token_budget: int = 100
     granted_history: List[Grant] = field(default_factory=list)
+    research_registry: List[Dict[str, Any]] = field(default_factory=list)
+
+    def register_research_insight(self, topic: str, priority_boost: float = 0.2) -> None:
+        """Principle 5/12: Register research insights from Research OS directly into HiveMind token bidding registry."""
+        record = {"topic": topic, "priority_boost": priority_boost}
+        self.research_registry.append(record)
+        logger.info(f"[Hive Mind] Registered research insight for token arbitration: '{topic}' [boost={priority_boost}]")
 
     def arbitrate(self, bids: List[TaskBid]) -> List[Grant]:
         """Allocate tokens to the highest-scoring bids within budget."""
@@ -48,7 +54,6 @@ class HiveMind:
         remaining = self.token_budget
         grants: List[Grant] = []
         for i, bid in enumerate(ordered):
-            # Second-price-style signal: clearing score is the next-best bid.
             clearing = ordered[i + 1].score if i + 1 < len(ordered) else 0.0
             if bid.token_cost <= remaining:
                 remaining -= bid.token_cost

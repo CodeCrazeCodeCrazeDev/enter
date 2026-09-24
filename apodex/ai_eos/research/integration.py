@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 integration.py: Multi-paradigm scientific research-to-code integration layer.
-Incorporates transferable engineering principles extracted from the 200-paper corpus,
-directly resolving high-priority research debt in AI-EOS, AEAN, and Research OS.
+Incorporates transferable engineering principles extracted from the 500-paper corpus,
+directly resolving high-priority research debt in AI-EOS, AEAN, EIOS Kernel, and Research OS.
 """
 
 from __future__ import annotations
@@ -13,11 +13,60 @@ import ast
 import tempfile
 import sys
 import os
+import yaml
 from typing import Any, Dict, List, Optional, Tuple, Set
 from uuid import UUID, uuid4
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger("sero.research.integration")
+
+# =====================================================================
+# 0. 500-Paper Research Corpus Principle Registry
+# =====================================================================
+
+ALPHAALGO_301_500_PRINCIPLES: List[Dict[str, Any]] = []
+
+def register_301_500_paper_corpus_principles() -> List[Dict[str, Any]]:
+    """
+    Loads and registers extracted principles from papers 301-500 in ALPHA_ALGO_200_NEW_RESEARCH.yaml.
+    Exposes structured principles across AEAN, EOS Engine, EIOS Kernel, and Research OS.
+    """
+    global ALPHAALGO_301_500_PRINCIPLES
+    if ALPHAALGO_301_500_PRINCIPLES:
+        return ALPHAALGO_301_500_PRINCIPLES
+
+    filepath = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))),
+        "docs", "research", "papers", "ALPHA_ALGO_200_NEW_RESEARCH.yaml"
+    )
+
+    if not os.path.exists(filepath):
+        # Fallback relative path
+        filepath = "docs/research/papers/ALPHA_ALGO_200_NEW_RESEARCH.yaml"
+
+    if os.path.exists(filepath):
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                data = yaml.safe_load(f)
+                papers = data.get("papers", [])
+                for p in papers:
+                    meta = p.get("metadata", {})
+                    analysis = p.get("analysis", {})
+                    ALPHAALGO_301_500_PRINCIPLES.append({
+                        "id": p.get("id"),
+                        "paper_title": meta.get("title"),
+                        "category": meta.get("domain"),
+                        "target_subsystem": meta.get("target_subsystem", "Research OS"),
+                        "extracted_principle": analysis.get("ai_eos_relevance"),
+                        "impl_module": analysis.get("architectural_fit"),
+                        "doi": meta.get("doi")
+                    })
+            logger.info(f"Registered {len(ALPHAALGO_301_500_PRINCIPLES)} principles from 200-paper corpus (301-500).")
+        except Exception as e:
+            logger.error(f"Failed to register 301-500 paper corpus principles: {e}")
+
+    return ALPHAALGO_301_500_PRINCIPLES
+
 
 # =====================================================================
 # 1. Self-Referential Code Rewrite & Verification Engine (STOP / Gödel)

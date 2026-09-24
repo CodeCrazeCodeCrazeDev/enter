@@ -7,7 +7,7 @@ Bayesian Belief Engine, Contradiction Detection Agent, and Theory Formation Loop
 from __future__ import annotations
 import math
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid4
 from pydantic import BaseModel, Field
@@ -25,8 +25,8 @@ class IKGNode(BaseModel):
     node_type: str  # e.g. "paper", "experiment", "dataset", "feature", "model", "capability", "decision", "hypothesis", "evidence", "theory", "contradiction"
     properties: Dict[str, Any] = Field(default_factory=dict)
     confidence: float = Field(1.0, ge=0.0, le=1.0)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    last_retrieved_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    last_retrieved_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     version: int = Field(1, ge=1)
 
 
@@ -37,7 +37,7 @@ class IKGEdge(BaseModel):
     target_id: str
     relation_type: str  # e.g. "DEPENDS_ON", "EVALUATES", "SUPPORTS", "ORIGINATES_FROM"
     weight: float = Field(1.0, ge=0.0)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class KnowledgeInfrastructure(IKnowledgeInfrastructure):
@@ -72,7 +72,7 @@ class KnowledgeInfrastructure(IKnowledgeInfrastructure):
                 confidence=existing.confidence,
                 version=existing.version + 1,
                 created_at=existing.created_at,
-                last_retrieved_at=datetime.utcnow()
+                last_retrieved_at=datetime.now(timezone.utc)
             )
             self.nodes.save(node_id, updated)
             logger.debug(f"Updated IKG Node: {node_id} to version {updated.version}")
@@ -83,8 +83,8 @@ class KnowledgeInfrastructure(IKnowledgeInfrastructure):
                 properties=properties,
                 confidence=1.0,
                 version=1,
-                created_at=datetime.utcnow(),
-                last_retrieved_at=datetime.utcnow()
+                created_at=datetime.now(timezone.utc),
+                last_retrieved_at=datetime.now(timezone.utc)
             )
             self.nodes.save(node_id, new_node)
             logger.info(f"Recorded new IKG Node: {node_id} ({node_type})")
@@ -236,7 +236,7 @@ class KnowledgeInfrastructure(IKnowledgeInfrastructure):
     # ------------------------------------------------------------------
     def apply_memory_decay(self, decay_rate: float = 0.05) -> None:
         """Apply temporal exponential decay to the weights of all IKG edges based on idle days."""
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         for edge in self.edges.list_all():
             days_elapsed = (now - edge.created_at).total_seconds() / 86400.0
             decay_factor = math.exp(-decay_rate * days_elapsed)
@@ -271,7 +271,7 @@ class KnowledgeInfrastructure(IKnowledgeInfrastructure):
                         old_conf = dependent.confidence
                         dependent.confidence = min(dependent.confidence, current.confidence * edge.weight)
                         if dependent.confidence != old_conf:
-                            dependent.last_retrieved_at = datetime.utcnow()
+                            dependent.last_retrieved_at = datetime.now(timezone.utc)
                             self.nodes.save(dependent.node_id, dependent)
                             logger.info(f"Propagated confidence: {dependent.node_id} confidence updated from {old_conf:.4f} to {dependent.confidence:.4f}")
                             queue.append(dependent)

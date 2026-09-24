@@ -1,5 +1,5 @@
 from __future__ import annotations
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List
 from uuid import UUID, uuid4
 from pydantic import BaseModel, Field
@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 class WmcDomainEvent(BaseModel):
     """Base schema for all events published by the WMC."""
     event_id: UUID = Field(default_factory=uuid4)
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     version: str = "1.0.0"
 
 

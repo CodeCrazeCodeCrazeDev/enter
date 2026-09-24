@@ -5,7 +5,7 @@ of the system, ensuring strict boundaries and adhering to Domain-Driven Design.
 """
 
 from __future__ import annotations
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid4
@@ -47,7 +47,7 @@ class KnowledgeROI(BaseModel):
 
 class AuditProvenance(BaseModel):
     """Immutable audit tracking metadata for tracing decision origins."""
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     created_by: str = Field(..., description="Entity or agent responsible for the action.")
     signature_sha256: str = Field(..., description="Cryptographic fingerprint of the inputs/state.")
     parent_provenance_id: Optional[UUID] = None
@@ -56,7 +56,7 @@ class AuditProvenance(BaseModel):
 class DecisionProvenance(BaseModel):
     """An immutable record detailing the scientific backing behind a strategic decision."""
     decision_id: UUID = Field(default_factory=uuid4)
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     evidence: List[str] = Field(default_factory=list, description="Validated factual observations.")
     assumptions: List[str] = Field(default_factory=list, description="Strategic assumptions made.")
     models_consulted: List[str] = Field(default_factory=list, description="Model variants utilized.")
@@ -92,8 +92,8 @@ class VentureCell(BaseModel):
     # Cognitive Tracking
     current_cognitive_stage: CognitiveStage = Field(default=CognitiveStage.IMAGINE)
 
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     @property
     def net_profit_cents(self) -> int:
@@ -135,8 +135,8 @@ class Hypothesis(BaseModel):
     target_metric: Optional[str] = None
     significance_level_alpha: float = Field(0.05, ge=0.001, le=0.2)
 
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    last_updated: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    last_updated: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     def model_post_init(self, __context: Any) -> None:
         """Autofill new fields from old ones if needed."""
@@ -166,7 +166,7 @@ class Evidence(BaseModel):
     replicated_by: List[str] = Field(default_factory=list, description="List of replica Evidence IDs.")
     replication_status: str = Field(default="unreplicated", description="unreplicated | replicated | failed_replication.")
 
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     decay_rate: float = Field(0.02, ge=0.0)
     current_relevance: float = Field(1.0, ge=0.0, le=1.0)
 
@@ -203,7 +203,7 @@ class Theory(BaseModel):
 
     contradictions: List[str] = Field(default_factory=list, description="List of raised Contradiction IDs.")
     status: str = Field("draft", description="Status (draft, active, contradicted, retired).")
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class Contradiction(BaseModel):
@@ -216,7 +216,7 @@ class Contradiction(BaseModel):
     resolution_status: str = Field(default="pending", description="Status of resolution: pending, resolved.")
     resolution_action: Optional[str] = None
     routed_to: str = Field(default="chairman_agent", description="chairman_agent | human_governance.")
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class Relationship(BaseModel):
@@ -225,7 +225,7 @@ class Relationship(BaseModel):
     from_node: str = Field(..., description="Source node ID.")
     to_node: str = Field(..., description="Target node ID.")
     type: str = Field(..., description="supports | contradicts | causes | correlates | derived_from | generalizes | specializes.")
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class DecisionRecord(BaseModel):
@@ -244,7 +244,7 @@ class DecisionRecord(BaseModel):
             "confidence_in_hindsight": None
         }
     )
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class Experiment(BaseModel):
@@ -296,5 +296,5 @@ class Capability(BaseModel):
     rollback_trigger: str = Field(..., description="Metric threshold or exception pattern triggering auto-rollback.")
     retirement_policy: str = Field(..., description="Condition for automatic deprecation.")
 
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

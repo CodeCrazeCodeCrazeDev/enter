@@ -8,7 +8,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid4
-from datetime import datetime
+from datetime import datetime, timezone
 
 from ..domain.models import Capability
 from ..interfaces.services import IGovernanceGateway
@@ -196,7 +196,7 @@ class GovernanceGateway(IGovernanceGateway):
             "confidence": confidence,
             "actual_accuracy": actual_accuracy,
             "bias": bias,
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(timezone.utc)
         }
         self.decision_record_ledger.append(record)
         return record

@@ -2,7 +2,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Callable, Dict, List, Type, TypeVar, Coroutine, Awaitable
 from pydantic import BaseModel, Field
 
@@ -17,7 +17,7 @@ class DomainEvent(BaseModel):
     """Base schema for all event-sourced messages in ARCS."""
 
     event_id: uuid.UUID = Field(default_factory=uuid.uuid4)
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class MarketOpportunityDiscoveredEvent(DomainEvent):
@@ -101,7 +101,7 @@ class DomainCommand(BaseModel):
     """Base schema for state-modifying requests."""
 
     command_id: uuid.UUID = Field(default_factory=uuid.uuid4)
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class ScanMarketOpportunitiesCommand(DomainCommand):

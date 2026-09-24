@@ -10,7 +10,7 @@ import random
 import logging
 from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid4
-from datetime import datetime
+from datetime import datetime, timezone
 
 from ..domain.models import Hypothesis, Experiment, ExecutionStatus
 from ..interfaces.services import IResearchOS
@@ -116,10 +116,27 @@ class ResearchOS(IResearchOS):
     def conduct_literature_review(self, domain: str) -> Dict[str, Any]:
         """Automated literature synthesis and citation mapping over active scientific namespaces."""
         logger.info(f"Autonomous Science Engine conducting literature synthesis for domain: {domain}")
+        from .integration import register_301_400_paper_corpus_principles
+        principles = register_301_400_paper_corpus_principles()
+
+        # Match principles relevant to domain query across multiple fields
+        domain_lower = domain.lower()
+        matched = [
+            p for p in principles
+            if any(domain_lower in str(v).lower() for v in p.values())
+        ]
+
         return {
             "domain": domain,
-            "reviewed_citations_count": 14,
-            "synthesized_trends": ["Deep Reinforcement learning with GRPO", "Active Inference with Expected Free Energy approximation"],
+            "reviewed_citations_count": len(principles),
+            "matched_principles_count": len(matched),
+            "matched_principles": matched if matched else principles[:2],
+            "synthesized_trends": [
+                "Active Inference Expected Free Energy (EFE) Task Routing",
+                "Non-Gaussian Hawkes Process Event Excitation & Stability Control",
+                "MAP-Elites Behavioral Archive Illumination",
+                "On-Policy Advantage Margin Preference Distillation"
+            ],
             "whitespace_found": "Expected Free Energy implementation under lightweight micro-VM environments."
         }
 
@@ -152,7 +169,7 @@ class ResearchOS(IResearchOS):
         return {
             "needs_refinement": needs_refinement,
             "critique": critique,
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(timezone.utc)
         }
 
     # ------------------------------------------------------------------
@@ -169,7 +186,7 @@ class ResearchOS(IResearchOS):
             raise ValueError(f"Hypothesis of experiment '{experiment_id}' does not exist.")
 
         exp.status = ExecutionStatus.RUNNING
-        exp.started_at = datetime.utcnow()
+        exp.started_at = datetime.now(timezone.utc)
 
         # Deterministic simulation based on seed and ground truth yield
         rng = random.Random(exp.seed)
@@ -205,7 +222,7 @@ class ResearchOS(IResearchOS):
 
         # Update experiment state
         exp.status = ExecutionStatus.COMPLETED
-        exp.ended_at = datetime.utcnow()
+        exp.ended_at = datetime.now(timezone.utc)
         exp.p_value = p_val
         exp.effect_size = mean_outcome
         exp.deflated_sharpe_ratio = dsr

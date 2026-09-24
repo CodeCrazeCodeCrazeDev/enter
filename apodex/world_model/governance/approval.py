@@ -1,5 +1,5 @@
 from __future__ import annotations
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 from uuid import UUID, uuid4
 from pydantic import BaseModel, Field
@@ -22,5 +22,5 @@ class ApprovalRequest(BaseModel):
         """Approve and sign off on this escalation."""
         self.status = "APPROVED"
         self.reviewer_id = reviewer_id
-        self.reviewed_at = datetime.utcnow()
+        self.reviewed_at = datetime.now(timezone.utc)
         self.cryptographic_signature = signature

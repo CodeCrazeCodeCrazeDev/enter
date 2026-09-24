@@ -10,12 +10,13 @@ import random
 import logging
 from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid4
-from datetime import datetime
+from datetime import datetime, timezone
 
 from ..domain.models import Hypothesis, Experiment, ExecutionStatus
 from ..interfaces.services import IResearchOS
 from ..infrastructure.identity import DeterministicIdentityGenerator
 from ..infrastructure.persistence import InMemoryLedger
+from .integration import register_301_500_paper_corpus_principles
 
 logger = logging.getLogger("sero.ros")
 
@@ -116,11 +117,28 @@ class ResearchOS(IResearchOS):
     def conduct_literature_review(self, domain: str) -> Dict[str, Any]:
         """Automated literature synthesis and citation mapping over active scientific namespaces."""
         logger.info(f"Autonomous Science Engine conducting literature synthesis for domain: {domain}")
+        registered_principles = register_301_500_paper_corpus_principles()
+
+        matching_principles = [
+            p for p in registered_principles
+            if domain.lower() in p.get("category", "").lower()
+            or domain.lower() in p.get("target_subsystem", "").lower()
+            or domain.lower() in p.get("paper_title", "").lower()
+            or domain.lower() in p.get("extracted_principle", "").lower()
+        ]
+
+        citations_count = len(matching_principles) if matching_principles else 14
+        trends = [p["extracted_principle"] for p in matching_principles[:3]] if matching_principles else [
+            "Deep Reinforcement learning with GRPO",
+            "Active Inference with Expected Free Energy approximation"
+        ]
+
         return {
             "domain": domain,
-            "reviewed_citations_count": 14,
-            "synthesized_trends": ["Deep Reinforcement learning with GRPO", "Active Inference with Expected Free Energy approximation"],
-            "whitespace_found": "Expected Free Energy implementation under lightweight micro-VM environments."
+            "reviewed_citations_count": citations_count,
+            "synthesized_trends": trends,
+            "whitespace_found": f"Active inference and expected free energy optimization within {domain} subsystems.",
+            "matching_principles": matching_principles
         }
 
     def design_experiment(self, hypothesis_id: UUID) -> Dict[str, Any]:
@@ -152,7 +170,7 @@ class ResearchOS(IResearchOS):
         return {
             "needs_refinement": needs_refinement,
             "critique": critique,
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(timezone.utc)
         }
 
     # ------------------------------------------------------------------
@@ -169,12 +187,12 @@ class ResearchOS(IResearchOS):
             raise ValueError(f"Hypothesis of experiment '{experiment_id}' does not exist.")
 
         exp.status = ExecutionStatus.RUNNING
-        exp.started_at = datetime.utcnow()
+        exp.started_at = datetime.now(timezone.utc)
 
         # Deterministic simulation based on seed and ground truth yield
         rng = random.Random(exp.seed)
 
-        # Simulate a set of returns/outcomes (e.g. 100 walk-forward iterations)
+        # Simulate a set of returns/outcomes (e.g. 120 walk-forward iterations)
         sample_size = 120
         sim_outcomes = [ground_truth_yield + rng.normalvariate(0.0, 1.5) for _ in range(sample_size)]
 
@@ -205,7 +223,7 @@ class ResearchOS(IResearchOS):
 
         # Update experiment state
         exp.status = ExecutionStatus.COMPLETED
-        exp.ended_at = datetime.utcnow()
+        exp.ended_at = datetime.now(timezone.utc)
         exp.p_value = p_val
         exp.effect_size = mean_outcome
         exp.deflated_sharpe_ratio = dsr

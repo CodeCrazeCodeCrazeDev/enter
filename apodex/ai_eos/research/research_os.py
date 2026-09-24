@@ -223,3 +223,34 @@ class ResearchOS(IResearchOS):
 
         self.hypotheses.save(hyp.hypothesis_id, hyp)
         return exp
+
+    # ------------------------------------------------------------------
+    # Cross-Layer Integration Bridge Handoff Methods
+    # ------------------------------------------------------------------
+    def export_validated_hypothesis_to_kernel(self, hypothesis_id: UUID, compiler: Any) -> Any:
+        """Export a validated hypothesis to EIOS Compiler to build an execution DAG."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp or hyp.status not in ("validated", "active"):
+            raise ValueError(f"Hypothesis '{hypothesis_id}' is not validated or active.")
+        from apodex.ai_eos.research.integration import ResearchToSystemBridge
+        bridge = ResearchToSystemBridge()
+        return bridge.export_validated_hypothesis_to_kernel(hyp, compiler)
+
+    def promote_hypothesis_to_eos(self, hypothesis_id: UUID, eos_engine: Any) -> None:
+        """Promote a validated research hypothesis into the EOS Engine."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp or hyp.status not in ("validated", "active"):
+            raise ValueError(f"Hypothesis '{hypothesis_id}' is not validated or active.")
+        from apodex.ai_eos.research.integration import ResearchToSystemBridge
+        bridge = ResearchToSystemBridge()
+        bridge.promote_hypothesis_to_eos(hyp, eos_engine)
+
+    def hand_off_to_aean_and_world_model(self, hypothesis_id: UUID, hive_mind: Any, world_model: Any) -> None:
+        """Hand off a validated hypothesis state to AEAN HiveMind bidding and WorldModel belief state."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp or hyp.status not in ("validated", "active"):
+            raise ValueError(f"Hypothesis '{hypothesis_id}' is not validated or active.")
+        from apodex.ai_eos.research.integration import ResearchToSystemBridge
+        bridge = ResearchToSystemBridge()
+        bridge.bridge_hypothesis_to_hive_mind(hyp, hive_mind)
+        bridge.sync_hypothesis_to_world_model(hyp, world_model)

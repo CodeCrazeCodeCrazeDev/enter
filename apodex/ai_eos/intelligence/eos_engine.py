@@ -505,3 +505,20 @@ class EOSEngine:
             "research_portfolio_cents": self.portfolio_manager.research_budget_cents,
             "venture_portfolio_cents": self.portfolio_manager.venture_budget_cents
         }
+
+    def ingest_validated_research(self, hypothesis: Hypothesis) -> None:
+        """Ingest a validated Research OS hypothesis into the active hypothesis engine and opportunity graph."""
+        hypothesis.status = "active"
+        self.hypothesis_engine.add_hypothesis(hypothesis)
+        op_id = f"op_{hypothesis.hypothesis_id}"
+        self.opportunity_graph.add_opportunity(
+            op_id=op_id,
+            name=f"Opportunity: {hypothesis.title}",
+            value_cents=50000_00,
+            keywords=[hypothesis.domain, "validated_research", hypothesis.target_metric]
+        )
+        logger.info(f"Ingested validated research hypothesis '{hypothesis.title}' into EOS Engine.")
+
+    @property
+    def active_hypotheses(self) -> List[Hypothesis]:
+        return [h for h in self.hypothesis_engine.hypotheses.values() if h.status == "active"]

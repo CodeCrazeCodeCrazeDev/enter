@@ -423,3 +423,89 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. Research To System Bridge (Layer 1 -> Layer 2/3/4 Handoff)
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Orchestrates active inference state handoffs across the unified 4-layer cognitive architecture:
+    - Layer 1: Research OS hypotheses & statistical validation
+    - Layer 2: EIOS Kernel sensing/DAG execution & EOS System decisions
+    - Layer 3: AEAN multi-agent strategy execution and token bidding
+    - Layer 4: APODEX WorldModel entity, causal link, and belief updates
+    """
+
+    def export_validated_hypothesis_to_kernel(
+        self,
+        hypothesis: Any,
+        compiler: Any
+    ) -> Any:
+        """Converts a validated Research OS hypothesis into an executable EIOS DAG."""
+        goal_prompt = f"Execute experiment and rollout for validated research hypothesis: {hypothesis.title} ({hypothesis.domain})"
+        dag = compiler.compile_goal_to_dag(goal=goal_prompt, target_budget_usd=10000)
+        logger.info(f"[Bridge] Formulated EIOS DAG [id={dag.id}] from validated hypothesis [id={hypothesis.hypothesis_id}]")
+        return dag
+
+    def promote_hypothesis_to_eos(
+        self,
+        hypothesis: Any,
+        eos_engine: Any
+    ) -> None:
+        """Promotes a validated research hypothesis directly into EOS Engine active hypotheses and opportunity graph."""
+        if hasattr(eos_engine, "ingest_validated_research"):
+            eos_engine.ingest_validated_research(hypothesis)
+        else:
+            eos_engine.hypothesis_engine.add_hypothesis(hypothesis)
+        logger.info(f"[Bridge] Promoted research hypothesis [id={hypothesis.hypothesis_id}] to EOS Engine.")
+
+    def bridge_hypothesis_to_hive_mind(
+        self,
+        hypothesis: Any,
+        hive_mind: Any,
+        token_cost: int = 15
+    ) -> Any:
+        """Translates hypothesis expected utility into AEAN HiveMind token bids for execution."""
+        from apodex.aean.coordination.hive_mind import TaskBid
+
+        priority = 0.9 if hypothesis.status == "validated" else 0.5
+        ev = max(0.1, 1.0 - getattr(hypothesis, "p_value", 0.05))
+
+        bid = TaskBid(
+            task=f"execute_research_{hypothesis.title}",
+            priority=priority,
+            expected_value=ev,
+            token_cost=token_cost
+        )
+        grants = hive_mind.arbitrate([bid])
+        logger.info(f"[Bridge] Arbitrated AEAN token grant for research task: {grants}")
+        return grants
+
+    def sync_hypothesis_to_world_model(
+        self,
+        hypothesis: Any,
+        world_model: Any
+    ) -> None:
+        """Registers research hypothesis causal node, relation edges, and initial belief state in APODEX WorldModel."""
+        from apodex.world_model.world_model import CausalNode
+
+        node_id = f"hyp_{hypothesis.hypothesis_id}"
+        causal_node = CausalNode(
+            node_id=node_id,
+            node_type="validated_hypothesis",
+            properties={
+                "title": hypothesis.title,
+                "domain": hypothesis.domain,
+                "status": hypothesis.status,
+                "target_metric": getattr(hypothesis, "target_metric", hypothesis.domain)
+            }
+        )
+        world_model.add_node(causal_node)
+        world_model.beliefs[node_id] = {
+            "posterior_confidence": getattr(hypothesis, "posterior_confidence", 0.95),
+            "status": hypothesis.status,
+            "last_validated": time_now()
+        }
+        logger.info(f"[Bridge] Synchronized research hypothesis [id={hypothesis.hypothesis_id}] into WorldModel.")

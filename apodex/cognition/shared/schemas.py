@@ -1,6 +1,6 @@
 from __future__ import annotations
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
@@ -12,7 +12,7 @@ class StrategicGoal(BaseModel):
     priority_score: float = Field(..., description="Value between 0.0 (low) and 1.0 (critical)")
     budget_cents: int
     constraints: List[str] = Field(default_factory=list)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class Hypothesis(BaseModel):
@@ -39,7 +39,7 @@ class EvidenceCard(BaseModel):
     description: str
     reliability: float = Field(0.5, description="Source reliability score (0.0 to 1.0)")
     contradicts_hypothesis_ids: List[uuid.UUID] = Field(default_factory=list)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class RiskAssessment(BaseModel):
@@ -99,12 +99,12 @@ class Lesson(BaseModel):
     summary: str
     context: str
     impact_delta: float = Field(0.0, description="Change in performance metric if applied")
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class DecisionProvenance(BaseModel):
     id: uuid.UUID = Field(default_factory=uuid.uuid4)
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     objective: StrategicGoal
     hypotheses: List[Hypothesis] = Field(default_factory=list)
     evidence: List[EvidenceCard] = Field(default_factory=list)

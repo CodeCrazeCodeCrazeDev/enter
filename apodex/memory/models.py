@@ -7,7 +7,7 @@ and self-evolution components.
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid4
@@ -116,7 +116,7 @@ class WorkingContextGraph(BaseModel):
     tenant_id: str = Field(..., description="Tenant namespace filter. DB-level index: yes.")
     nodes: List[WorkingContextNode] = Field(default_factory=list)
     edges: List[WorkingContextEdge] = Field(default_factory=list)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 # ==========================================
@@ -148,7 +148,7 @@ class EpisodeLogRecord(BaseModel):
     tenant_id: str = Field(..., description="Tenant namespace filter. DB-level index: yes.")
     user_id: str = Field(..., description="User ownership tracking. DB-level index: yes.")
     timestamp: datetime = Field(
-        default_factory=datetime.utcnow,
+        default_factory=lambda: datetime.now(timezone.utc),
         description="Execution timestamp. DB-level index: yes."
     )
     agent_id: str = Field(..., description="The sub-agent that executed this step.")
@@ -196,8 +196,8 @@ class AtomicMemory(BaseModel):
         default_factory=list,
         description="Keywords representing entities, affected files, and utilized APIs. DB-level index: yes (GIN/Array)."
     )
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    last_retrieved_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    last_retrieved_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     retrieval_count: int = Field(0, ge=0)
 
 
@@ -241,7 +241,7 @@ class ScenarioPattern(BaseModel):
     )
     average_latency_ms: float = Field(0.0, ge=0.0)
     average_token_cost: int = Field(0, ge=0)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 # ==========================================
@@ -287,7 +287,7 @@ class PersonalEvolutionProfile(BaseModel):
         default_factory=list,
         description="Tenant or user-specific business/technical terms."
     )
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 # ==========================================
@@ -313,7 +313,7 @@ class ResearchTicket(BaseModel):
     )
     priority: int = Field(default=3, ge=1, le=5)
     status: str = Field(default="queued", description="Status of research (e.g., queued, analyzing, patched).")
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class CapabilityDelta(BaseModel):
@@ -329,4 +329,4 @@ class CapabilityDelta(BaseModel):
     candidate_version: str = Field(..., description="Upgraded version reference.")
     performance_gain_ratio: float = Field(..., description="Observed gain multiplier in verification sandboxes.")
     rollback_sha256: str = Field(..., description="SHA-256 fingerprint of rollback configurations.")
-    applied_at: datetime = Field(default_factory=datetime.utcnow)
+    applied_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

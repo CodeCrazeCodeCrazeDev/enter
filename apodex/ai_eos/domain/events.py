@@ -4,7 +4,7 @@ Every major state transition in the OS publishes an event inheriting from `Domai
 """
 
 from __future__ import annotations
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid4
 from pydantic import BaseModel, Field
@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field
 class DomainEvent(BaseModel):
     """Base schema for all domain events in AI-EOS."""
     event_id: UUID = Field(default_factory=uuid4)
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     schema_version: str = Field(default="1.0")
 
 

@@ -6,7 +6,7 @@ Computes multi-dimensional utility scoring and tracks execution lineage across t
 from __future__ import annotations
 
 import math
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List
 
 from apodex.memory.cmos.models import MemoryNode
@@ -27,7 +27,9 @@ class MemoryEconomicsEngine:
         decision_impact = float(node.metadata.get("decision_impact", 1.0))
 
         # Recency decay calculation
-        age_seconds = max(1.0, (datetime.utcnow() - node.last_retrieved_at).total_seconds())
+        last_retrieved = node.last_retrieved_at.replace(tzinfo=None) if hasattr(node.last_retrieved_at, 'replace') else node.last_retrieved_at
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
+        age_seconds = max(1.0, (now - last_retrieved).total_seconds())
         age_factor = 1.0 + math.log(age_seconds)
 
         # Storage footprint cost

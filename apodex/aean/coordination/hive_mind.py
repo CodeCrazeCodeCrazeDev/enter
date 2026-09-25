@@ -60,3 +60,16 @@ class HiveMind:
 
     def granted_tasks(self, grants: List[Grant]) -> Dict[str, bool]:
         return {g.task: g.granted for g in grants}
+
+    def register_research_insight(self, insight_id: str, description: str, suggested_bid_tokens: int = 100) -> TaskBid:
+        """
+        Registers a research insight from Layer 1 Research OS / Layer 2 EOS Engine into HiveMind token bidding registry.
+        """
+        bid = TaskBid(
+            task=f"ResearchInsight_{insight_id}",
+            priority=0.9,
+            expected_value=2.0,
+            token_cost=min(self.token_budget, max(10, suggested_bid_tokens))
+        )
+        logger.info(f"[HiveMind] Registered research insight task '{bid.task}' with priority {bid.priority}.")
+        return bid

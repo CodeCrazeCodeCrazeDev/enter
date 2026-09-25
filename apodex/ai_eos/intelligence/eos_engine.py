@@ -475,6 +475,19 @@ class EOSEngine:
         self.memory = EntrepreneurialMemory()
         self.evaluator = EvaluationFramework()
 
+    def ingest_validated_research(self, validated_hypothesis: Any) -> Any:
+        """
+        Ingests a validated hypothesis from Layer 1 Research OS into EOS Engine active hypotheses.
+        """
+        from ...ai_eos.research.integration import ResearchToSystemBridge
+        bridge = ResearchToSystemBridge()
+        kernel_output = {
+            "hypothesis_id": getattr(validated_hypothesis, "hypothesis_id", uuid4()),
+            "title": getattr(validated_hypothesis, "title", getattr(validated_hypothesis, "statement", "Validated Hypothesis")),
+            "posterior_confidence": getattr(validated_hypothesis, "posterior_confidence", 0.90)
+        }
+        return bridge.handoff_kernel_to_eos(kernel_output, self)
+
     def run_continuous_sensing_cycle(self, cells: List[VentureCell], total_budget_cents: int) -> Dict[str, Any]:
         """Execute one complete hierarchical sensing, planning, allocation, and diagnostic loop."""
         # 1. World State sensing & transitions

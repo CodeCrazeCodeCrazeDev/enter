@@ -63,6 +63,18 @@ class EIOSKernel:
     def __init__(self) -> None:
         self.active_processes: Dict[str, ExecutionDAG] = {}
         self.metrics_history: List[Dict[str, Any]] = []
+        self.research_hypotheses: Dict[str, Any] = {}
+
+    def register_research_hypothesis(self, hypothesis: Any) -> ExecutionDAG:
+        """
+        Ingests a Layer 1 Research OS hypothesis and converts it into an active inference EFE sensing DAG.
+        """
+        hyp_id = str(getattr(hypothesis, "hypothesis_id", uuid.uuid4()))
+        self.research_hypotheses[hyp_id] = hypothesis
+
+        from apodex.ai_eos.research.integration import ResearchToSystemBridge
+        bridge = ResearchToSystemBridge()
+        return bridge.handoff_research_to_kernel(hypothesis, self)
 
     async def execute_dag(self, dag: ExecutionDAG) -> bool:
         """Schedules and executes the compiled DAG with failure recovery."""

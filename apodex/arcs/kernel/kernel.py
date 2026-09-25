@@ -64,6 +64,35 @@ class EIOSKernel:
         self.active_processes: Dict[str, ExecutionDAG] = {}
         self.metrics_history: List[Dict[str, Any]] = []
 
+    def register_research_hypothesis(self, hypothesis: Any) -> None:
+        """Registers a research hypothesis into the EIOS Executive Kernel for active inference tracking."""
+        h_id = getattr(hypothesis, "hypothesis_id", str(uuid.uuid4()))
+        title = getattr(hypothesis, "title", str(hypothesis))
+        self.metrics_history.append({
+            "type": "research_hypothesis",
+            "hypothesis_id": str(h_id),
+            "title": title,
+            "registered_at": datetime.now(UTC).isoformat()
+        })
+        logger.info(f"[Kernel] Registered research hypothesis for active inference: {title} [id={h_id}]")
+
+    def sense_opportunity_anomalies(self, opportunities: List[Any]) -> List[Dict[str, Any]]:
+        """Senses opportunities and identifies execution anomalies via precision-weighted variance checks."""
+        anomalies = []
+        for op in opportunities:
+            val = getattr(op, "expected_value", 0.0)
+            unc = getattr(op, "uncertainty", 0.5)
+            precision = 1.0 / max(0.01, unc)
+            if precision * val < 0.2 or unc > 0.8:
+                anomalies.append({
+                    "opportunity": getattr(op, "name", str(op)),
+                    "precision_score": precision,
+                    "uncertainty": unc,
+                    "anomaly_flag": "HIGH_EFE_SURPRISE"
+                })
+        logger.info(f"[Kernel] Anomaly sensing complete: {len(anomalies)} anomalies flagged across {len(opportunities)} opportunities.")
+        return anomalies
+
     async def execute_dag(self, dag: ExecutionDAG) -> bool:
         """Schedules and executes the compiled DAG with failure recovery."""
         logger.info(f"[Kernel] Initiating execution DAG: {dag.id}")

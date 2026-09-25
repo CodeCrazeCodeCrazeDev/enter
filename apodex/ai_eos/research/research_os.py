@@ -10,7 +10,7 @@ import random
 import logging
 from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid4
-from datetime import datetime
+from datetime import datetime, timezone
 
 from ..domain.models import Hypothesis, Experiment, ExecutionStatus
 from ..interfaces.services import IResearchOS
@@ -116,11 +116,28 @@ class ResearchOS(IResearchOS):
     def conduct_literature_review(self, domain: str) -> Dict[str, Any]:
         """Automated literature synthesis and citation mapping over active scientific namespaces."""
         logger.info(f"Autonomous Science Engine conducting literature synthesis for domain: {domain}")
+        from .integration import register_500_paper_corpus_principles
+        corpus_principles = register_500_paper_corpus_principles()
+
+        dom_lower = domain.lower().strip()
+        matched = []
+        for p in corpus_principles:
+            search_blob = f"{p.get('category', '')} {p.get('target_subsystem', '')} {p.get('paper_title', '')} {p.get('extracted_principle', '')} {p.get('description', '')} {p.get('impl_module', '')}".lower()
+            if dom_lower in search_blob or dom_lower == "all" or dom_lower in p.get("target_subsystem", "").lower():
+                matched.append(p)
+
+        synthesized_trends = list(set([m["extracted_principle"] for m in matched[:10] if m.get("extracted_principle")]))
+        if not synthesized_trends:
+            synthesized_trends = ["Deep Reinforcement learning with GRPO", "Active Inference with Expected Free Energy approximation"]
+
         return {
             "domain": domain,
-            "reviewed_citations_count": 14,
-            "synthesized_trends": ["Deep Reinforcement learning with GRPO", "Active Inference with Expected Free Energy approximation"],
-            "whitespace_found": "Expected Free Energy implementation under lightweight micro-VM environments."
+            "reviewed_citations_count": len(matched) if matched else len(corpus_principles),
+            "total_corpus_papers": len(corpus_principles),
+            "matched_principles_count": len(matched),
+            "synthesized_trends": synthesized_trends,
+            "matched_principles": matched[:5],
+            "whitespace_found": f"Expected Free Energy and multi-agent token bidding optimization under domain '{domain}'."
         }
 
     def design_experiment(self, hypothesis_id: UUID) -> Dict[str, Any]:
@@ -152,7 +169,7 @@ class ResearchOS(IResearchOS):
         return {
             "needs_refinement": needs_refinement,
             "critique": critique,
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(timezone.utc)
         }
 
     # ------------------------------------------------------------------
@@ -169,7 +186,7 @@ class ResearchOS(IResearchOS):
             raise ValueError(f"Hypothesis of experiment '{experiment_id}' does not exist.")
 
         exp.status = ExecutionStatus.RUNNING
-        exp.started_at = datetime.utcnow()
+        exp.started_at = datetime.now(timezone.utc)
 
         # Deterministic simulation based on seed and ground truth yield
         rng = random.Random(exp.seed)
@@ -205,7 +222,7 @@ class ResearchOS(IResearchOS):
 
         # Update experiment state
         exp.status = ExecutionStatus.COMPLETED
-        exp.ended_at = datetime.utcnow()
+        exp.ended_at = datetime.now(timezone.utc)
         exp.p_value = p_val
         exp.effect_size = mean_outcome
         exp.deflated_sharpe_ratio = dsr
@@ -223,3 +240,21 @@ class ResearchOS(IResearchOS):
 
         self.hypotheses.save(hyp.hypothesis_id, hyp)
         return exp
+
+    def export_validated_hypothesis_to_kernel(self, hypothesis_id: UUID, kernel: Any) -> bool:
+        """Exports a validated/active hypothesis from Research OS to the EIOS Kernel."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis '{hypothesis_id}' not found.")
+        if hyp.status not in ["validated", "active"]:
+            logger.warning(f"Hypothesis {hypothesis_id} is in status '{hyp.status}', not validated/active.")
+        kernel.register_research_hypothesis(hyp)
+        return True
+
+    def promote_hypothesis_to_eos(self, hypothesis_id: UUID, eos_engine: Any) -> bool:
+        """Promotes a validated hypothesis from Research OS into the EOSEngine."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis '{hypothesis_id}' not found.")
+        eos_engine.ingest_validated_research(hyp)
+        return True

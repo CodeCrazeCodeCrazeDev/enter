@@ -423,3 +423,143 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. Research Paper Principles Corpus Registry (500 Papers: IDs 1-500)
+# =====================================================================
+
+ALPHAALGO_500_PRINCIPLES: List[Dict[str, Any]] = []
+
+
+def register_500_paper_corpus_principles() -> List[Dict[str, Any]]:
+    """Registers and loads extracted transferable principles from the 500-paper corpus."""
+    global ALPHAALGO_500_PRINCIPLES
+    if ALPHAALGO_500_PRINCIPLES:
+        return ALPHAALGO_500_PRINCIPLES
+
+    principles: List[Dict[str, Any]] = []
+    yaml_paths = [
+        "docs/research/papers/AI_EOS_RESEARCH_DB.yaml",
+        "docs/research/papers/ALPHA_ALGO_100_NEW_RESEARCH.yaml",
+        "docs/research/papers/ALPHA_ALGO_200_NEW_RESEARCH.yaml"
+    ]
+
+    import yaml
+    for path in yaml_paths:
+        if os.path.exists(path):
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    db = yaml.safe_load(f)
+                for p in db.get("papers", []):
+                    meta = p.get("metadata", {})
+                    analysis = p.get("analysis", {})
+
+                    pid = p.get("id")
+                    title = meta.get("title", "")
+                    category = meta.get("domain", "")
+                    notes = analysis.get("implementation_notes", "")
+
+                    target = "ResearchOS"
+                    if "AEAN" in notes or category in ["Multi-Agent Coordination"]:
+                        target = "AEAN"
+                    elif "EOS" in notes or category in ["Entrepreneurial Systems"]:
+                        target = "EOS"
+                    elif "EIOS" in notes or category in ["Executive Intelligence", "Active Inference"]:
+                        target = "EIOS"
+
+                    principles.append({
+                        "paper_id": pid,
+                        "paper_title": title,
+                        "category": category,
+                        "target_subsystem": target,
+                        "extracted_principle": notes,
+                        "description": analysis.get("ai_eos_relevance", ""),
+                        "impl_module": f"apodex.{target.lower()}"
+                    })
+            except Exception as e:
+                logger.warning(f"Failed to load principles from {path}: {e}")
+
+    ALPHAALGO_500_PRINCIPLES = principles
+    logger.info(f"Registered {len(principles)} transferable principles across the 500-paper research corpus.")
+    return principles
+
+
+def register_200_paper_corpus_principles() -> List[Dict[str, Any]]:
+    """Alias for registering principles extracted from the 200 new papers / 500 total corpus."""
+    return register_500_paper_corpus_principles()
+
+
+# =====================================================================
+# 6. Research-to-System Cross-Layer State Handoff Bridge
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Coordinates cross-layer active inference state handoffs between:
+    - Layer 1 Research OS (hypothesis validation)
+    - Layer 2 EIOS Kernel & EOS Engine (sensing & capital decisions)
+    - Layer 3 AEAN HiveMind (multi-agent bidding & strategy execution)
+    - Layer 4 APODEX WorldModel (entity & belief updates)
+    """
+
+    def __init__(
+        self,
+        research_os: Any,
+        eios_kernel: Any,
+        eos_engine: Any,
+        hive_mind: Any,
+        world_model: Optional[Any] = None
+    ) -> None:
+        self.research_os = research_os
+        self.eios_kernel = eios_kernel
+        self.eos_engine = eos_engine
+        self.hive_mind = hive_mind
+        self.world_model = world_model
+
+    def execute_cross_layer_handoff(self, hypothesis_id: UUID) -> Dict[str, Any]:
+        """
+        Executes an end-to-end active inference state handoff for a hypothesis:
+        1. Validates/retrieves hypothesis from Research OS.
+        2. Registers active inference state in EIOS Kernel.
+        3. Ingests hypothesis into EOS Engine for capital allocation.
+        4. Submits research insight into AEAN HiveMind for agent token bidding.
+        5. Updates WorldModel beliefs if present.
+        """
+        hyp = self.research_os.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis '{hypothesis_id}' not found in Research OS ledger.")
+
+        # Step 1: Export to EIOS Kernel
+        self.research_os.export_validated_hypothesis_to_kernel(hypothesis_id, self.eios_kernel)
+
+        # Step 2: Promote to EOS Engine
+        self.research_os.promote_hypothesis_to_eos(hypothesis_id, self.eos_engine)
+
+        # Step 3: Register into AEAN HiveMind bidding registry
+        insight = {
+            "title": hyp.title,
+            "priority": 0.85,
+            "expected_value": getattr(hyp, "posterior_confidence", 0.9),
+            "token_cost": 15
+        }
+        bid = self.hive_mind.register_research_insight(insight)
+
+        # Step 4: Update WorldModel if present
+        world_updated = False
+        if self.world_model and hasattr(self.world_model, "register_pkc_trace"):
+            try:
+                self.world_model.register_pkc_trace({"hypothesis_id": str(hypothesis_id), "status": hyp.status})
+                world_updated = True
+            except Exception as e:
+                logger.warning(f"WorldModel update note: {e}")
+
+        logger.info(f"[Bridge] Successfully executed cross-layer state handoff for hypothesis '{hyp.title}' [id={hypothesis_id}]")
+        return {
+            "hypothesis_id": str(hypothesis_id),
+            "status": hyp.status,
+            "eios_registered": True,
+            "eos_promoted": True,
+            "hive_mind_bid_score": bid.score,
+            "world_model_updated": world_updated
+        }

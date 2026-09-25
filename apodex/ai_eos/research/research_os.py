@@ -223,3 +223,40 @@ class ResearchOS(IResearchOS):
 
         self.hypotheses.save(hyp.hypothesis_id, hyp)
         return exp
+
+    # ------------------------------------------------------------------
+    # Active Inference Cross-Layer Integration Handlers
+    # ------------------------------------------------------------------
+    def export_validated_hypothesis_to_kernel(self, hypothesis_id: UUID, kernel: Any) -> Any:
+        """
+        Exports a validated Layer 1 research hypothesis to Layer 2 EIOS Kernel as an Active Inference EFE sensing DAG.
+        """
+        from .integration import ResearchToSystemBridge
+
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis {hypothesis_id} does not exist.")
+
+        if hyp.status not in ["validated", "active", "proposed"]:
+            logger.warning(f"Exporting hypothesis {hypothesis_id} with non-validated status '{hyp.status}'.")
+
+        bridge = ResearchToSystemBridge()
+        return bridge.handoff_research_to_kernel(hyp, kernel)
+
+    def promote_hypothesis_to_eos(self, hypothesis_id: UUID, eos_engine: Any) -> Any:
+        """
+        Promotes a Layer 1 research hypothesis directly into Layer 2 EOS Engine active hypothesis state.
+        """
+        from .integration import ResearchToSystemBridge
+
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis {hypothesis_id} does not exist.")
+
+        bridge = ResearchToSystemBridge()
+        kernel_output = {
+            "hypothesis_id": str(hyp.hypothesis_id),
+            "title": hyp.title or hyp.statement,
+            "posterior_confidence": getattr(hyp, "posterior_confidence", 0.85)
+        }
+        return bridge.handoff_kernel_to_eos(kernel_output, eos_engine)

@@ -423,3 +423,137 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. Cross-Layer Active Inference System Bridge (ResearchToSystemBridge)
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Cross-Layer Active Inference System Bridge.
+    Orchestrates state handoffs and active inference cycles between:
+    - Layer 1: Research OS (ResearchHypothesis & Statistical Validation)
+    - Layer 2: EIOS Kernel (Active Inference Sensing DAGs) & EOS Engine (Opportunity Decisions)
+    - Layer 3: AEAN (HiveMind Token Bidding Execution)
+    - Layer 4: APODEX (WorldModel Causal Nodes & Bayesian Belief Priors)
+    """
+
+    def __init__(self) -> None:
+        self.handoff_history: List[Dict[str, Any]] = []
+
+    def handoff_research_to_kernel(self, hypothesis: Any, kernel: Any) -> Any:
+        """
+        Translates Layer 1 research hypothesis into a Layer 2 EIOS Kernel Active Inference EFE sensing DAG node.
+        """
+        from apodex.arcs.kernel.kernel import ExecutionNode, ExecutionDAG
+
+        hyp_title = getattr(hypothesis, "title", "Research Hypothesis")
+        hyp_id = str(getattr(hypothesis, "hypothesis_id", uuid4()))
+
+        sensing_node = ExecutionNode(
+            name=f"EFE_Sensing_{hyp_title[:30]}",
+            action_type="active_inference_sensing",
+            payload={
+                "hypothesis_id": hyp_id,
+                "title": hyp_title,
+                "epistemic_value": getattr(hypothesis, "prior_confidence", 0.5),
+                "layer_origin": "Layer 1 Research OS"
+            }
+        )
+
+        dag = ExecutionDAG()
+        dag.add_node(sensing_node)
+
+        # Register or update kernel active processes
+        kernel.active_processes[dag.id] = dag
+
+        record = {
+            "handoff_type": "Research_to_Kernel",
+            "hypothesis_id": hyp_id,
+            "dag_id": dag.id,
+            "timestamp": time_now()
+        }
+        self.handoff_history.append(record)
+        logger.info(f"Handoff Layer 1 -> Layer 2 Kernel successful: [Hypothesis: {hyp_id}] -> [DAG: {dag.id}]")
+        return dag
+
+    def handoff_kernel_to_eos(self, kernel_output: Dict[str, Any], eos_engine: Any) -> Any:
+        """
+        Converts Layer 2 sensed environmental state from EIOS Kernel into EOS Engine opportunity decisions.
+        """
+        from apodex.ai_eos.domain.models import Hypothesis as EOSHypothesis
+
+        hyp_id = kernel_output.get("hypothesis_id") or uuid4()
+        title = kernel_output.get("title", "Sensed Opportunity")
+
+        eos_hyp = EOSHypothesis(
+            hypothesis_id=UUID(str(hyp_id)) if isinstance(hyp_id, str) and len(str(hyp_id)) == 36 else uuid4(),
+            title=title,
+            statement=f"EOS Sensed opportunity from EIOS Kernel: {title}",
+            posterior_confidence=kernel_output.get("posterior_confidence", 0.85)
+        )
+
+        eos_engine.hypothesis_engine.add_hypothesis(eos_hyp)
+
+        record = {
+            "handoff_type": "Kernel_to_EOS",
+            "hypothesis_id": str(eos_hyp.hypothesis_id),
+            "timestamp": time_now()
+        }
+        self.handoff_history.append(record)
+        logger.info(f"Handoff Layer 2 Kernel -> Layer 2 EOS Engine successful: [Hypothesis: {eos_hyp.hypothesis_id}]")
+        return eos_hyp
+
+    def handoff_eos_to_hive_mind(self, opportunity: Any, hive_mind: Any) -> str:
+        """
+        Transforms Layer 2 EOS opportunities into Layer 3 AEAN HiveMind token bidding tasks.
+        """
+        op_title = getattr(opportunity, "title", getattr(opportunity, "name", "Opportunity Task"))
+        task_id = f"task_hive_{uuid4().hex[:8]}"
+
+        hive_mind.register_research_insight(
+            insight_id=task_id,
+            description=f"Execute strategic opportunity: {op_title}",
+            suggested_bid_tokens=100
+        )
+
+        record = {
+            "handoff_type": "EOS_to_HiveMind",
+            "task_id": task_id,
+            "opportunity_title": op_title,
+            "timestamp": time_now()
+        }
+        self.handoff_history.append(record)
+        logger.info(f"Handoff Layer 2 EOS -> Layer 3 AEAN HiveMind successful: [Task: {task_id}]")
+        return task_id
+
+    def handoff_hive_mind_to_world_model(self, agent_results: Dict[str, Any], world_model: Any) -> Any:
+        """
+        Translates Layer 3 agent execution outcomes into Layer 4 APODEX WorldModel causal node and Bayesian belief updates.
+        """
+        node_id = agent_results.get("node_id", f"causal_node_{uuid4().hex[:8]}")
+        label = agent_results.get("label", "Agent Execution Outcome")
+        domain = agent_results.get("domain", "system_execution")
+        value = agent_results.get("value", 1.0)
+
+        # Create or update causal node in WorldModel
+        causal_node = world_model.create_node(
+            label=label,
+            domain=domain,
+            value=value
+        )
+
+        # Record belief update if belief distribution is present
+        confidence = agent_results.get("confidence", 0.9)
+        world_model.update_belief(node_id=causal_node.node_id, new_confidence=confidence)
+
+        record = {
+            "handoff_type": "HiveMind_to_WorldModel",
+            "node_id": causal_node.node_id,
+            "label": label,
+            "timestamp": time_now()
+        }
+        self.handoff_history.append(record)
+        logger.info(f"Handoff Layer 3 AEAN HiveMind -> Layer 4 WorldModel successful: [Node: {causal_node.node_id}]")
+        return causal_node

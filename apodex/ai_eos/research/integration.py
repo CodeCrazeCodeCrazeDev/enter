@@ -423,3 +423,123 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. Cross-Layer System Bridge (Research OS <-> EIOS <-> EOS <-> AEAN <-> WorldModel)
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Cross-Layer Active Inference & Strategy Execution Bridge.
+    Orchestrates seamless state handoffs across Layer 1 Research OS,
+    Layer 2 EIOS Kernel & EOS Engine, Layer 3 AEAN HiveMind, and Layer 4 APODEX WorldModel.
+    """
+
+    def __init__(
+        self,
+        research_os: Any = None,
+        eios_kernel: Any = None,
+        eos_engine: Any = None,
+        hive_mind: Any = None,
+        world_model: Any = None
+    ) -> None:
+        self.research_os = research_os
+        self.eios_kernel = eios_kernel
+        self.eos_engine = eos_engine
+        self.hive_mind = hive_mind
+        self.world_model = world_model
+        self.handoff_history: List[Dict[str, Any]] = []
+
+    def handoff_validated_hypothesis(self, hypothesis_id: str) -> Dict[str, Any]:
+        """
+        Executes end-to-end state handoff of a validated research hypothesis
+        across EIOS Kernel, EOS Engine, AEAN HiveMind, and APODEX WorldModel.
+        """
+        record: Dict[str, Any] = {
+            "hypothesis_id": hypothesis_id,
+            "timestamp": time_now(),
+            "status": "initiated",
+            "layers_notified": []
+        }
+
+        hypothesis = None
+        if self.research_os and hasattr(self.research_os, "hypotheses"):
+            if hasattr(self.research_os.hypotheses, "get"):
+                hypothesis = self.research_os.hypotheses.get(hypothesis_id)
+                if hypothesis is None and isinstance(hypothesis_id, str):
+                    try:
+                        from uuid import UUID
+                        hypothesis = self.research_os.hypotheses.get(UUID(hypothesis_id))
+                    except Exception:
+                        pass
+
+        # 1. EIOS Kernel Integration
+        if self.eios_kernel:
+            try:
+                if hasattr(self.eios_kernel, "register_research_hypothesis"):
+                    self.eios_kernel.register_research_hypothesis(
+                        hypothesis_id=hypothesis_id,
+                        description=hypothesis.statement if hypothesis else f"Hypothesis {hypothesis_id}",
+                        efe_score=0.85
+                    )
+                record["layers_notified"].append("EIOS_Kernel")
+            except Exception as e:
+                logger.warning(f"Bridge error notifying EIOS Kernel: {e}")
+
+        # 2. EOS Engine Ingestion
+        if self.eos_engine:
+            try:
+                if hasattr(self.eos_engine, "ingest_validated_research"):
+                    hypo_data = hypothesis.__dict__ if hypothesis and hasattr(hypothesis, "__dict__") else {"id": hypothesis_id}
+                    self.eos_engine.ingest_validated_research(hypo_data)
+                elif hasattr(self.eos_engine, "hypothesis_engine") and hasattr(self.eos_engine.hypothesis_engine, "add_hypothesis"):
+                    if hypothesis:
+                        self.eos_engine.hypothesis_engine.add_hypothesis(hypothesis)
+                record["layers_notified"].append("EOS_Engine")
+            except Exception as e:
+                logger.warning(f"Bridge error notifying EOS Engine: {e}")
+
+        # 3. AEAN HiveMind Integration
+        if self.hive_mind:
+            try:
+                if hasattr(self.hive_mind, "register_research_insight"):
+                    self.hive_mind.register_research_insight(
+                        insight_id=hypothesis_id,
+                        content=hypothesis.statement if hypothesis else f"Hypothesis {hypothesis_id}",
+                        relevance_weight=0.9
+                    )
+                record["layers_notified"].append("AEAN_HiveMind")
+            except Exception as e:
+                logger.warning(f"Bridge error notifying AEAN HiveMind: {e}")
+
+        # 4. APODEX WorldModel Node Creation / Belief Update
+        if self.world_model:
+            try:
+                if hasattr(self.world_model, "create_node"):
+                    self.world_model.create_node(
+                        node_id=f"node_{hypothesis_id}",
+                        label=f"Hypothesis Node {hypothesis_id}",
+                        node_type="research_hypothesis"
+                    )
+                elif hasattr(self.world_model, "nodes"):
+                    self.world_model.nodes[f"node_{hypothesis_id}"] = {
+                        "label": f"Hypothesis Node {hypothesis_id}",
+                        "type": "research_hypothesis"
+                    }
+
+                if hasattr(self.world_model, "update_belief"):
+                    self.world_model.update_belief(
+                        key=f"belief_{hypothesis_id}",
+                        probability=hypothesis.p_value if (hypothesis and hasattr(hypothesis, "p_value")) else 0.95
+                    )
+                elif hasattr(self.world_model, "beliefs"):
+                    self.world_model.beliefs[f"belief_{hypothesis_id}"] = 0.95
+
+                record["layers_notified"].append("APODEX_WorldModel")
+            except Exception as e:
+                logger.warning(f"Bridge error updating APODEX WorldModel: {e}")
+
+        record["status"] = "completed"
+        self.handoff_history.append(record)
+        return record

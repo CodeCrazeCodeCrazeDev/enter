@@ -16,6 +16,7 @@ from ..domain.models import Hypothesis, Experiment, ExecutionStatus
 from ..interfaces.services import IResearchOS
 from ..infrastructure.identity import DeterministicIdentityGenerator
 from ..infrastructure.persistence import InMemoryLedger
+from .integration import ALPHAALGO_200_PRINCIPLES
 
 logger = logging.getLogger("sero.ros")
 
@@ -114,13 +115,28 @@ class ResearchOS(IResearchOS):
     # Autonomous Science Engine
     # ------------------------------------------------------------------
     def conduct_literature_review(self, domain: str) -> Dict[str, Any]:
-        """Automated literature synthesis and citation mapping over active scientific namespaces."""
+        """Automated literature synthesis and citation mapping over active scientific namespaces, including 200-paper corpus principles."""
         logger.info(f"Autonomous Science Engine conducting literature synthesis for domain: {domain}")
+
+        # Query extracted principles matching domain or target subsystem
+        matched_principles = [
+            p for p in ALPHAALGO_200_PRINCIPLES
+            if domain.lower() in p["category"].lower() or domain.lower() in p["target_subsystem"].lower() or domain == "all"
+        ]
+
+        synthesized_trends = [
+            "Deep Reinforcement learning with GRPO",
+            "Active Inference with Expected Free Energy approximation",
+            "Sycophancy-Resilient Token Bidding & Adversarial Deliberation Networks",
+            "Non-Gaussian Hawkes Self-Exciting Order Flow & Inventory Risk Bounds"
+        ]
+
         return {
             "domain": domain,
-            "reviewed_citations_count": 14,
-            "synthesized_trends": ["Deep Reinforcement learning with GRPO", "Active Inference with Expected Free Energy approximation"],
-            "whitespace_found": "Expected Free Energy implementation under lightweight micro-VM environments."
+            "reviewed_citations_count": 14 + len(ALPHAALGO_200_PRINCIPLES),
+            "synthesized_trends": synthesized_trends,
+            "matched_principles": matched_principles,
+            "whitespace_found": "Expected Free Energy implementation under lightweight micro-VM environments with island MAP-Elites mutation."
         }
 
     def design_experiment(self, hypothesis_id: UUID) -> Dict[str, Any]:
@@ -174,7 +190,7 @@ class ResearchOS(IResearchOS):
         # Deterministic simulation based on seed and ground truth yield
         rng = random.Random(exp.seed)
 
-        # Simulate a set of returns/outcomes (e.g. 100 walk-forward iterations)
+        # Simulate a set of returns/outcomes (e.g. 120 walk-forward iterations)
         sample_size = 120
         sim_outcomes = [ground_truth_yield + rng.normalvariate(0.0, 1.5) for _ in range(sample_size)]
 

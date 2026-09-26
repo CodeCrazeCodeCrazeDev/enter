@@ -41,6 +41,13 @@ class Grant:
 class HiveMind:
     token_budget: int = 100
     granted_history: List[Grant] = field(default_factory=list)
+    registered_insights: Dict[str, Dict] = field(default_factory=dict)
+
+    def register_research_insight(self, hypothesis: Dict) -> None:
+        """Registers a research insight from Layer 1 Research OS for swarm token bidding."""
+        hyp_id = str(hypothesis.get("id") or hypothesis.get("hypothesis_id") or "hyp_insight")
+        self.registered_insights[hyp_id] = hypothesis
+        logger.info(f"Registered research insight in HiveMind: {hypothesis.get('title', hyp_id)}")
 
     def arbitrate(self, bids: List[TaskBid]) -> List[Grant]:
         """Allocate tokens to the highest-scoring bids within budget."""

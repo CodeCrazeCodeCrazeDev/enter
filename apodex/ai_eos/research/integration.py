@@ -423,3 +423,74 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. ResearchToSystemBridge (Cross-Layer Active Inference Gateway)
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Bridge orchestrating active inference state handoffs across Layer 1 (Research OS),
+    Layer 2 (EIOS Kernel & EOS Engine), Layer 3 (AEAN HiveMind), and Layer 4 (APODEX WorldModel).
+    """
+
+    def __init__(
+        self,
+        ros: Any = None,
+        kernel: Any = None,
+        eos: Any = None,
+        hive_mind: Any = None,
+        world_model: Any = None
+    ) -> None:
+        self.ros = ros
+        self.kernel = kernel
+        self.eos = eos
+        self.hive_mind = hive_mind
+        self.world_model = world_model
+
+    def process_validated_hypothesis(self, hypothesis: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Processes a validated research hypothesis across all 4 system layers.
+        """
+        hyp_id = hypothesis.get("id") or hypothesis.get("hypothesis_id") or str(uuid4())
+        title = hypothesis.get("title", "Untitled Hypothesis")
+
+        # Layer 2 Ingestion: EOSEngine & EIOSKernel
+        if self.eos and hasattr(self.eos, "ingest_validated_research"):
+            self.eos.ingest_validated_research(hypothesis)
+
+        active_dag = []
+        if self.kernel:
+            if hasattr(self.kernel, "register_research_hypothesis"):
+                self.kernel.register_research_hypothesis(hypothesis)
+            if hasattr(self.kernel, "compile_active_inference_dag"):
+                active_dag = self.kernel.compile_active_inference_dag(hyp_id)
+
+        # Layer 3 Ingestion: HiveMind
+        token_registered = False
+        if self.hive_mind and hasattr(self.hive_mind, "register_research_insight"):
+            self.hive_mind.register_research_insight(hypothesis)
+            token_registered = True
+
+        # Layer 4 Ingestion: WorldModel
+        if self.world_model:
+            node_id = f"node_hyp_{hyp_id}"
+            if hasattr(self.world_model, "create_node"):
+                self.world_model.create_node(
+                    node_id=node_id,
+                    name=title,
+                    description=hypothesis.get("description", "")
+                )
+            if hasattr(self.world_model, "update_belief"):
+                conf = hypothesis.get("statistical_confidence", 0.95)
+                self.world_model.update_belief(node_id=node_id, observed_outcome=True, confidence=conf)
+
+        return {
+            "status": "HANDOFF_SUCCESS",
+            "hypothesis_id": hyp_id,
+            "target_subsystem": hypothesis.get("target_subsystem", "ALL"),
+            "active_inference_dag": active_dag,
+            "token_bid_registered": token_registered,
+            "timestamp": time_now()
+        }

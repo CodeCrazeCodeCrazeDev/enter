@@ -36,6 +36,29 @@ class WorldModel(DirectedGraph[CausalNode, RelationEdge]):
     def _make_placeholder_node(self, node_id: str) -> CausalNode:
         return CausalNode(node_id=node_id, node_type="unknown")
 
+    def create_node(self, node_id: str, name: str, description: str = "") -> CausalNode:
+        """Creates and registers a causal node in the World Model."""
+        node = CausalNode(node_id=node_id, node_type="hypothesis_node", properties={"name": name, "description": description})
+        self.add_node(node)
+        return node
+
+    def update_belief(self, node_id: str, observed_outcome: bool, confidence: float = 0.95) -> Dict[str, Any]:
+        """Updates recursive Bayesian belief for a node."""
+        belief_entry = self.beliefs.get(node_id, {"p_prior": 0.5, "updates_count": 0})
+        prior = belief_entry["p_prior"]
+
+        # Conjugate update: likelihood given observation
+        likelihood = confidence if observed_outcome else (1.0 - confidence)
+        posterior = (likelihood * prior) / max(1e-5, (likelihood * prior + (1.0 - likelihood) * (1.0 - prior)))
+
+        updated_entry = {
+            "p_prior": posterior,
+            "updates_count": belief_entry["updates_count"] + 1,
+            "last_outcome": observed_outcome
+        }
+        self.beliefs[node_id] = updated_entry
+        return updated_entry
+
     def register_pkc_trace(self, trace: PerceptionKnowledgeChain) -> None:
         """Register a search or reasoning trace with the World Model."""
         self.pkc_traces[str(trace.trace_id)] = trace

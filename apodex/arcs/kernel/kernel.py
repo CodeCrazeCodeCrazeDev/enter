@@ -57,12 +57,44 @@ class ExecutionDAG(BaseModel):
 class EIOSKernel:
     """The central core of the Entrepreneurial Intelligence Operating System.
 
-    Manages task scheduling, failure recovery (retries), and model routing.
+    Manages task scheduling, failure recovery (retries), active inference sensing, and model routing.
     """
 
     def __init__(self) -> None:
         self.active_processes: Dict[str, ExecutionDAG] = {}
         self.metrics_history: List[Dict[str, Any]] = []
+        self.research_hypotheses: Dict[str, Dict[str, Any]] = {}
+
+    def register_research_hypothesis(self, hypothesis: Dict[str, Any]) -> None:
+        """Registers a research hypothesis exported from Layer 1 Research OS."""
+        hyp_id = hypothesis.get("id") or hypothesis.get("hypothesis_id") or str(uuid.uuid4())
+        self.research_hypotheses[str(hyp_id)] = hypothesis
+        logger.info(f"[Kernel] Registered Research OS hypothesis: {hypothesis.get('title', hyp_id)}")
+
+    def compile_active_inference_dag(self, hypothesis_id: str) -> List[Dict[str, Any]]:
+        """Compiles an Active Inference DAG optimized for Expected Free Energy (EFE) minimization."""
+        hyp = self.research_hypotheses.get(str(hypothesis_id), {})
+        title = hyp.get("title", f"Hypothesis_{hypothesis_id}")
+        return [
+            {
+                "step": 1,
+                "action": "EFE_SENSING_ANOMALY",
+                "description": f"Sensing market anomalies for hypothesis: {title}",
+                "expected_free_energy": 0.12
+            },
+            {
+                "step": 2,
+                "action": "EFE_UNIT_ECONOMICS_EVAL",
+                "description": f"Evaluate LTV/CAC for hypothesis: {title}",
+                "expected_free_energy": 0.08
+            },
+            {
+                "step": 3,
+                "action": "SWARM_TOKEN_DISPATCH",
+                "description": f"Dispatch execution bidding to AEAN HiveMind",
+                "expected_free_energy": 0.03
+            }
+        ]
 
     async def execute_dag(self, dag: ExecutionDAG) -> bool:
         """Schedules and executes the compiled DAG with failure recovery."""

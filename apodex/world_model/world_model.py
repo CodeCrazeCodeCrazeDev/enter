@@ -39,3 +39,29 @@ class WorldModel(DirectedGraph[CausalNode, RelationEdge]):
     def register_pkc_trace(self, trace: PerceptionKnowledgeChain) -> None:
         """Register a search or reasoning trace with the World Model."""
         self.pkc_traces[str(trace.trace_id)] = trace
+
+    def create_node(
+        self, name: str, node_type: str = "GENERIC", metadata: Optional[Dict[str, Any]] = None
+    ) -> CausalNode:
+        """Creates and adds a new CausalNode into the World Model graph."""
+        import uuid
+        node_id = f"node_{uuid.uuid4().hex[:8]}"
+        node = CausalNode(
+            node_id=node_id,
+            node_type=node_type,
+            properties={"name": name, **(metadata or {})}
+        )
+        self.add_node(node)
+        return node
+
+    def update_belief(
+        self, topic: str, confidence: float, evidence: Optional[Dict[str, Any]] = None
+    ) -> None:
+        """Updates a Bayesian belief state within the World Model."""
+        import datetime
+        self.beliefs[topic] = {
+            "topic": topic,
+            "confidence": confidence,
+            "evidence": evidence or {},
+            "updated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        }

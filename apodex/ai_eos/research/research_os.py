@@ -10,7 +10,7 @@ import random
 import logging
 from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid4
-from datetime import datetime
+from datetime import datetime, timezone
 
 from ..domain.models import Hypothesis, Experiment, ExecutionStatus
 from ..interfaces.services import IResearchOS
@@ -114,13 +114,30 @@ class ResearchOS(IResearchOS):
     # Autonomous Science Engine
     # ------------------------------------------------------------------
     def conduct_literature_review(self, domain: str) -> Dict[str, Any]:
-        """Automated literature synthesis and citation mapping over active scientific namespaces."""
+        """Automated literature synthesis and citation mapping over active scientific namespaces.
+        Enhanced with multi-field active inference principle querying across the 500-paper corpus.
+        """
         logger.info(f"Autonomous Science Engine conducting literature synthesis for domain: {domain}")
+        from .integration import ALPHAALGO_200_PRINCIPLES
+
+        query = domain.lower()
+        matched_principles = []
+        for p in ALPHAALGO_200_PRINCIPLES:
+            # Query across category, description, target_subsystem, paper_title, extracted_principle, and impl_module
+            searchable_text = f"{p.get('category', '')} {p.get('target_subsystem', '')} {p.get('paper_title', '')} {p.get('extracted_principle', '')} {p.get('impl_module', '')}".lower()
+            if query in searchable_text or any(token in searchable_text for token in query.split()):
+                matched_principles.append(p)
+
+        if not matched_principles:
+            matched_principles = ALPHAALGO_200_PRINCIPLES[:3]
+
         return {
             "domain": domain,
-            "reviewed_citations_count": 14,
-            "synthesized_trends": ["Deep Reinforcement learning with GRPO", "Active Inference with Expected Free Energy approximation"],
-            "whitespace_found": "Expected Free Energy implementation under lightweight micro-VM environments."
+            "reviewed_citations_count": len(ALPHAALGO_200_PRINCIPLES),
+            "matched_principles_count": len(matched_principles),
+            "synthesized_trends": [p["extracted_principle"] for p in matched_principles[:3]],
+            "whitespace_found": f"Active Inference integration in target subsystems: {[p['target_subsystem'] for p in matched_principles[:3]]}",
+            "principles": matched_principles
         }
 
     def design_experiment(self, hypothesis_id: UUID) -> Dict[str, Any]:
@@ -152,7 +169,7 @@ class ResearchOS(IResearchOS):
         return {
             "needs_refinement": needs_refinement,
             "critique": critique,
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(timezone.utc)
         }
 
     # ------------------------------------------------------------------

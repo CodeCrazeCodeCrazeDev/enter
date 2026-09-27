@@ -1,4 +1,5 @@
 from __future__ import annotations
+import datetime
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
@@ -32,6 +33,44 @@ class WorldModel(DirectedGraph[CausalNode, RelationEdge]):
         self.beliefs: Dict[str, Dict[str, Any]] = {}
         # Support for Perception-Knowledge Chain (PKC) trace logging
         self.pkc_traces: Dict[str, PerceptionKnowledgeChain] = {}
+
+    def create_node(self, node_id: str, name: str, domain: str = "default") -> CausalNode:
+        """Helper to create and add a CausalNode into the WorldModel graph."""
+        node = CausalNode(
+            node_id=node_id,
+            node_type="causal_node",
+            properties={"name": name, "domain": domain},
+        )
+        self.add_node(node)
+        self.beliefs[node_id] = {
+            "prior": 0.5,
+            "posterior": 0.5,
+            "last_updated": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        }
+        return node
+
+    def update_belief(
+        self,
+        node_id: str,
+        evidence_score: float,
+        observation_notes: str = "",
+    ) -> Dict[str, Any]:
+        """Update Bayesian belief posterior for a given node_id."""
+        belief = self.beliefs.get(node_id, {"prior": 0.5, "posterior": 0.5})
+        prior = belief["posterior"]
+        # Bayesian update formula: posterior = (prior * likelihood) / norm
+        likelihood = max(0.01, min(0.99, evidence_score))
+        posterior = (prior * likelihood) / ((prior * likelihood) + ((1.0 - prior) * (1.0 - likelihood)))
+
+        updated_belief = {
+            "node_id": node_id,
+            "prior": prior,
+            "posterior": posterior,
+            "observation_notes": observation_notes,
+            "last_updated": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        }
+        self.beliefs[node_id] = updated_belief
+        return updated_belief
 
     def _make_placeholder_node(self, node_id: str) -> CausalNode:
         return CausalNode(node_id=node_id, node_type="unknown")

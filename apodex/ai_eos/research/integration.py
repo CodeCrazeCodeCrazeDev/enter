@@ -13,6 +13,7 @@ import ast
 import tempfile
 import sys
 import os
+import datetime
 from typing import Any, Dict, List, Optional, Tuple, Set
 from uuid import UUID, uuid4
 from pydantic import BaseModel, Field
@@ -420,6 +421,96 @@ class LearnableRoutingGateDispatcher:
         logger.info(f"Updated routing metrics for agent '{agent_id}': SuccessRate={agent.historical_success_rate:.4f}, Curiosity={agent.epistemic_curiosity:.4f}")
 
 
+# =====================================================================
+# 5. Cross-Layer Research-to-System Active Inference Bridge
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Bridge coordinating active inference state handoffs between:
+    - Layer 1: Research OS
+    - Layer 2: EIOS Kernel & EOS Engine
+    - Layer 3: AEAN HiveMind
+    - Layer 4: APODEX WorldModel
+    """
+
+    def __init__(
+        self,
+        research_os: Any,
+        eios_kernel: Any,
+        eos_engine: Any,
+        hive_mind: Any,
+        world_model: Any,
+    ) -> None:
+        self.research_os = research_os
+        self.eios_kernel = eios_kernel
+        self.eos_engine = eos_engine
+        self.hive_mind = hive_mind
+        self.world_model = world_model
+
+    def handoff_hypothesis_to_execution(self, hypothesis_id: Any) -> Dict[str, Any]:
+        """
+        Executes explicit handoff of a validated research hypothesis into
+        EIOS Active Inference sensing and EOS engine state.
+        """
+        if hasattr(self.research_os, "hypotheses") and hasattr(self.research_os.hypotheses, "get"):
+            hypothesis = self.research_os.hypotheses.get(hypothesis_id)
+        elif hasattr(self.research_os, "get_hypothesis"):
+            hypothesis = self.research_os.get_hypothesis(hypothesis_id)
+        else:
+            hypothesis = None
+
+        if not hypothesis:
+            raise ValueError(f"Hypothesis {hypothesis_id} not found in ResearchOS registry.")
+
+        # Register with EIOS Kernel for active inference sensing
+        kernel_registered = False
+        if hasattr(self.eios_kernel, "register_research_hypothesis"):
+            self.eios_kernel.register_research_hypothesis(hypothesis)
+            kernel_registered = True
+
+        # Ingest into EOS Engine
+        eos_ingested = False
+        if hasattr(self.eos_engine, "ingest_validated_research"):
+            self.eos_engine.ingest_validated_research(hypothesis)
+            eos_ingested = True
+
+        return {
+            "hypothesis_id": str(hypothesis_id),
+            "kernel_registered": kernel_registered,
+            "eos_ingested": eos_ingested,
+            "timestamp": time_now(),
+        }
+
+    def get_unified_system_state(self) -> Dict[str, Any]:
+        """Returns consolidated snapshot of active state across all 4 system layers."""
+        l1_count = 0
+        if hasattr(self.research_os, "hypotheses"):
+            if hasattr(self.research_os.hypotheses, "list_all"):
+                l1_count = len(self.research_os.hypotheses.list_all())
+            elif isinstance(self.research_os.hypotheses, (dict, list)):
+                l1_count = len(self.research_os.hypotheses)
+
+        l2_count = 0
+        if hasattr(self.eios_kernel, "active_hypotheses"):
+            l2_count = len(self.eios_kernel.active_hypotheses)
+
+        l3_count = 0
+        if hasattr(self.hive_mind, "pending_tasks"):
+            l3_count = len(self.hive_mind.pending_tasks)
+
+        l4_count = 0
+        if hasattr(self.world_model, "nodes"):
+            l4_count = len(self.world_model.nodes)
+
+        return {
+            "layer1_active_hypotheses_count": l1_count,
+            "layer2_kernel_hypotheses_count": l2_count,
+            "layer3_hive_mind_pending_tasks_count": l3_count,
+            "layer4_world_model_nodes_count": l4_count,
+            "snapshot_timestamp": time_now(),
+        }
+
+
 def time_now() -> str:
-    import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()

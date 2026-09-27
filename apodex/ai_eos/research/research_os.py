@@ -223,3 +223,23 @@ class ResearchOS(IResearchOS):
 
         self.hypotheses.save(hyp.hypothesis_id, hyp)
         return exp
+
+    def export_validated_hypothesis_to_kernel(self, hypothesis_id: UUID, eios_kernel: Any) -> bool:
+        """Exports a validated hypothesis from Research OS to EIOS Kernel."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp or hyp.status not in ("validated", "active", "registered"):
+            return False
+        if hasattr(eios_kernel, "register_research_hypothesis"):
+            eios_kernel.register_research_hypothesis(hyp)
+            return True
+        return False
+
+    def promote_hypothesis_to_eos(self, hypothesis_id: UUID, eos_engine: Any) -> bool:
+        """Promotes a hypothesis from Research OS directly into EOS Engine."""
+        hyp = self.hypotheses.get(hypothesis_id)
+        if not hyp:
+            return False
+        if hasattr(eos_engine, "ingest_validated_research"):
+            eos_engine.ingest_validated_research(hyp)
+            return True
+        return False

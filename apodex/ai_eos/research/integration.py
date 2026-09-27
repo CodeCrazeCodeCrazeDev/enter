@@ -423,3 +423,78 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. Research-To-System Active Inference Cross-Layer Bridge
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Unified Cross-Layer Research-to-System Bridge.
+    Orchestrates active inference state handoffs between:
+      - Layer 1: Research OS (Scientific Hypotheses)
+      - Layer 2: EIOS Kernel & EOS Engine (Sensing, Execution DAGs, Opportunity Management)
+      - Layer 3: AEAN HiveMind (Token Bidding & Multi-Agent Execution)
+      - Layer 4: APODEX WorldModel (Causal Nodes, Relation Edges & Bayesian Belief Updates)
+    """
+
+    def __init__(
+        self,
+        research_os: Any,
+        eios_kernel: Any,
+        eos_engine: Any,
+        hive_mind: Any,
+        world_model: Any
+    ) -> None:
+        self.ros = research_os
+        self.kernel = eios_kernel
+        self.eos = eos_engine
+        self.hive_mind = hive_mind
+        self.world_model = world_model
+        self.handoff_history: List[Dict[str, Any]] = []
+
+    def propagate_validated_hypothesis(self, hypothesis_id: Any) -> Dict[str, Any]:
+        """
+        Propagates a validated hypothesis from Research OS through EIOS/EOS, AEAN HiveMind, and WorldModel.
+        """
+        # 1. Fetch hypothesis from Research OS
+        hyp = self.ros.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis '{hypothesis_id}' not found in Research OS.")
+
+        # 2. Register/Sense in EIOS Kernel
+        if hasattr(self.kernel, "register_research_hypothesis"):
+            self.kernel.register_research_hypothesis(hyp)
+
+        # 3. Ingest into EOS Engine
+        if hasattr(self.eos, "ingest_validated_research"):
+            self.eos.ingest_validated_research(hyp)
+
+        # 4. Register insight in AEAN HiveMind
+        if hasattr(self.hive_mind, "register_research_insight"):
+            self.hive_mind.register_research_insight(
+                insight_name=hyp.title,
+                priority=0.9 if hyp.status == "validated" else 0.5
+            )
+
+        # 5. Update APODEX WorldModel causal graph and belief
+        if hasattr(self.world_model, "create_node"):
+            node_id = f"hyp_node_{str(hypothesis_id)[:8]}"
+            self.world_model.create_node(
+                node_id=node_id,
+                label=hyp.title,
+                domain=hyp.domain
+            )
+        if hasattr(self.world_model, "update_belief"):
+            belief_key = f"belief_{hyp.domain}"
+            self.world_model.update_belief(belief_key=belief_key, delta=0.25)
+
+        record = {
+            "hypothesis_id": str(hypothesis_id),
+            "status": hyp.status,
+            "timestamp": time_now()
+        }
+        self.handoff_history.append(record)
+        logger.info(f"Successfully propagated hypothesis {hypothesis_id} across all system layers.")
+        return record

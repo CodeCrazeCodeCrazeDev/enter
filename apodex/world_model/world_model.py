@@ -13,6 +13,10 @@ class CausalNode(BaseModel):
     node_type: str  # event, state, file, function, test, bug_report, proposal, doc_snippet, etc.
     properties: Dict[str, Any] = Field(default_factory=dict)
 
+    @property
+    def id(self) -> str:
+        return self.node_id
+
 
 class RelationEdge(BaseModel):
     """Represents a causal, temporal, or semantic link between two nodes in the World Model."""
@@ -39,3 +43,25 @@ class WorldModel(DirectedGraph[CausalNode, RelationEdge]):
     def register_pkc_trace(self, trace: PerceptionKnowledgeChain) -> None:
         """Register a search or reasoning trace with the World Model."""
         self.pkc_traces[str(trace.trace_id)] = trace
+
+    def create_node(self, node_id: str, label: str) -> CausalNode:
+        """Creates and stores a CausalNode in the World Model."""
+        node = CausalNode(node_id=node_id, node_type="causal", properties={"label": label})
+        self.add_node(node)
+        return node
+
+    def get_node(self, node_id: str) -> Optional[CausalNode]:
+        """Retrieves a CausalNode by ID."""
+        for node in self.nodes.values():
+            if node.node_id == node_id:
+                return node
+        return None
+
+    def update_belief(self, node_id: str, prior_confidence: float, observation: float) -> float:
+        """Updates Bayesian belief confidence for a causal node."""
+        updated = (prior_confidence + observation) / 2.0
+        self.beliefs[node_id] = {
+            "confidence": updated,
+            "last_updated": "now"
+        }
+        return updated

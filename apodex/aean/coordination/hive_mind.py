@@ -41,6 +41,25 @@ class Grant:
 class HiveMind:
     token_budget: int = 100
     granted_history: List[Grant] = field(default_factory=list)
+    registered_agents: Dict[str, Dict[str, Any]] = field(default_factory=dict)
+    pending_tasks: List[Dict[str, Any]] = field(default_factory=list)
+
+    def register_agent(self, agent_id: str, specialization: str, token_balance: float = 100.0) -> None:
+        """Registers a specialized agent in the HiveMind ecosystem."""
+        self.registered_agents[agent_id] = {
+            "specialization": specialization,
+            "token_balance": token_balance
+        }
+        logger.info(f"[HiveMind] Registered agent: {agent_id} ({specialization})")
+
+    def register_task(self, task_id: str, task_type: str, payload: Dict[str, Any]) -> None:
+        """Registers a task node in the HiveMind pending queue."""
+        self.pending_tasks.append({
+            "id": task_id,
+            "type": task_type,
+            "payload": payload
+        })
+        logger.info(f"[HiveMind] Registered pending task node: {task_id}")
 
     def arbitrate(self, bids: List[TaskBid]) -> List[Grant]:
         """Allocate tokens to the highest-scoring bids within budget."""

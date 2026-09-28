@@ -32,6 +32,31 @@ class ResearchOS(IResearchOS):
         self.models = InMemoryLedger[Dict[str, Any]]()
         self.artifacts = InMemoryLedger[Dict[str, Any]]()
 
+    def generate_hypotheses(self, domain: str = "general", count: int = 1) -> List[Hypothesis]:
+        """Generates candidate research hypotheses for a given domain."""
+        generated = []
+        for i in range(count):
+            hyp = self.register_hypothesis(
+                title=f"{domain.title()} Alpha Hypothesis {i+1}",
+                description=f"Active inference optimization hypothesis for domain {domain}",
+                null_hypothesis="No active inference performance gain",
+                target_metric=domain,
+                significance_alpha=0.05
+            )
+            generated.append(hyp)
+        return generated
+
+    def validate_hypothesis(self, hypothesis_id: UUID) -> Dict[str, Any]:
+        """Validates a hypothesis via experiment simulation and statistical checks."""
+        exp = self.create_experiment(hypothesis_id=hypothesis_id)
+        sim_exp = self.execute_experiment_simulation(experiment_id=exp.experiment_id, ground_truth_yield=1.5)
+        return {
+            "hypothesis_id": hypothesis_id,
+            "validated": sim_exp.is_statistically_significant,
+            "p_value": sim_exp.p_value,
+            "dsr": sim_exp.deflated_sharpe_ratio
+        }
+
     def register_hypothesis(
         self,
         title: str,

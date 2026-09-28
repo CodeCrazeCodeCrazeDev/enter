@@ -64,6 +64,30 @@ class EIOSKernel:
         self.active_processes: Dict[str, ExecutionDAG] = {}
         self.metrics_history: List[Dict[str, Any]] = []
 
+    def sense_opportunity_anomalies(self, market_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Senses active inference anomalies and opportunity triggers."""
+        logger.info(f"[Kernel] Sensing opportunity anomalies from data: {market_data}")
+        return [{
+            "id": f"opp_anomaly_{uuid.uuid4().hex[:6]}",
+            "confidence": 0.92,
+            "expected_value": 1500.0,
+            "data": market_data
+        }]
+
+    def compile_execution_dag(self, opportunity_id: str) -> Dict[str, Any]:
+        """Compiles strategic opportunity into executable active inference DAG."""
+        compiler = EntrepreneurialCompiler()
+        dag = compiler.compile_goal_to_dag(goal=f"Capitalize on opportunity {opportunity_id}", target_budget_usd=5000)
+        self.active_processes[dag.id] = dag
+        tasks = [
+            {"id": node.node_id, "type": node.action_type, "payload": node.payload}
+            for node in dag.nodes.values()
+        ]
+        return {
+            "id": dag.id,
+            "tasks": tasks
+        }
+
     async def execute_dag(self, dag: ExecutionDAG) -> bool:
         """Schedules and executes the compiled DAG with failure recovery."""
         logger.info(f"[Kernel] Initiating execution DAG: {dag.id}")

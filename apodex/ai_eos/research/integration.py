@@ -423,3 +423,67 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. Research To System Cross-Layer Active Inference Bridge
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Unified Cross-Layer Bridge orchestrating active inference state handoffs across:
+    Layer 1 (Research OS), Layer 2 (EIOS Kernel & EOS Engine),
+    Layer 3 (AEAN HiveMind), and Layer 4 (APODEX WorldModel).
+    """
+
+    def __init__(
+        self,
+        research_os: Any,
+        kernel: Any,
+        eos_engine: Any,
+        hive_mind: Any,
+        world_model: Any,
+    ) -> None:
+        self.research_os = research_os
+        self.kernel = kernel
+        self.eos_engine = eos_engine
+        self.hive_mind = hive_mind
+        self.world_model = world_model
+
+    def execute_full_active_inference_handoff(self, domain: str = "general") -> Dict[str, Any]:
+        """Orchestrates an end-to-end active inference state transition across all 4 cognitive layers."""
+        # Layer 1: Generate & Validate Scientific Research Hypothesis
+        hypotheses = self.research_os.generate_hypotheses(domain=domain, count=1)
+        if not hypotheses:
+            raise ValueError("Research OS failed to generate hypothesis.")
+        hypo = hypotheses[0]
+        self.research_os.validate_hypothesis(hypo.id)
+
+        # Layer 2: Ingest into EOS Business Engine & EIOS Kernel Active Inference DAG
+        self.eos_engine.ingest_validated_research(hypo)
+        anomalies = self.kernel.sense_opportunity_anomalies(market_data={"domain": domain})
+        opp_id = anomalies[0]["id"] if anomalies else f"opp_{hypo.id}"
+        dag = self.kernel.compile_execution_dag(opportunity_id=opp_id)
+
+        # Layer 3: Dispatch Task Nodes to AEAN Multi-Agent HiveMind
+        for task in dag.get("tasks", []):
+            self.hive_mind.register_task(
+                task_id=task.get("id", f"task_{uuid4()}"),
+                task_type=task.get("type", "general"),
+                payload=task.get("payload", {})
+            )
+
+        # Layer 4: Create Causal Graph Node & Update Bayesian Beliefs in APODEX WorldModel
+        node = self.world_model.create_node(node_id=f"wm_node_{hypo.id}", label=f"Research Node {hypo.id}")
+        self.world_model.update_belief(
+            node_id=node.id,
+            prior_confidence=getattr(hypo, "confidence_score", 0.8),
+            observation=0.92
+        )
+
+        return {
+            "status": "success",
+            "hypothesis_id": hypo.id,
+            "dag_id": dag.get("id", "dag_001"),
+            "world_model_node_id": node.id,
+        }

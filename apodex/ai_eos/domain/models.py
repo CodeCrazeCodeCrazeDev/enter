@@ -138,6 +138,10 @@ class Hypothesis(BaseModel):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     last_updated: datetime = Field(default_factory=datetime.utcnow)
 
+    @property
+    def id(self) -> UUID:
+        return self.hypothesis_id
+
     def model_post_init(self, __context: Any) -> None:
         """Autofill new fields from old ones if needed."""
         if not self.statement and self.description:

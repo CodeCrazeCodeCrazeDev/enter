@@ -1,7 +1,7 @@
 from __future__ import annotations
 import logging
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from apodex.cognition.shared.schemas import (
@@ -166,7 +166,7 @@ class CognitiveSystemController:
                 "cost_variance_cents": cost_variance_cents,
                 "roi_variance_multiple": roi_variance,
                 "performance_gap_detected": not simulate_success,
-                "comparison_timestamp": datetime.utcnow().isoformat()
+                "comparison_timestamp": datetime.now(timezone.utc).isoformat()
             }
         else:
             final_decision = f"REJECTED: {gov_clearance.reason}"

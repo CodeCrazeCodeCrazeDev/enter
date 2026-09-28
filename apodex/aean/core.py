@@ -8,7 +8,7 @@ from __future__ import annotations
 import logging
 import uuid
 import random
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
 from pydantic import BaseModel, Field
 from .models import Event, Evidence, Hypothesis, Theory, DecisionProposal, AgentScope
@@ -417,7 +417,7 @@ class DecisionLifecycleManager:
         if prop and prop.status == "simulating":
             prop.status = "approved"
             prop.approval["approved_by"] = approved_by
-            prop.approval["approved_at"] = datetime.utcnow()
+            prop.approval["approved_at"] = datetime.now(timezone.utc)
             self.event_manager.publish("DecisionApproved", {"proposal_id": prop.id, "approved_by": approved_by})
 
     def reject(self, prop_id: str) -> None:

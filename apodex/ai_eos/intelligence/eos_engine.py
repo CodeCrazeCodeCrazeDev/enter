@@ -11,7 +11,7 @@ import logging
 import random
 from typing import Any, Dict, List, Optional, Tuple, Set
 from uuid import UUID, uuid4
-from datetime import datetime
+from datetime import datetime, timezone
 
 from ...ai_eos.domain.models import VentureCell, Hypothesis, Evidence, Theory
 
@@ -145,7 +145,7 @@ class HypothesisEngine:
         a = hyp.confidence_distribution["params"]["alpha"]
         b = hyp.confidence_distribution["params"]["beta"]
         hyp.posterior_confidence = float(a / (a + b))
-        hyp.last_updated = datetime.utcnow()
+        hyp.last_updated = datetime.now(timezone.utc)
 
     def evaluate_promotions(self) -> List[UUID]:
         """Promote high-confidence hypotheses (posterior > 0.8) to active or theory-ready."""
@@ -424,7 +424,7 @@ class EntrepreneurialMemory:
             "cell_id": cell_id,
             "step": step_name,
             "metrics": metrics,
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(timezone.utc)
         })
 
     def retrieve_matching_trajectories(self, key_metric: str, threshold_val: float) -> List[Dict[str, Any]]:

@@ -37,7 +37,7 @@ def decay_confidence(
     Formula: C(t) = C_0 * 0.5 ** (delta_t / half_life)
     """
     if current_time is None:
-        current_time = datetime.utcnow()
+        current_time = datetime.now(timezone.utc)
 
     # Ensure timezone naive for comparison
     observed = observed_time.replace(tzinfo=None)
@@ -95,7 +95,7 @@ class SkillRunner:
         if tier == CostTier.CHEAP:
             cost_est = max(1, cost_est // 5)  # CHEAP is 5x cheaper than standard
 
-        start_time = datetime.utcnow()
+        start_time = datetime.now(timezone.utc)
         output_payload: Dict[str, Any] = {}
         status = "SUCCESS"
         anchors_hit: List[str] = []
@@ -132,7 +132,7 @@ class SkillRunner:
             output_payload=output_payload,
             anchors_hit=anchors_hit,
             metrics_lift=metrics_lift,
-            timestamp=datetime.utcnow()
+            timestamp=datetime.now(timezone.utc)
         )
         self.execution_logs.append(log)
 
@@ -199,7 +199,7 @@ class SkillRunner:
                 "generated_by": skill.name,
                 "knowledge_type": skill.knowledge_type.value,
                 "tier": tier.value,
-                "observed_at": datetime.utcnow().isoformat()
+                "observed_at": datetime.now(timezone.utc).isoformat()
             }
         )
         self.world_graph.add_node(node)
@@ -322,7 +322,7 @@ class ProtocolEngine:
                             tier_used=CostTier.CHEAP,
                             status="BUDGET_HALTED",
                             output_payload={"reason": "Insufficient budget for step execution."},
-                            timestamp=datetime.utcnow()
+                            timestamp=datetime.now(timezone.utc)
                         )
                     )
                     break
@@ -654,7 +654,7 @@ class LearnFeedLoopEngine:
         self.state.current_stage = LearnFeedStage.STAGE_7_FEED_BACK
 
         if current_time is None:
-            current_time = datetime.utcnow()
+            current_time = datetime.now(timezone.utc)
 
         revalidation_window_days = 15.0
 

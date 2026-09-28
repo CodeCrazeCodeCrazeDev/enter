@@ -8,7 +8,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid4
-from datetime import datetime
+from datetime import datetime, timezone
 
 from ..domain.models import Capability, SubsystemMaturity
 from ..interfaces.services import ICapabilityRegistry
@@ -45,7 +45,7 @@ class CapabilityRegistry(ICapabilityRegistry):
         rollback_record = {
             "capability_id": capability_id,
             "name": cap.name,
-            "rolled_back_at": datetime.utcnow(),
+            "rolled_back_at": datetime.now(timezone.utc),
             "reason": reason,
             "previous_status": cap.deployment_status,
             "rollback_sha256": cap.rollback_trigger
@@ -102,7 +102,7 @@ class CapabilityIntelligenceManager:
             description=candidate["description"],
             source=candidate["source"],
             origin=candidate["origin"],
-            evidence=[f"distilled_at_{datetime.utcnow().isoformat()}"],
+            evidence=[f"distilled_at_{datetime.now(timezone.utc).isoformat()}"],
             benchmark_results={"accuracy": 0.0, "latency_ms": 0.0},
             risk_score=0.15,
             dependencies=candidate["extracted_dependencies"],
@@ -129,7 +129,7 @@ class CapabilityIntelligenceManager:
             capability.benchmark_results = {
                 "accuracy": simulated_acc,
                 "cost_ratio": cost_ratio,
-                "validated_at": datetime.utcnow().isoformat()
+                "validated_at": datetime.now(timezone.utc).isoformat()
             }
             logger.info(f"Capability successfully cleared Sandbox Validation: Accuracy = {simulated_acc:.4f}")
             return True

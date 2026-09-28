@@ -6,7 +6,7 @@ Validates Query Planner compilation, temporal scheduling, and multi-objective ec
 from __future__ import annotations
 
 import pytest
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
 from apodex.memory.cmos.models import MemoryNode, CMOSNodeType, ProvenanceBlock
@@ -55,7 +55,7 @@ def test_memory_economics_utility_decay():
         content="Short test content assertion",
         provenance=prov,
         retrieval_count=10,
-        last_retrieved_at=datetime.utcnow()
+        last_retrieved_at=datetime.now(timezone.utc)
     )
 
     node_old = MemoryNode(
@@ -64,7 +64,7 @@ def test_memory_economics_utility_decay():
         content="Short test content assertion",
         provenance=prov,
         retrieval_count=10,
-        last_retrieved_at=datetime.utcnow() - timedelta(days=5)
+        last_retrieved_at=datetime.now(timezone.utc) - timedelta(days=5)
     )
 
     utility_fresh = engine.compute_utility(node_fresh)

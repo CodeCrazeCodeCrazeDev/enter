@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import pytest
 from uuid import uuid4
-from datetime import datetime
+from datetime import datetime, timezone
 
 from apodex.memory.cmos.models import MemoryNode, MemoryEdge, CMOSNodeType, CMOSEdgeType, ProvenanceBlock
 from apodex.memory.cmos.repositories import InMemoryMemoryRepository
@@ -23,7 +23,7 @@ from apodex.memory.cmos.operators import RecallOperator, CompareOperator
 def clean_provenance():
     return ProvenanceBlock(
         origin="csc_simulated_brain",
-        timestamp=datetime.utcnow(),
+        timestamp=datetime.now(timezone.utc),
         creator_id="csc_orchestrator",
         confidence=1.0
     )

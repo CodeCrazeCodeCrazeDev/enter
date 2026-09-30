@@ -420,6 +420,174 @@ class LearnableRoutingGateDispatcher:
         logger.info(f"Updated routing metrics for agent '{agent_id}': SuccessRate={agent.historical_success_rate:.4f}, Curiosity={agent.epistemic_curiosity:.4f}")
 
 
+# =====================================================================
+# 5. Research-To-System Cross-Layer Active Inference Bridge
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Cross-Layer Active Inference State Handoff Bridge.
+    Orchestrates seamless state transitions and active inference feedback loops across:
+    - Layer 1: Research OS (hypotheses, literature, statistical validation)
+    - Layer 2: EIOS Kernel & EOS Engine (strategic DAG compilation, EFE decision tree, sensing)
+    - Layer 3: AEAN HiveMind & Router (token economics bidding & EFE-guided agent dispatch)
+    - Layer 4: APODEX WorldModel & Cognitive Brain (causal subgraphs & Bayesian belief updating)
+    """
+
+    def __init__(
+        self,
+        research_os: Optional[Any] = None,
+        eos_engine: Optional[Any] = None,
+        eios_kernel: Optional[Any] = None,
+        hive_mind: Optional[Any] = None,
+        world_model: Optional[Any] = None,
+        brain: Optional[Any] = None,
+        dispatcher: Optional[LearnableRoutingGateDispatcher] = None,
+    ) -> None:
+        self.research_os = research_os
+        self.eos_engine = eos_engine
+        self.eios_kernel = eios_kernel
+        self.hive_mind = hive_mind
+        self.world_model = world_model
+        self.brain = brain
+        self.dispatcher = dispatcher
+        self.handoff_history: List[Dict[str, Any]] = []
+
+    async def handoff_validated_hypothesis(
+        self,
+        hypothesis_id: UUID,
+        goal_description: str,
+        token_bid_amount: int = 20,
+        estimated_cost_usd: float = 0.05
+    ) -> Dict[str, Any]:
+        """
+        Executes a complete 4-layer active inference state handoff for a validated hypothesis.
+        """
+        # 1. Layer 1: Research OS Retrieval
+        hyp_data = {}
+        title = goal_description
+        target_metric = "default_metric"
+        if self.research_os and hasattr(self.research_os, "hypotheses"):
+            hyp_obj = self.research_os.hypotheses.get(hypothesis_id)
+            if hyp_obj:
+                title = getattr(hyp_obj, "title", goal_description)
+                target_metric = getattr(hyp_obj, "target_metric", "default_metric")
+                hyp_data = {
+                    "id": str(hypothesis_id),
+                    "title": title,
+                    "target_metric": target_metric,
+                    "status": getattr(hyp_obj, "status", "validated")
+                }
+
+        # 2. Layer 2: EIOS Kernel DAG Compilation/Execution & EOS Engine Registration
+        dag_executed = False
+        free_energy = 0.0
+        if self.eos_engine and hasattr(self.eos_engine, "hypothesis_engine"):
+            from ..domain.models import Hypothesis as EOSHypothesis
+            try:
+                eos_hyp = EOSHypothesis(
+                    hypothesis_id=hypothesis_id,
+                    title=title,
+                    statement=goal_description,
+                    domain=target_metric,
+                    status="active",
+                    posterior_confidence=0.90
+                )
+                self.eos_engine.hypothesis_engine.add_hypothesis(eos_hyp)
+            except Exception as e:
+                logger.warning(f"EOS Engine hypothesis registration notice: {e}")
+
+        if self.eios_kernel:
+            from apodex.arcs.kernel.kernel import EntrepreneurialCompiler, HierarchicalActiveInference
+            compiler = EntrepreneurialCompiler()
+            dag = compiler.compile_goal_to_dag(goal_description, target_budget_usd=int(estimated_cost_usd * 1000))
+            if hasattr(self.eios_kernel, "execute_dag"):
+                dag_executed = await self.eios_kernel.execute_dag(dag)
+            active_inf = HierarchicalActiveInference()
+            free_energy = active_inf.calculate_layer_free_energy("action", actual_outcome=1.0, expected_outcome=0.8)
+
+        # 3. Layer 3: AEAN HiveMind Bidding & Task Dispatching
+        grant_approved = False
+        dispatched_agent = None
+        if self.hive_mind:
+            from apodex.aean.coordination.hive_mind import TaskBid
+            bid = TaskBid(
+                task=f"exec_{hypothesis_id}",
+                priority=0.9,
+                expected_value=0.85,
+                token_cost=token_bid_amount
+            )
+            grants = self.hive_mind.arbitrate([bid])
+            if grants and grants[0].granted:
+                grant_approved = True
+
+        if self.dispatcher:
+            try:
+                dispatched_agent = self.dispatcher.route_task(task_complexity=float(token_bid_amount), domain="AI Research")
+                self.dispatcher.update_routing_parameters(agent_id=dispatched_agent, success=True, cost_incurred=estimated_cost_usd)
+            except Exception as e:
+                logger.warning(f"Dispatcher routing notice: {e}")
+
+        # 4. Layer 4: APODEX WorldModel & Cognitive Brain Causal and Bayesian Updates
+        world_updated = False
+        belief_updated = False
+        if self.world_model:
+            from apodex.world_model.world_model import CausalNode, RelationEdge
+            node_hyp = CausalNode(
+                node_id=f"hyp_{hypothesis_id}",
+                node_type="validated_hypothesis",
+                properties={"title": title, "metric": target_metric}
+            )
+            node_exec = CausalNode(
+                node_id=f"exec_{hypothesis_id}",
+                node_type="execution_outcome",
+                properties={"dag_executed": dag_executed}
+            )
+            edge = RelationEdge(
+                source_id=f"hyp_{hypothesis_id}",
+                target_id=f"exec_{hypothesis_id}",
+                relation_type="causal",
+                weight=0.95
+            )
+            self.world_model.add_node(node_hyp)
+            self.world_model.add_node(node_exec)
+            if hasattr(self.world_model, "add_relation"):
+                self.world_model.add_relation(edge)
+            elif hasattr(self.world_model, "add_edge"):
+                self.world_model.add_edge(edge)
+            self.world_model.beliefs[f"hyp_{hypothesis_id}"] = {
+                "posterior_confidence": 0.92,
+                "updated_at": time_now()
+            }
+            world_updated = True
+
+        if self.brain:
+            self.brain.memory.assert_fact(
+                name=title,
+                concept_type="hypothesis",
+                attributes={"hypothesis_id": str(hypothesis_id), "status": "active_in_system"}
+            )
+            mean, variance = self.brain.world_model.update_bayesian_belief(title, trials=10, successes=9)
+            belief_updated = True
+
+        handoff_record = {
+            "hypothesis_id": str(hypothesis_id),
+            "goal_description": goal_description,
+            "layer_1_research": hyp_data,
+            "layer_2_eios_dag_executed": dag_executed,
+            "layer_2_free_energy": free_energy,
+            "layer_3_grant_approved": grant_approved,
+            "layer_3_dispatched_agent": dispatched_agent,
+            "layer_4_world_model_updated": world_updated,
+            "layer_4_belief_updated": belief_updated,
+            "timestamp": time_now()
+        }
+
+        self.handoff_history.append(handoff_record)
+        logger.info(f"Cross-layer active inference handoff completed for hypothesis {hypothesis_id}")
+        return handoff_record
+
+
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()

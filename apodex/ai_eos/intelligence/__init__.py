@@ -1,4 +1,55 @@
-"""Entrepreneurial Intelligence System (EIS) context."""
+"""Entrepreneurial Intelligence System (EIS) context and EOS Engine exports."""
 
 from .decision_engine import EntrepreneurialIntelligenceSystem
 from .collective import CollectiveIntelligenceEngine
+from .eos_engine import EOSEngine
+from .eos_first_principles import (
+    EOSEngineFirstPrinciples,
+    MasterLoopNode,
+    LoopTimescale,
+    DecisionRiskType,
+    SignalAnomaly,
+    FalsifiableHypothesis,
+    CheapTestResult,
+    MentalModel,
+    ExternalBusinessLoopType,
+    BusinessLoopState,
+    JourneyStage,
+    CustomerJourneyStageMetrics,
+    GTMDistributionMotion,
+    GTMSystemConfig,
+    GrowthStage,
+    GrowthStageStatus,
+    MoatType,
+    MoatEvaluation,
+    FailureModeDiagnostic,
+    SystemState,
+    DecisionTreeResult,
+)
+
+__all__ = [
+    "EntrepreneurialIntelligenceSystem",
+    "CollectiveIntelligenceEngine",
+    "EOSEngine",
+    "EOSEngineFirstPrinciples",
+    "MasterLoopNode",
+    "LoopTimescale",
+    "DecisionRiskType",
+    "SignalAnomaly",
+    "FalsifiableHypothesis",
+    "CheapTestResult",
+    "MentalModel",
+    "ExternalBusinessLoopType",
+    "BusinessLoopState",
+    "JourneyStage",
+    "CustomerJourneyStageMetrics",
+    "GTMDistributionMotion",
+    "GTMSystemConfig",
+    "GrowthStage",
+    "GrowthStageStatus",
+    "MoatType",
+    "MoatEvaluation",
+    "FailureModeDiagnostic",
+    "SystemState",
+    "DecisionTreeResult",
+]

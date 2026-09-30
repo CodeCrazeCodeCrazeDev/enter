@@ -12,7 +12,7 @@ import random
 import asyncio
 from datetime import datetime
 from typing import Dict, Any, List, Optional, Tuple, Set, Union
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 logger = logging.getLogger("apodex.cognition.brain")
 
@@ -474,8 +474,7 @@ class CognitiveBrain(BaseModel):
     self_improvement: SelfImprovementEngine = Field(default_factory=SelfImprovementEngine)
     executor: LongHorizonExecutor = Field(default_factory=LongHorizonExecutor)
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def run_strategic_cycle(self, goal_title: str) -> Dict[str, Any]:
         """Executes a single unified cognitive cycle across all integrated primitives."""

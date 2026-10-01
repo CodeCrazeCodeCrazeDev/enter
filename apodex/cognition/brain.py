@@ -10,9 +10,9 @@ import uuid
 import logging
 import random
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional, Tuple, Set, Union
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 logger = logging.getLogger("apodex.cognition.brain")
 
@@ -27,7 +27,7 @@ class UnifiedConcept(BaseModel):
     concept_type: str  # "entity", "market", "hypothesis", "fact", "skill"
     attributes: Dict[str, Any] = Field(default_factory=dict)
     confidence: float = 1.0
-    last_updated: float = Field(default_factory=lambda: datetime.utcnow().timestamp())
+    last_updated: float = Field(default_factory=lambda: datetime.now(timezone.utc).timestamp())
 
 
 class TrajectoryStep(BaseModel):
@@ -115,13 +115,12 @@ class AdvancedMemoryEngine(BaseModel):
             return {"consolidated_episodes": 0, "extracted_lessons": 0}
 
         num_episodes = len(self.episodic_memory)
-        # Summarize episodic traces into a lesson
         success_count = sum(1 for step in self.episodic_memory if step.outcome and step.outcome.get("success", False))
         lesson_summary = f"Consolidated {num_episodes} steps. Historical success rate: {success_count / num_episodes:.2f}"
 
         lesson = {
             "id": str(uuid.uuid4()),
-            "timestamp": datetime.utcnow().timestamp(),
+            "timestamp": datetime.now(timezone.utc).timestamp(),
             "summary": lesson_summary,
             "success_ratio": success_count / num_episodes
         }
@@ -146,10 +145,10 @@ class DeepCausalWorldModel(BaseModel):
     - Causal relationships & Counterfactual scenarios
     """
     variables: List[str] = Field(default_factory=list)
-    causal_links: Dict[str, List[str]] = Field(default_factory=dict)  # child -> list of parents
-    coefficients: Dict[str, float] = Field(default_factory=dict)  # "parent->child" coefficient
-    beliefs_alpha: Dict[str, float] = Field(default_factory=dict)  # Beta conjugate prior alpha
-    beliefs_beta: Dict[str, float] = Field(default_factory=dict)   # Beta conjugate prior beta
+    causal_links: Dict[str, List[str]] = Field(default_factory=dict)
+    coefficients: Dict[str, float] = Field(default_factory=dict)
+    beliefs_alpha: Dict[str, float] = Field(default_factory=dict)
+    beliefs_beta: Dict[str, float] = Field(default_factory=dict)
 
     def add_variable(self, name: str, alpha: float = 1.0, beta: float = 1.0) -> None:
         if name not in self.variables:
@@ -179,13 +178,11 @@ class DeepCausalWorldModel(BaseModel):
     def query_do_calculus(self, intervention_var: str, intervention_val: float) -> Dict[str, float]:
         """
         Simulates Judea Pearl's do-operator (do(X = x)).
-        Prunes causal paths leading into the intervention variable (decoupling it from parents)
-        and propagates the static intervention value down the SCM.
+        Prunes causal paths leading into the intervention variable and propagates value.
         """
         values: Dict[str, float] = {v: 0.0 for v in self.variables}
         values[intervention_var] = intervention_val
 
-        # Topological propagation of direct causal equations
         for _ in range(len(self.variables)):
             for child in self.variables:
                 if child == intervention_var:
@@ -204,8 +201,7 @@ class DeepCausalWorldModel(BaseModel):
 
 class SimulationEngine(BaseModel):
     """
-    Runs multi-universe, branching scenario rollouts and probabilistic Monte Carlo risk assessments
-    over strategies, competitor responses, and financial market models.
+    Runs multi-universe, branching scenario rollouts and probabilistic Monte Carlo risk assessments.
     """
     world_model: DeepCausalWorldModel
 
@@ -217,16 +213,13 @@ class SimulationEngine(BaseModel):
         num_trials: int = 100
     ) -> Dict[str, Any]:
         """
-        Executes Monte Carlo simulations propagating uncertainty through the structural causal model.
-        Returns expected outcomes, standard deviation, and Value at Risk (VaR).
+        Executes Monte Carlo simulations propagating uncertainty through SCM.
         """
         results = []
         for _ in range(num_trials):
-            # Compute base do-calculus values
             base_values = self.world_model.query_do_calculus(strategy_var, intervention_val)
             target_val = base_values.get(target_var, 0.0)
 
-            # Inject aleatoric Gaussian noise to simulate volatility / competitor shocks
             noise = random.normalvariate(0.0, 0.1 * (target_val if target_val != 0.0 else 1.0))
             results.append(target_val + noise)
 
@@ -234,7 +227,6 @@ class SimulationEngine(BaseModel):
         variance = sum((r - mean_val) ** 2 for r in results) / len(results)
         std_dev = math.sqrt(variance)
 
-        # Sort to calculate the 5th percentile (Value at Risk)
         sorted_res = sorted(results)
         var_95 = sorted_res[int(num_trials * 0.05)] if num_trials >= 20 else sorted_res[0]
 
@@ -256,7 +248,7 @@ class PlanNode(BaseModel):
     description: str
     dependencies: List[uuid.UUID] = Field(default_factory=list)
     sub_tasks: List[PlanNode] = Field(default_factory=list)
-    action_type: str  # "research", "engineering", "business"
+    action_type: str
     params: Dict[str, Any] = Field(default_factory=dict)
     is_completed: bool = False
 
@@ -271,13 +263,9 @@ class AdvancedPlanner(BaseModel):
     def decompose_goal(self, goal_description: str) -> List[PlanNode]:
         """Decomposes a long-horizon goal into an HTN hierarchical plan graph with dependencies."""
         logger.info(f"Decomposing goal: {goal_description}")
-        # Stage 1: Research / Literature review
         step1 = PlanNode(description="Literature review & gap analysis", action_type="research", params={"depth": "deep"})
-        # Stage 2: Experiment design (depends on review)
         step2 = PlanNode(description="Formulate hypothesis & design experiment", action_type="research", dependencies=[step1.id])
-        # Stage 3: Engineering sandbox execution
         step3 = PlanNode(description="Compile and execute sandbox simulation", action_type="engineering", dependencies=[step2.id])
-        # Stage 4: Business evaluation & promote
         step4 = PlanNode(description="Value-at-risk analysis & theory promotion", action_type="business", dependencies=[step3.id])
 
         return [step1, step2, step3, step4]
@@ -296,12 +284,9 @@ class AdvancedPlanner(BaseModel):
             pragmatic_prob = branch.get("pragmatic_prob", 0.8)
             target_pref = branch.get("target_pref", 0.9)
 
-            # Epistemic value: expected information gain (entropy reduction)
             epistemic = max(0.0, prior_entropy - expected_post_entropy)
-            # Pragmatic value: log likelihood of satisfying preferences
             pragmatic = math.log(max(1e-5, pragmatic_prob)) - math.log(max(1e-5, target_pref))
 
-            # Expected Free Energy G = - Pragmatic - Curiosity * Epistemic
             g_score = -pragmatic - (epistemic * self.curiosity_weight)
             branch["g_score"] = g_score
 
@@ -324,8 +309,7 @@ class AgentInstance(BaseModel):
 
 class MultiAgentOrchestrator(BaseModel):
     """
-    Implements Agent Lifecycle Management (spawn, retire, split, merge),
-    multi-mind debate, consensus resolutions, and sycophancy mitigation.
+    Implements Agent Lifecycle Management, multi-mind debate, consensus resolutions, and sycophancy mitigation.
     """
     agents: Dict[uuid.UUID, AgentInstance] = Field(default_factory=dict)
 
@@ -339,7 +323,6 @@ class MultiAgentOrchestrator(BaseModel):
             self.agents[aid].status = "retired"
 
     def split_agent(self, aid: uuid.UUID, new_roles: List[str]) -> List[AgentInstance]:
-        """Splits a single complex agent into multiple specialized agents."""
         new_agents = []
         if aid in self.agents:
             self.retire_agent(aid)
@@ -348,10 +331,6 @@ class MultiAgentOrchestrator(BaseModel):
         return new_agents
 
     def resolve_debate_consensus(self, evaluations: Dict[str, float]) -> Tuple[float, float]:
-        """
-        Coordinates distinct specialized agent perspectives (Bayesian, Symbolic, Causal, etc.),
-        detecting and mitigating sycophancy (echo traps).
-        """
         scores = list(evaluations.values())
         if not scores:
             return 0.5, 0.0
@@ -361,7 +340,6 @@ class MultiAgentOrchestrator(BaseModel):
         std_dev = math.sqrt(variance)
 
         sycophancy_correction = 1.0
-        # Low variance among independent agents indicates an uncritical echo trap
         if std_dev < 0.03:
             logger.warning("Echo chamber detected! Down-weighting consensus to prevent overconfidence.")
             sycophancy_correction = 0.82
@@ -374,14 +352,9 @@ class MultiAgentOrchestrator(BaseModel):
 # ==============================================================================
 
 class ResearchLabOS(BaseModel):
-    """
-    Coordinates literature discovery, paper reading, hypothesis generation,
-    experiment design, claim verification, and citation management.
-    """
     knowledge_base: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
 
     def search_literature(self, query: str) -> List[Dict[str, Any]]:
-        """Simulates literature retrieval from scientific APIs."""
         return [
             {
                 "title": f"Scientific advances in {query}",
@@ -393,9 +366,7 @@ class ResearchLabOS(BaseModel):
         ]
 
     def verify_claim(self, claim: str, experimental_results: Dict[str, Any]) -> bool:
-        """Programmatically validates a research claim against empirical results."""
         measured_increase = experimental_results.get("conversion_increase", 0.0)
-        # If experimental evidence aligns, the claim is verified
         return measured_increase >= 0.10
 
 
@@ -404,14 +375,9 @@ class ResearchLabOS(BaseModel):
 # ==============================================================================
 
 class SelfImprovementEngine(BaseModel):
-    """
-    Optimizes agent prompts and code scripts using TextGrad natural language gradients,
-    benchmarks, root-cause analysis, and rollback evaluation gates.
-    """
     evaluation_history: List[Dict[str, Any]] = Field(default_factory=dict)
 
     def textgrad_optimize_prompt(self, current_prompt: str, failures: List[str]) -> str:
-        """Treats raw execution failure logs as gradients to optimize agent prompts."""
         if not failures:
             return current_prompt
 
@@ -419,7 +385,6 @@ class SelfImprovementEngine(BaseModel):
         return current_prompt + optimized_instructions
 
     def evaluate_gate(self, original_score: float, new_score: float) -> bool:
-        """Enforces a non-bypassable promotion gate requiring strict improvement."""
         return new_score > original_score
 
 
@@ -428,10 +393,6 @@ class SelfImprovementEngine(BaseModel):
 # ==============================================================================
 
 class LongHorizonExecutor(BaseModel):
-    """
-    Manages task queues, parallel task executions, state checkpointing, failovers,
-    and budget parameters across day, week, and month-long lifecycles.
-    """
     task_queue: List[PlanNode] = Field(default_factory=list)
     checkpoints: Dict[uuid.UUID, Dict[str, Any]] = Field(default_factory=dict)
     resource_budget_cents: int = 100_000
@@ -449,7 +410,7 @@ class LongHorizonExecutor(BaseModel):
     def create_checkpoint(self, task_id: uuid.UUID, state: Dict[str, Any]) -> None:
         self.checkpoints[task_id] = {
             "state": state,
-            "timestamp": datetime.utcnow().timestamp()
+            "timestamp": datetime.now(timezone.utc).timestamp()
         }
 
     def recover_from_checkpoint(self, task_id: uuid.UUID) -> Optional[Dict[str, Any]]:
@@ -463,9 +424,11 @@ class LongHorizonExecutor(BaseModel):
 class CognitiveBrain(BaseModel):
     """
     The Single Brain of the Entrepreneurial Intelligence Operating System.
-    Unifies the planner, world model, memory, multi-agent orchestrator, simulation,
+    Unifies planner, world model, memory, multi-agent orchestrator, simulation,
     research engine, self-improvement, and execution modules.
     """
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     memory: AdvancedMemoryEngine = Field(default_factory=AdvancedMemoryEngine)
     world_model: DeepCausalWorldModel = Field(default_factory=DeepCausalWorldModel)
     planner: AdvancedPlanner = Field(default_factory=AdvancedPlanner)
@@ -474,25 +437,19 @@ class CognitiveBrain(BaseModel):
     self_improvement: SelfImprovementEngine = Field(default_factory=SelfImprovementEngine)
     executor: LongHorizonExecutor = Field(default_factory=LongHorizonExecutor)
 
-    class Config:
-        arbitrary_types_allowed = True
-
     def run_strategic_cycle(self, goal_title: str) -> Dict[str, Any]:
         """Executes a single unified cognitive cycle across all integrated primitives."""
         logger.info(f"Starting unified brain cycle for goal: {goal_title}")
 
-        # 1. Plan: Decompose the strategic objective hierarchically
         plan_steps = self.planner.decompose_goal(goal_title)
         self.executor.queue_tasks(plan_steps)
 
-        # 2. Simulate: Run parallel multi-universe scenarios using the World Model
         self.world_model.add_variable("resource_investment", 10.0, 10.0)
         self.world_model.add_causal_relation("resource_investment", "market_penetration", 0.85)
 
         simulator = SimulationEngine(world_model=self.world_model)
         sim_report = simulator.simulate_rollout("resource_investment", 1.5, "market_penetration", num_trials=50)
 
-        # 3. Deliberate: Multi-agent debate using specialized perspectives
         agents_debating = {
             "Bayesian": 0.82,
             "Causal": 0.80,
@@ -500,7 +457,6 @@ class CognitiveBrain(BaseModel):
         }
         consensus_score, disagreement_index = self.orchestrator.resolve_debate_consensus(agents_debating)
 
-        # 4. Execute: Perform sandbox operations & log episodic context
         step_trace = TrajectoryStep(
             action="execute_mcts_simulation",
             parameters={"strategy_score": consensus_score},
@@ -510,20 +466,17 @@ class CognitiveBrain(BaseModel):
         )
         self.memory.log_episode(step_trace)
 
-        # 5. Scientific Validation: Claim verification inside Research OS
         is_verified = self.research_os.verify_claim(
             "High temperature increases conversion rates by 12%",
             experimental_results={"conversion_increase": step_trace.outcome.get("conversion_increase", 0.0)}
         )
 
-        # 6. Consolidate: Save facts and update beliefs
         fact_ref = self.memory.assert_fact(
             name="checkout_optimization_claim",
             concept_type="hypothesis",
             attributes={"verified": is_verified, "consensus_score": consensus_score}
         )
 
-        # 7. Self-Improvement: Run prompt optimization
         optimized_prompt = self.self_improvement.textgrad_optimize_prompt(
             current_prompt="Run ast audits",
             failures=["Ast node unhandled type Exception"]

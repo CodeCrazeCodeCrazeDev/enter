@@ -423,3 +423,111 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. Research OS to Cognitive System Unified Bridge (Cross-Layer Active Inference)
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Unified Cross-Layer Research-to-System Orchestrator.
+    Transfers validated hypotheses from Layer 1 Research OS into:
+    - Layer 2: EIOS Kernel & EOS Engine (sensing, active hypotheses, and execution DAGs)
+    - Layer 3: AEAN HiveMind (multi-agent token bids & task allocation)
+    - Layer 4: APODEX WorldModel (causal graph nodes and Bayesian belief state updates)
+    """
+
+    def __init__(
+        self,
+        research_os: Any = None,
+        eos_engine: Any = None,
+        eios_kernel: Any = None,
+        hive_mind: Any = None,
+        world_model: Any = None
+    ) -> None:
+        self.research_os = research_os
+        self.eos_engine = eos_engine
+        self.eios_kernel = eios_kernel
+        self.hive_mind = hive_mind
+        self.world_model = world_model
+        self.synchronized_hypotheses: Set[str] = set()
+
+    def synchronize_validated_hypothesis(self, hypothesis: Any) -> Dict[str, Any]:
+        """
+        Orchestrates cross-layer state handoffs for a validated scientific hypothesis.
+        """
+        hyp_id = str(getattr(hypothesis, "hypothesis_id", uuid4()))
+        title = getattr(hypothesis, "title", "Validated Hypothesis")
+        domain = getattr(hypothesis, "domain", getattr(hypothesis, "target_metric", "general"))
+        status = getattr(hypothesis, "status", "validated")
+
+        results = {
+            "hypothesis_id": hyp_id,
+            "title": title,
+            "eos_ingested": False,
+            "eios_kernel_registered": False,
+            "hive_mind_bidded": False,
+            "world_model_updated": False,
+        }
+
+        # 1. Ingest into EOS Engine
+        if self.eos_engine is not None:
+            if hasattr(self.eos_engine, "ingest_validated_research"):
+                self.eos_engine.ingest_validated_research(hypothesis)
+                results["eos_ingested"] = True
+
+        # 2. Register with EIOS Kernel
+        if self.eios_kernel is not None:
+            if hasattr(self.eios_kernel, "register_research_hypothesis"):
+                self.eios_kernel.register_research_hypothesis(hypothesis)
+                results["eios_kernel_registered"] = True
+
+        # 3. Submit Task Bid to AEAN HiveMind
+        if self.hive_mind is not None:
+            if hasattr(self.hive_mind, "register_research_insight"):
+                self.hive_mind.register_research_insight(
+                    task=f"execute_research_insight_{hyp_id[:8]}",
+                    priority=0.9,
+                    expected_value=1.5,
+                    token_cost=10
+                )
+                results["hive_mind_bidded"] = True
+
+        # 4. Update APODEX WorldModel Causal Graph and Beliefs
+        if self.world_model is not None:
+            if hasattr(self.world_model, "create_node"):
+                self.world_model.create_node(
+                    node_id=f"hyp_node_{hyp_id[:8]}",
+                    node_type="validated_hypothesis",
+                    properties={"title": title, "domain": domain, "status": status}
+                )
+            if hasattr(self.world_model, "update_belief"):
+                self.world_model.update_belief(
+                    node_id=f"hyp_node_{hyp_id[:8]}",
+                    alpha=10.0,
+                    beta=1.0
+                )
+            results["world_model_updated"] = True
+
+        self.synchronized_hypotheses.add(hyp_id)
+        logger.info(f"Synchronized hypothesis [id={hyp_id}, title='{title}'] across all active system layers.")
+        return results
+
+    def synchronize_all_pending_research(self) -> List[Dict[str, Any]]:
+        """
+        Scans Research OS for all validated or active hypotheses and synchronizes them.
+        """
+        if not self.research_os or not hasattr(self.research_os, "get_validated_hypotheses"):
+            return []
+
+        validated = self.research_os.get_validated_hypotheses()
+        sync_results = []
+
+        for hyp in validated:
+            hyp_id = str(getattr(hyp, "hypothesis_id", uuid4()))
+            if hyp_id not in self.synchronized_hypotheses:
+                res = self.synchronize_validated_hypothesis(hyp)
+                sync_results.append(res)
+
+        return sync_results

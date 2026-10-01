@@ -474,6 +474,29 @@ class EOSEngine:
         self.reinvention_engine = ReinventionEngine()
         self.memory = EntrepreneurialMemory()
         self.evaluator = EvaluationFramework()
+        self._ingested_research_hypotheses: List[Any] = []
+
+    def ingest_validated_research(self, hypothesis: Any) -> None:
+        """Ingest validated research hypothesis into active hypotheses and opportunity graph."""
+        self._ingested_research_hypotheses.append(hypothesis)
+        hyp_id = str(getattr(hypothesis, "hypothesis_id", uuid4()))
+        title = getattr(hypothesis, "title", getattr(hypothesis, "statement", "Research Opportunity"))
+        domain = getattr(hypothesis, "domain", getattr(hypothesis, "target_metric", "research"))
+
+        # Add to Opportunity Graph as an actionable venture node
+        self.opportunity_graph.add_opportunity(
+            op_id=f"op_{hyp_id[:8]}",
+            name=f"Venture Opportunity: {title}",
+            value_cents=500000_00,  # default $500k opportunity value
+            keywords=[domain, "research_validated", "active_inference"]
+        )
+        logger.info(f"EOSEngine ingested research hypothesis [id={hyp_id}] into active opportunity graph.")
+
+    @property
+    def active_hypotheses(self) -> List[Any]:
+        """Expose active hypotheses including ingested research hypotheses."""
+        engine_hypotheses = list(self.hypothesis_engine.hypotheses.values())
+        return engine_hypotheses + self._ingested_research_hypotheses
 
     def run_continuous_sensing_cycle(self, cells: List[VentureCell], total_budget_cents: int) -> Dict[str, Any]:
         """Execute one complete hierarchical sensing, planning, allocation, and diagnostic loop."""

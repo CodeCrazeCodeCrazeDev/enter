@@ -223,3 +223,11 @@ class ResearchOS(IResearchOS):
 
         self.hypotheses.save(hyp.hypothesis_id, hyp)
         return exp
+
+    def get_validated_hypotheses(self) -> List[Hypothesis]:
+        """Return all hypotheses that have been validated or marked active."""
+        validated = []
+        for hyp in self.hypotheses.list_all():
+            if getattr(hyp, "status", None) in {"validated", "active"}:
+                validated.append(hyp)
+        return validated

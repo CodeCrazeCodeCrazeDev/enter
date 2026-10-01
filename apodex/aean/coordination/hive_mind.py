@@ -41,6 +41,12 @@ class Grant:
 class HiveMind:
     token_budget: int = 100
     granted_history: List[Grant] = field(default_factory=list)
+    research_insights_registry: List[Dict[str, float]] = field(default_factory=list)
+
+    def register_research_insight(self, title: str, initial_bidding_tokens: float = 100.0) -> None:
+        """Registers validated research insights from Research OS directly into HiveMind bidding pool."""
+        self.research_insights_registry.append({"insight": title, "bidding_tokens": initial_bidding_tokens})
+        logger.info(f"[HiveMind] Registered research insight into token bidding registry: {title}")
 
     def arbitrate(self, bids: List[TaskBid]) -> List[Grant]:
         """Allocate tokens to the highest-scoring bids within budget."""

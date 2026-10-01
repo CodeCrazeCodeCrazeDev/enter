@@ -57,12 +57,18 @@ class ExecutionDAG(BaseModel):
 class EIOSKernel:
     """The central core of the Entrepreneurial Intelligence Operating System.
 
-    Manages task scheduling, failure recovery (retries), and model routing.
+    Manages task scheduling, failure recovery (retries), active inference sensing, and model routing.
     """
 
     def __init__(self) -> None:
         self.active_processes: Dict[str, ExecutionDAG] = {}
         self.metrics_history: List[Dict[str, Any]] = []
+        self.research_hypotheses: List[Dict[str, str]] = []
+
+    def register_research_hypothesis(self, title: str, description: str) -> None:
+        """Ingests Research OS hypothesis for Active Inference sensing DAG execution."""
+        self.research_hypotheses.append({"title": title, "description": description})
+        logger.info(f"[Kernel] Registered research hypothesis for EIOS sensing: {title}")
 
     async def execute_dag(self, dag: ExecutionDAG) -> bool:
         """Schedules and executes the compiled DAG with failure recovery."""

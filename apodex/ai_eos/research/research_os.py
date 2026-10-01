@@ -10,12 +10,13 @@ import random
 import logging
 from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid4
-from datetime import datetime
+from datetime import datetime, timezone
 
 from ..domain.models import Hypothesis, Experiment, ExecutionStatus
 from ..interfaces.services import IResearchOS
 from ..infrastructure.identity import DeterministicIdentityGenerator
 from ..infrastructure.persistence import InMemoryLedger
+from .integration import ALPHAALGO_301_400_PRINCIPLES
 
 logger = logging.getLogger("sero.ros")
 
@@ -114,12 +115,34 @@ class ResearchOS(IResearchOS):
     # Autonomous Science Engine
     # ------------------------------------------------------------------
     def conduct_literature_review(self, domain: str) -> Dict[str, Any]:
-        """Automated literature synthesis and citation mapping over active scientific namespaces."""
+        """Automated literature synthesis querying registered research corpus principles across fields."""
         logger.info(f"Autonomous Science Engine conducting literature synthesis for domain: {domain}")
+        query = domain.strip().lower()
+
+        matched_principles = []
+        for p in ALPHAALGO_301_400_PRINCIPLES:
+            category = str(p.get("category", "")).lower()
+            description = str(p.get("description", "")).lower()
+            target_subsystem = str(p.get("target_subsystem", "")).lower()
+            paper_title = str(p.get("paper_title", "")).lower()
+            extracted_principle = str(p.get("extracted_principle", "")).lower()
+            impl_module = str(p.get("impl_module", "")).lower()
+
+            if (query in category or query in description or query in target_subsystem
+                    or query in paper_title or query in extracted_principle or query in impl_module):
+                matched_principles.append(p)
+
         return {
             "domain": domain,
-            "reviewed_citations_count": 14,
-            "synthesized_trends": ["Deep Reinforcement learning with GRPO", "Active Inference with Expected Free Energy approximation"],
+            "reviewed_citations_count": len(ALPHAALGO_301_400_PRINCIPLES),
+            "matched_principles_count": len(matched_principles),
+            "matched_principles": matched_principles,
+            "synthesized_trends": [
+                "Island MAP-Elites Migration Gates",
+                "Continuous-Time Non-Gaussian Hawkes Process Volatility Bounds",
+                "Budget-Decayed Expected Free Energy Task Routing",
+                "Clipped Advantage Margins in Trajectory Preference DPO"
+            ],
             "whitespace_found": "Expected Free Energy implementation under lightweight micro-VM environments."
         }
 
@@ -129,8 +152,6 @@ class ResearchOS(IResearchOS):
         if not hyp:
             raise ValueError(f"Hypothesis {hypothesis_id} does not exist.")
 
-        # Simple power analysis simulation (for alpha = 0.05, power = 0.80, effect size = 0.5)
-        # Required Sample Size n = 2 * (1.96 + 0.84)^2 / (effect_size^2)
         effect_size = 0.5
         required_sample = math.ceil(2 * (1.96 + 0.84) ** 2 / (effect_size ** 2))
 
@@ -152,7 +173,7 @@ class ResearchOS(IResearchOS):
         return {
             "needs_refinement": needs_refinement,
             "critique": critique,
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(timezone.utc)
         }
 
     # ------------------------------------------------------------------
@@ -169,12 +190,9 @@ class ResearchOS(IResearchOS):
             raise ValueError(f"Hypothesis of experiment '{experiment_id}' does not exist.")
 
         exp.status = ExecutionStatus.RUNNING
-        exp.started_at = datetime.utcnow()
+        exp.started_at = datetime.now(timezone.utc)
 
-        # Deterministic simulation based on seed and ground truth yield
         rng = random.Random(exp.seed)
-
-        # Simulate a set of returns/outcomes (e.g. 100 walk-forward iterations)
         sample_size = 120
         sim_outcomes = [ground_truth_yield + rng.normalvariate(0.0, 1.5) for _ in range(sample_size)]
 
@@ -182,30 +200,22 @@ class ResearchOS(IResearchOS):
         variance = sum((x - mean_outcome) ** 2 for x in sim_outcomes) / (sample_size - 1)
         std_dev = math.sqrt(variance) if variance > 0 else 1e-5
 
-        # 1. Compute standard T-Statistic against Null Hypothesis (H0: mean <= 0)
         t_stat = mean_outcome / (std_dev / math.sqrt(sample_size))
 
-        # Approximate p-value from t-statistic using Gaussian approximation
-        # One-tailed check: if t_stat is negative, p_val should be >= 0.5
         if t_stat < 0:
             p_val = 0.5 + 0.5 * math.erf(abs(t_stat) / math.sqrt(2.0))
         else:
             p_val = 0.5 * (1.0 - math.erf(t_stat / math.sqrt(2.0)))
 
-        # 2. Deflated Sharpe Ratio (DSR) Approximation
-        # Corrects for standard Sharpe inflated by selection bias (multiple tests)
         num_tests_conducted = len(self.experiments.list_all())
         expected_max_sharpe = std_dev * math.sqrt(2 * math.log(max(2, num_tests_conducted)))
         dsr = mean_outcome / max(1e-5, expected_max_sharpe)
 
-        # 3. White's Reality Check (WRC) Adjustment
-        # Checks if the best-performing hypothesis is significant under multiple-testing correction
         bonferroni_corrected_alpha = hyp.significance_level_alpha / max(1, num_tests_conducted)
         is_significant = (p_val < bonferroni_corrected_alpha) and (mean_outcome > 0)
 
-        # Update experiment state
         exp.status = ExecutionStatus.COMPLETED
-        exp.ended_at = datetime.utcnow()
+        exp.ended_at = datetime.now(timezone.utc)
         exp.p_value = p_val
         exp.effect_size = mean_outcome
         exp.deflated_sharpe_ratio = dsr
@@ -213,7 +223,6 @@ class ResearchOS(IResearchOS):
 
         self.experiments.save(exp.experiment_id, exp)
 
-        # If significant, promote Hypothesis status
         if is_significant:
             hyp.status = "validated"
             logger.info(f"Hypothesis validated! P-value: {p_val:.6f} < Bonferroni Alpha: {bonferroni_corrected_alpha:.6f}")

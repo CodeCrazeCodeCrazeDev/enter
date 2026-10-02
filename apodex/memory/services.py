@@ -1,7 +1,7 @@
 from __future__ import annotations
 import random
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid4
 from pydantic import BaseModel, Field
@@ -159,7 +159,7 @@ class IngestionPipelineImpl(IngestionPipeline):
         if "vocabulary" in trigger_event:
             pep.domain_vocabulary.extend(trigger_event["vocabulary"])
 
-        pep.updated_at = datetime.utcnow()
+        pep.updated_at = datetime.now(timezone.utc)
         self.store.peps[user_id] = pep
         return pep
 
@@ -180,7 +180,7 @@ class IngestionPipelineImpl(IngestionPipeline):
         else:
             graph.nodes.append(node)
 
-        graph.updated_at = datetime.utcnow()
+        graph.updated_at = datetime.now(timezone.utc)
         self.store.graphs[task_id] = graph
 
 

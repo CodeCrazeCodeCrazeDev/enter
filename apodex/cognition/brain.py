@@ -10,9 +10,9 @@ import uuid
 import logging
 import random
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional, Tuple, Set, Union
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 logger = logging.getLogger("apodex.cognition.brain")
 
@@ -27,7 +27,7 @@ class UnifiedConcept(BaseModel):
     concept_type: str  # "entity", "market", "hypothesis", "fact", "skill"
     attributes: Dict[str, Any] = Field(default_factory=dict)
     confidence: float = 1.0
-    last_updated: float = Field(default_factory=lambda: datetime.utcnow().timestamp())
+    last_updated: float = Field(default_factory=lambda: datetime.now(timezone.utc).timestamp())
 
 
 class TrajectoryStep(BaseModel):
@@ -121,7 +121,7 @@ class AdvancedMemoryEngine(BaseModel):
 
         lesson = {
             "id": str(uuid.uuid4()),
-            "timestamp": datetime.utcnow().timestamp(),
+            "timestamp": datetime.now(timezone.utc).timestamp(),
             "summary": lesson_summary,
             "success_ratio": success_count / num_episodes
         }
@@ -449,7 +449,7 @@ class LongHorizonExecutor(BaseModel):
     def create_checkpoint(self, task_id: uuid.UUID, state: Dict[str, Any]) -> None:
         self.checkpoints[task_id] = {
             "state": state,
-            "timestamp": datetime.utcnow().timestamp()
+            "timestamp": datetime.now(timezone.utc).timestamp()
         }
 
     def recover_from_checkpoint(self, task_id: uuid.UUID) -> Optional[Dict[str, Any]]:
@@ -466,6 +466,8 @@ class CognitiveBrain(BaseModel):
     Unifies the planner, world model, memory, multi-agent orchestrator, simulation,
     research engine, self-improvement, and execution modules.
     """
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     memory: AdvancedMemoryEngine = Field(default_factory=AdvancedMemoryEngine)
     world_model: DeepCausalWorldModel = Field(default_factory=DeepCausalWorldModel)
     planner: AdvancedPlanner = Field(default_factory=AdvancedPlanner)
@@ -473,9 +475,6 @@ class CognitiveBrain(BaseModel):
     research_os: ResearchLabOS = Field(default_factory=ResearchLabOS)
     self_improvement: SelfImprovementEngine = Field(default_factory=SelfImprovementEngine)
     executor: LongHorizonExecutor = Field(default_factory=LongHorizonExecutor)
-
-    class Config:
-        arbitrary_types_allowed = True
 
     def run_strategic_cycle(self, goal_title: str) -> Dict[str, Any]:
         """Executes a single unified cognitive cycle across all integrated primitives."""

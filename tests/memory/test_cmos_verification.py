@@ -9,7 +9,7 @@ from __future__ import annotations
 import tempfile
 import os
 import pytest
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import uuid4
 
 from apodex.memory.cmos.models import MemoryNode, MemoryEdge, CMOSNodeType, CMOSEdgeType, NodeState, ProvenanceBlock
@@ -24,7 +24,7 @@ from apodex.memory.cmos.operators import RecallOperator, VerifyOperator, Compare
 def clean_provenance():
     return ProvenanceBlock(
         origin="institutional_suite",
-        timestamp=datetime.utcnow(),
+        timestamp=datetime.now(timezone.utc),
         creator_id="csc_main",
         confidence=1.0,
         git_sha="1234abc"

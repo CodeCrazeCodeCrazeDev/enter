@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
@@ -28,7 +28,7 @@ class Hypothesis(BaseModel):
     economic_rationale: str = Field(description="Causal or economic rationale (e.g., MICROSTRUCTURE, BEHAVIORAL)")
     null_hypothesis: str = Field(description="Definition of criteria under which the claim is false")
     target_variable: str = Field(description="Variable the signal claims to predict")
-    registered_at: datetime = Field(default_factory=datetime.utcnow)
+    registered_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
 
@@ -39,7 +39,7 @@ class Dataset(BaseModel):
     version: str = Field(description="Version string (e.g., v1.0)")
     raw_source: str = Field(description="Origin source URI or path")
     ingestion_pipeline_hash: str = Field(description="SHA-256 hash of the ingestion pipeline code")
-    registered_at: datetime = Field(default_factory=datetime.utcnow)
+    registered_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     data_quality_report: Dict[str, Any] = Field(default_factory=dict, description="Captured temporal & PIT quality checks")
 
 
@@ -52,7 +52,7 @@ class Feature(BaseModel):
     parameters: Dict[str, Any] = Field(default_factory=dict, description="Hyperparameters used to generate the feature")
     lineage_dataset_id: str = Field(description="ID of the dataset snapshot used for calculation")
     stationarity_p_value: Optional[float] = Field(None, description="P-value from ADF stationarity test")
-    registered_at: datetime = Field(default_factory=datetime.utcnow)
+    registered_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class Experiment(BaseModel):
@@ -72,7 +72,7 @@ class Experiment(BaseModel):
     metrics: Dict[str, float] = Field(default_factory=dict, description="Backtest metrics (Sharpe, drawdown, ROI, etc.)")
     returns_time_series: List[float] = Field(default_factory=list, description="Time series of daily or step returns")
     error_log: Optional[str] = Field(None, description="Captured traceback if status is FAILED")
-    registered_at: datetime = Field(default_factory=datetime.utcnow)
+    registered_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     def calculate_config_hash(self) -> str:
         """Compute the SHA-256 configuration hash over all input configurations."""
@@ -99,7 +99,7 @@ class ValidationReport(BaseModel):
     probability_of_backtest_overfitting: float = Field(description="Probability of Backtest Overfitting (PBO)")
     bootstrap_sharpe_quantile_5: float = Field(description="5th percentile Sharpe Ratio from block bootstrap")
     is_statistically_significant: bool = Field(description="True if DSR and adjusted p-value meet targets")
-    validated_at: datetime = Field(default_factory=datetime.utcnow)
+    validated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class Model(BaseModel):
@@ -112,7 +112,7 @@ class Model(BaseModel):
     capacity_limit_usd: float = Field(description="Estimated maximum liquidity-based capacity limit")
     correlation_to_portfolio: float = Field(description="Historical correlation to active portfolio")
     status: str = Field("PROMOTED", description="PROMOTED | LIVE | REJECTED | SUSPENDED")
-    promoted_at: datetime = Field(default_factory=datetime.utcnow)
+    promoted_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
 
@@ -128,7 +128,7 @@ class DecisionRecord(BaseModel):
     rejection_rationales: List[str] = Field(default_factory=list)
     previous_log_hash: str = Field("", description="SHA-256 hash of the previous audit log entry")
     entry_hash: str = Field("", description="SHA-256 hash over this entry + previous_log_hash")
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     def calculate_entry_hash(self) -> str:
         """Compute the unique cryptographically-chained entry hash."""

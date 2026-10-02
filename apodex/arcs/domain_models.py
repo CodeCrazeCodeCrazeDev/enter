@@ -1,6 +1,6 @@
 from __future__ import annotations
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 from sqlmodel import Field, SQLModel
 
@@ -14,7 +14,7 @@ class Tenant(SQLModel, table=True):
     name: str
     api_key_hash: str
     status: str = "active"  # active, suspended
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class Customer(SQLModel, table=True):
@@ -29,7 +29,7 @@ class Customer(SQLModel, table=True):
     currency: str = "USD"
     balance_cents: int = 0
     status: str = "active"  # active, suspended, canceled
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class Product(SQLModel, table=True):
@@ -45,7 +45,7 @@ class Product(SQLModel, table=True):
     amount_cents: int
     currency: str = "USD"
     status: str = "draft"  # draft, active, retired
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class Invoice(SQLModel, table=True):
@@ -61,7 +61,7 @@ class Invoice(SQLModel, table=True):
     status: str = "draft"  # draft, pending, paid, unpaid, suspended
     due_at: datetime
     paid_at: Optional[datetime] = None
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class LedgerEntry(SQLModel, table=True):
@@ -76,4 +76,4 @@ class LedgerEntry(SQLModel, table=True):
     debit_cents: int = 0
     credit_cents: int = 0
     description: str
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

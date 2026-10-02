@@ -6,7 +6,7 @@ Validates execution paths, telemetry emission, and operator correctness contract
 from __future__ import annotations
 
 import pytest
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import uuid4
 
 from apodex.memory.cmos.models import MemoryNode, MemoryEdge, CMOSNodeType, CMOSEdgeType, NodeState, ProvenanceBlock
@@ -42,7 +42,7 @@ def test_context():
 def test_provenance():
     return ProvenanceBlock(
         origin="ops_suite",
-        timestamp=datetime.utcnow(),
+        timestamp=datetime.now(timezone.utc),
         creator_id="ops_agent",
         confidence=1.0
     )

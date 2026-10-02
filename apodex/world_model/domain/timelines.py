@@ -1,5 +1,5 @@
 from __future__ import annotations
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid4
 from pydantic import BaseModel, Field
@@ -17,8 +17,8 @@ class Timeline(BaseModel):
     timeline_id: UUID = Field(default_factory=uuid4)
     parent_timeline_id: Optional[UUID] = None  # None for main reality timeline
     name: str
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    branch_point_sim_time: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    branch_point_sim_time: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     deltas: List[WorldGraphDelta] = Field(default_factory=list)
     is_committed: bool = False
 

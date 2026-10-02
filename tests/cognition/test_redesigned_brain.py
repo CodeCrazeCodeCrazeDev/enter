@@ -4,7 +4,7 @@ from __future__ import annotations
 import math
 import uuid
 import pytest
-from datetime import datetime
+from datetime import datetime, timezone
 
 from apodex.cognition.brain import (
     CognitiveBrain,
@@ -122,10 +122,10 @@ def test_phase4_memory_consolidation_and_ebbinghaus_forgetting() -> None:
         confidence=1.0
     )
     # Set historical timestamp
-    fact1.last_updated = datetime.utcnow().timestamp() - 10.0
+    fact1.last_updated = datetime.now(timezone.utc).timestamp() - 10.0
 
     # Test Ebbinghaus forgetting decay: C(t) = 1.0 * e^(-0.1 * 10) = e^(-1) ≈ 0.3678
-    memory.apply_ebbinghaus_forgetting(datetime.utcnow().timestamp())
+    memory.apply_ebbinghaus_forgetting(datetime.now(timezone.utc).timestamp())
     assert pytest.approx(memory.semantic_memory[fact1.id].confidence, abs=1e-3) == math.exp(-1.0)
 
     # Test episodic logging and memory consolidation sweep

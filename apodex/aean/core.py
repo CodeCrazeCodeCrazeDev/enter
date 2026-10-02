@@ -8,7 +8,7 @@ from __future__ import annotations
 import logging
 import uuid
 import random
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
 from pydantic import BaseModel, Field
 from .models import Event, Evidence, Hypothesis, Theory, DecisionProposal, AgentScope
@@ -20,7 +20,7 @@ logger = logging.getLogger("aean.core")
 # ===========================================================================
 class CostLog(BaseModel):
     call_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     engine: str
     layer: str
     token_cost: int
@@ -58,7 +58,7 @@ class SystemEconomics:
 # ===========================================================================
 class Transaction(BaseModel):
     transaction_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     lead_id: str
     amount_cents: int
     status: str = "PENDING"  # PENDING, RECONCILED, REFUNDED
@@ -203,7 +203,7 @@ class SecurityRobustness:
 # ===========================================================================
 class HITLQueueItem(BaseModel):
     item_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     source_layer: str
     description: str
     severity: str  # low, medium, high
@@ -417,7 +417,7 @@ class DecisionLifecycleManager:
         if prop and prop.status == "simulating":
             prop.status = "approved"
             prop.approval["approved_by"] = approved_by
-            prop.approval["approved_at"] = datetime.utcnow()
+            prop.approval["approved_at"] = datetime.now(timezone.utc)
             self.event_manager.publish("DecisionApproved", {"proposal_id": prop.id, "approved_by": approved_by})
 
     def reject(self, prop_id: str) -> None:

@@ -39,3 +39,25 @@ class WorldModel(DirectedGraph[CausalNode, RelationEdge]):
     def register_pkc_trace(self, trace: PerceptionKnowledgeChain) -> None:
         """Register a search or reasoning trace with the World Model."""
         self.pkc_traces[str(trace.trace_id)] = trace
+
+    def create_node(self, node: CausalNode) -> None:
+        """Alias for add_node to support unified 4-layer WorldModel creation contract."""
+        self.add_node(node)
+
+    def update_belief(self, hypothesis_id: str, evidence_signal: float, source_agent: str = "system") -> None:
+        """Update or initialize a Bayesian belief entry in the world model."""
+        from apodex.world_model.domain.beliefs import Belief
+        if hypothesis_id in self.beliefs:
+            existing = self.beliefs[hypothesis_id]
+            if isinstance(existing, Belief):
+                existing.prior_probability = 0.5 * existing.prior_probability + 0.5 * evidence_signal
+            else:
+                existing["prior_probability"] = 0.5 * existing.get("prior_probability", 0.5) + 0.5 * evidence_signal
+        else:
+            belief = Belief(
+                belief_id=hypothesis_id,
+                target_id=hypothesis_id,
+                probability=evidence_signal,
+                evidence=[f"source:{source_agent}"]
+            )
+            self.beliefs[hypothesis_id] = belief

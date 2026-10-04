@@ -60,3 +60,20 @@ class HiveMind:
 
     def granted_tasks(self, grants: List[Grant]) -> Dict[str, bool]:
         return {g.task: g.granted for g in grants}
+
+    def register_research_insight(
+        self,
+        task: str,
+        priority: float = 0.8,
+        expected_value: float = 0.9,
+        token_cost: int = 10
+    ) -> TaskBid:
+        """Register a research insight from Research OS as a bid in the HiveMind token auction."""
+        bid = TaskBid(
+            task=task,
+            priority=priority,
+            expected_value=expected_value,
+            token_cost=token_cost
+        )
+        logger.info(f"[HiveMind] Registered research insight task bid: '{task}' with score {bid.score:.4f}")
+        return bid

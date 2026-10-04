@@ -113,6 +113,28 @@ class EIOSKernel:
 
         return False
 
+    def register_research_hypothesis(self, hypothesis_id: str, title: str) -> None:
+        """Register research hypothesis into EIOS Kernel active inference sensing context."""
+        logger.info(f"[Kernel] Registered research hypothesis: '{title}' [{hypothesis_id}]")
+        self.metrics_history.append({
+            "event": "hypothesis_registered",
+            "hypothesis_id": hypothesis_id,
+            "title": title,
+            "timestamp": datetime.now(UTC).isoformat()
+        })
+
+    def sense_opportunity_anomalies(self, domain: str, expected_free_energy: float) -> Dict[str, Any]:
+        """Active Inference EFE sensing over environmental opportunity anomalies."""
+        has_anomaly = expected_free_energy > 0.5
+        status = "ANOMALY_TRIGGERED" if has_anomaly else "NOMINAL"
+        logger.info(f"[Kernel] Active Inference Sensing for {domain}: EFE={expected_free_energy:.4f} -> {status}")
+        return {
+            "domain": domain,
+            "expected_free_energy": expected_free_energy,
+            "status": status,
+            "action_required": has_anomaly
+        }
+
 
 class EntrepreneurialCompiler:
     """Translates high-level business goals into a structured, executable DAG (Layer 18 Compiler)."""

@@ -505,3 +505,39 @@ class EOSEngine:
             "research_portfolio_cents": self.portfolio_manager.research_budget_cents,
             "venture_portfolio_cents": self.portfolio_manager.venture_budget_cents
         }
+
+    def ingest_validated_research(self, hypothesis: Any) -> None:
+        """Ingest a validated research hypothesis from ResearchOS into EOS HypothesisEngine."""
+        if isinstance(hypothesis, Hypothesis):
+            hyp_obj = hypothesis
+        elif hasattr(hypothesis, "hypothesis_id"):
+            hyp_obj = Hypothesis(
+                hypothesis_id=hypothesis.hypothesis_id,
+                statement=getattr(hypothesis, "description", getattr(hypothesis, "statement", "Research hypothesis")),
+                domain=getattr(hypothesis, "domain", "research")
+            )
+        else:
+            hyp_obj = Hypothesis(
+                hypothesis_id=uuid4(),
+                statement=str(hypothesis),
+                domain="research"
+            )
+        self.hypothesis_engine.add_hypothesis(hyp_obj)
+        logger.info(f"[EOSEngine] Ingested validated research hypothesis: {getattr(hyp_obj, 'statement', str(hyp_obj.hypothesis_id))}")
+
+    @property
+    def active_hypotheses(self) -> List[Any]:
+        """Return active research hypotheses in the EOS engine."""
+        return list(self.hypothesis_engine.hypotheses.values())
+
+    def evaluate_opportunity_efe(self, opportunity: Any) -> float:
+        """
+        Active Inference Expected Free Energy (EFE) calculation for opportunity nodes.
+        EFE = - (Epistemic Information Gain) + Risk Penalty (Discounted by Market Uncertainty).
+        """
+        uncertainty = self.world_model.calculate_state_entropy() if hasattr(self.world_model, "calculate_state_entropy") else 0.2
+        expected_value = getattr(opportunity, "expected_value", 0.8)
+        epistemic_gain = getattr(opportunity, "epistemic_value", 0.5) * uncertainty
+        risk_discount = 1.0 / (1.0 + (uncertainty ** 2))
+        efe_score = (expected_value * risk_discount) + epistemic_gain
+        return float(efe_score)

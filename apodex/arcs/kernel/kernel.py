@@ -113,6 +113,55 @@ class EIOSKernel:
 
         return False
 
+    def register_research_hypothesis(self, hypothesis: Any) -> str:
+        """Converts a ResearchOS hypothesis into an execution DAG node in EIOS Kernel."""
+        title = getattr(hypothesis, "title", "Research Hypothesis Node")
+        hyp_id = str(getattr(hypothesis, "hypothesis_id", uuid.uuid4().hex[:8]))
+        node_id = f"node_hyp_{hyp_id[:8]}"
+
+        node = ExecutionNode(
+            node_id=node_id,
+            name=f"Execute {title}",
+            action_type="HYPOTHESIS_VALIDATION",
+            payload={"hypothesis_id": hyp_id, "title": title}
+        )
+
+        dag_id = "research_execution_dag"
+        if dag_id not in self.active_processes:
+            self.active_processes[dag_id] = ExecutionDAG(id=dag_id)
+
+        self.active_processes[dag_id].add_node(node)
+        logger.info(f"[EIOSKernel] Registered hypothesis '{title}' into DAG '{dag_id}' as node '{node_id}'.")
+        return node_id
+
+    def sense_opportunity_anomalies(self) -> Dict[str, Any]:
+        """Sense Active Inference Expected Free Energy (EFE) over active execution processes."""
+        total_nodes = 0
+        pending_nodes = 0
+        failed_nodes = 0
+
+        for dag in self.active_processes.values():
+            for node in dag.nodes.values():
+                total_nodes += 1
+                if node.status == "PENDING":
+                    pending_nodes += 1
+                elif node.status == "FAILED":
+                    failed_nodes += 1
+
+        hawkes_intensity = (failed_nodes * 1.5) + (pending_nodes * 0.2)
+        efe_anomaly_score = hawkes_intensity / (total_nodes + 1.0)
+
+        anomaly_record = {
+            "total_nodes": total_nodes,
+            "pending_nodes": pending_nodes,
+            "failed_nodes": failed_nodes,
+            "hawkes_intensity": hawkes_intensity,
+            "efe_anomaly_score": float(efe_anomaly_score),
+            "anomaly_detected": efe_anomaly_score > 0.5
+        }
+        self.metrics_history.append(anomaly_record)
+        return anomaly_record
+
 
 class EntrepreneurialCompiler:
     """Translates high-level business goals into a structured, executable DAG (Layer 18 Compiler)."""

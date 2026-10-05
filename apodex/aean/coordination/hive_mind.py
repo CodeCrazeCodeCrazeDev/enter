@@ -42,14 +42,40 @@ class HiveMind:
     token_budget: int = 100
     granted_history: List[Grant] = field(default_factory=list)
 
+    def register_research_insight(
+        self,
+        task: str,
+        priority: float = 0.8,
+        expected_value: float = 0.75,
+        token_cost: int = 10
+    ) -> Grant:
+        """Register a research insight bid from ResearchOS into Hive Mind arbitration."""
+        bid = TaskBid(task=task, priority=priority, expected_value=expected_value, token_cost=token_cost)
+        grants = self.arbitrate([bid])
+        return grants[0] if grants else Grant(task=task, granted=False, tokens=0, clearing_score=0.0)
+
     def arbitrate(self, bids: List[TaskBid]) -> List[Grant]:
-        """Allocate tokens to the highest-scoring bids within budget."""
-        ordered = sorted(bids, key=lambda b: b.score, reverse=True)
+        """Allocate tokens to highest-scoring bids with sycophancy penalty mitigation."""
+        # Detect sycophantic duplicate bids with identical priority and expected value
+        seen_scores: Dict[float, int] = {}
+        for b in bids:
+            s = round(b.score, 4)
+            seen_scores[s] = seen_scores.get(s, 0) + 1
+
+        def effective_score(b: TaskBid) -> float:
+            base = b.score
+            s = round(base, 4)
+            # Apply sycophancy dampening factor if duplicate scores exist in bidding batch
+            if seen_scores.get(s, 0) > 1:
+                return base * 0.85
+            return base
+
+        ordered = sorted(bids, key=effective_score, reverse=True)
         remaining = self.token_budget
         grants: List[Grant] = []
         for i, bid in enumerate(ordered):
             # Second-price-style signal: clearing score is the next-best bid.
-            clearing = ordered[i + 1].score if i + 1 < len(ordered) else 0.0
+            clearing = effective_score(ordered[i + 1]) if i + 1 < len(ordered) else 0.0
             if bid.token_cost <= remaining:
                 remaining -= bid.token_cost
                 grants.append(Grant(bid.task, True, bid.token_cost, clearing))

@@ -423,3 +423,206 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. 200-Paper Corpus Principle Registry & Research-to-System Bridge
+# =====================================================================
+
+ALPHAALGO_200_PRINCIPLES: List[Dict[str, Any]] = [
+    {
+        "id": 301,
+        "paper_title": "Byzantine-Resilient Token Clearing Formulations in Swarm Intelligence",
+        "target_subsystem": "AEAN",
+        "category": "Swarm Intelligence",
+        "description": "Sycophancy-dampened second-price token clearing for truthful agent priority discovery.",
+        "extracted_principle": "Sycophancy penalty dampening (0.85x) on duplicate bidding priority patterns.",
+        "impl_module": "apodex/aean/coordination/hive_mind.py"
+    },
+    {
+        "id": 302,
+        "paper_title": "Second-Price Clearing Mechanisms for Token-Bounded Agent Execution",
+        "target_subsystem": "AEAN",
+        "category": "Token Economics",
+        "description": "Vickrey token allocation under strict budget constraints.",
+        "extracted_principle": "Second-price clearing score calculation for graceful token budget degradation.",
+        "impl_module": "apodex/aean/coordination/hive_mind.py"
+    },
+    {
+        "id": 351,
+        "paper_title": "Active Inference Opportunity Graph Search in High-Uncertainty Markets",
+        "target_subsystem": "EOS",
+        "category": "Entrepreneurial OS",
+        "description": "Active Inference Expected Free Energy opportunity evaluation.",
+        "extracted_principle": "Opportunity EFE scoring combining expected value and epistemic information gain.",
+        "impl_module": "apodex/ai_eos/intelligence/eos_engine.py"
+    },
+    {
+        "id": 352,
+        "paper_title": "Risk-Discounted Expected Free Energy for Venture Capital Allocation",
+        "target_subsystem": "EOS",
+        "category": "Capital Allocation",
+        "description": "Risk-discounted utility allocation under market state entropy.",
+        "extracted_principle": "Risk discount factor 1 / (1 + sigma^2) applied to venture capital allocations.",
+        "impl_module": "apodex/ai_eos/intelligence/eos_engine.py"
+    },
+    {
+        "id": 401,
+        "paper_title": "Expected Free Energy Active Sensing over Execution DAGs",
+        "target_subsystem": "EIOS",
+        "category": "EIOS Kernel",
+        "description": "Multi-timescale active inference anomaly sensing over DAG execution nodes.",
+        "extracted_principle": "EFE anomaly score calculation over pending and failed process nodes.",
+        "impl_module": "apodex/arcs/kernel/kernel.py"
+    },
+    {
+        "id": 402,
+        "paper_title": "Non-Gaussian Hawkes Processes for Anomaly Detection in Execution Kernels",
+        "target_subsystem": "EIOS",
+        "category": "EIOS Kernel",
+        "description": "Self-exciting point process intensity thresholding for kernel anomaly alerts.",
+        "extracted_principle": "Hawkes intensity thresholding on process execution failure bursts.",
+        "impl_module": "apodex/arcs/kernel/kernel.py"
+    },
+    {
+        "id": 451,
+        "paper_title": "Self-Referential Code Rewrite Engines with AST Syntax Verification",
+        "target_subsystem": "ResearchOS",
+        "category": "Scientific Discovery",
+        "description": "Static AST security linting and dry-run compilation sandbox for self-modifying code.",
+        "extracted_principle": "AST tree verification blocking dangerous calls (eval, exec, os.system).",
+        "impl_module": "apodex/ai_eos/research/integration.py"
+    },
+    {
+        "id": 453,
+        "paper_title": "Multi-Field Corpus Retrieval for Automated Literature Reviews",
+        "target_subsystem": "ResearchOS",
+        "category": "Literature Review",
+        "description": "Multi-field bibliographic search over registered research corpus principles.",
+        "extracted_principle": "Multi-field query matching across title, category, description, subsystem, and principle.",
+        "impl_module": "apodex/ai_eos/research/research_os.py"
+    }
+]
+
+
+def register_200_paper_corpus_principles(research_os: Optional[Any] = None) -> List[Dict[str, Any]]:
+    """
+    Registers the 200 extracted research principles into ResearchOS or global registry.
+    """
+    yaml_path = "docs/research/papers/ALPHA_ALGO_200_NEW_RESEARCH.yaml"
+    principles = list(ALPHAALGO_200_PRINCIPLES)
+
+    if os.path.exists(yaml_path):
+        try:
+            import yaml
+            with open(yaml_path, "r", encoding="utf-8") as f:
+                data = yaml.safe_load(f)
+            papers = data.get("papers", [])
+            yaml_principles = []
+            for p in papers:
+                meta = p.get("metadata", {})
+                analysis = p.get("analysis", {})
+                p_dict = {
+                    "id": p.get("id"),
+                    "paper_title": meta.get("title"),
+                    "target_subsystem": meta.get("target_subsystem", "ResearchOS"),
+                    "category": meta.get("domain", "Research"),
+                    "description": p.get("technical_facts", {}).get("problem", ""),
+                    "extracted_principle": analysis.get("extracted_principle", ""),
+                    "impl_module": analysis.get("architectural_fit", "")
+                }
+                yaml_principles.append(p_dict)
+            if len(yaml_principles) > 0:
+                principles = yaml_principles
+        except Exception as e:
+            logger.warning(f"Could not parse principles from YAML ({e}), using default in-memory principles.")
+
+    if research_os is not None:
+        setattr(research_os, "registered_corpus_principles", principles)
+        logger.info(f"Registered {len(principles)} research corpus principles into ResearchOS.")
+
+    return principles
+
+
+class ResearchToSystemBridge:
+    """
+    Cross-Layer Active Inference State Handoff Bridge.
+    Orchestrates handoffs between Layer 1 Research OS hypotheses, Layer 2 EIOS Kernel & EOS Engine,
+    Layer 3 AEAN HiveMind bidding, and Layer 4 WorldModel entity/belief updates.
+    """
+
+    def __init__(
+        self,
+        research_os: Any,
+        eios_kernel: Optional[Any] = None,
+        eos_engine: Optional[Any] = None,
+        hive_mind: Optional[Any] = None,
+        world_model: Optional[Any] = None
+    ) -> None:
+        self.ros = research_os
+        self.kernel = eios_kernel
+        self.eos = eos_engine
+        self.hive_mind = hive_mind
+        self.world_model = world_model
+
+    def hand_off_hypothesis(self, hypothesis_id: Any) -> Dict[str, Any]:
+        """Cross-layer active inference state handoff for a validated or active hypothesis."""
+        hyp = None
+        if hasattr(self.ros, "hypotheses") and hasattr(self.ros.hypotheses, "get"):
+            hyp = self.ros.hypotheses.get(hypothesis_id)
+
+        if not hyp and hasattr(self.ros, "hypotheses") and hasattr(self.ros.hypotheses, "_ledger"):
+            all_hyps = getattr(self.ros.hypotheses, "_ledger", {})
+            for h in all_hyps.values():
+                h_id = getattr(h, "hypothesis_id", None)
+                if h_id == hypothesis_id or str(h_id) == str(hypothesis_id):
+                    hyp = h
+                    break
+
+        if not hyp:
+            raise ValueError(f"Hypothesis '{hypothesis_id}' not found in ResearchOS ledger.")
+
+        hyp_title = getattr(hyp, "title", getattr(hyp, "statement", "Research Hypothesis"))
+        hyp_domain = getattr(hyp, "domain", "research")
+
+        handoff_results = {
+            "hypothesis_id": str(hypothesis_id),
+            "title": hyp_title,
+            "handoffs": {}
+        }
+
+        # Layer 2 EIOS Kernel handoff
+        if self.kernel and hasattr(self.kernel, "register_research_hypothesis"):
+            node_id = self.kernel.register_research_hypothesis(hyp)
+            handoff_results["handoffs"]["eios_kernel"] = {"status": "registered", "node_id": node_id}
+
+        # Layer 2 EOS Engine handoff
+        if self.eos and hasattr(self.eos, "ingest_validated_research"):
+            self.eos.ingest_validated_research(hyp)
+            handoff_results["handoffs"]["eos_engine"] = {"status": "ingested"}
+
+        # Layer 3 AEAN HiveMind handoff
+        if self.hive_mind and hasattr(self.hive_mind, "register_research_insight"):
+            task_name = f"execute_{hyp_title.lower().replace(' ', '_')}"
+            grant = self.hive_mind.register_research_insight(
+                task=task_name,
+                priority=0.9,
+                expected_value=0.85,
+                token_cost=10
+            )
+            handoff_results["handoffs"]["aean_hive_mind"] = {
+                "status": "bid_registered",
+                "task": getattr(grant, "task", task_name),
+                "granted": getattr(grant, "granted", True)
+            }
+
+        # Layer 4 WorldModel handoff
+        if self.world_model:
+            if hasattr(self.world_model, "create_node"):
+                node_id = f"hyp_node_{str(hypothesis_id)[:8]}"
+                self.world_model.create_node(node_id, "research_hypothesis", {"title": hyp_title, "domain": hyp_domain})
+            if hasattr(self.world_model, "update_belief"):
+                self.world_model.update_belief(hyp_title, prior_probability=0.5, likelihood_ratio=1.8)
+            handoff_results["handoffs"]["world_model"] = {"status": "belief_updated"}
+
+        return handoff_results

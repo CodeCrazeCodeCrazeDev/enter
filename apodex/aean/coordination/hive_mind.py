@@ -60,3 +60,16 @@ class HiveMind:
 
     def granted_tasks(self, grants: List[Grant]) -> Dict[str, bool]:
         return {g.task: g.granted for g in grants}
+
+    def register_research_insight(self, insight: Dict[str, Any]) -> TaskBid:
+        """Register a research insight into the HiveMind token bidding registry."""
+        bid = TaskBid(
+            task=f"ResearchTask:{insight.get('title', 'Untitled')}",
+            priority=0.9,
+            expected_value=1.5,
+            token_cost=10
+        )
+        if not hasattr(self, "registered_insights"):
+            self.registered_insights = []
+        self.registered_insights.append(insight)
+        return bid

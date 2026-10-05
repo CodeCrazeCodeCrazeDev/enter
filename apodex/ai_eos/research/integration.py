@@ -423,3 +423,98 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. Cross-Layer Active Inference ResearchToSystemBridge
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Cross-layer active inference state handoff bridge.
+    Orchestrates the unified 4-layer cognitive architecture:
+      - Layer 1: Research OS (Hypothesis generation & scientific validation)
+      - Layer 2: EIOS Kernel & EOS Engine (Opportunity sensing, DAG compilation, active inference planning)
+      - Layer 3: AEAN (HiveMind token-bidding multi-agent task dispatch & strategy execution)
+      - Layer 4: APODEX Platform (Causal World Model graph creation & recursive Bayesian belief updates)
+    """
+
+    def __init__(
+        self,
+        research_os: Any,
+        eios_kernel: Optional[Any] = None,
+        eos_engine: Optional[Any] = None,
+        hive_mind: Optional[Any] = None,
+        world_model: Optional[Any] = None
+    ) -> None:
+        self.research_os = research_os
+        self.eios_kernel = eios_kernel
+        self.eos_engine = eos_engine
+        self.hive_mind = hive_mind
+        self.world_model = world_model
+
+    def execute_active_inference_handoff(self, hypothesis_id: UUID) -> Dict[str, Any]:
+        """
+        Executes a closed-loop active inference handoff across all 4 cognitive layers.
+        """
+        # Layer 1: Research OS
+        hyp = self.research_os.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis '{hypothesis_id}' not found in Research OS.")
+
+        handoff_record: Dict[str, Any] = {
+            "hypothesis_id": str(hypothesis_id),
+            "title": hyp.title,
+            "status": hyp.status,
+            "layer1_research_os": {"validated": hyp.status in {"validated", "active"}},
+            "layer2_eios_eos": {},
+            "layer3_aean": {},
+            "layer4_apodex": {}
+        }
+
+        # Layer 2: EIOS / EOS Engine
+        if self.eos_engine is not None:
+            if hasattr(self.eos_engine, "ingest_validated_research"):
+                self.eos_engine.ingest_validated_research(hyp)
+            handoff_record["layer2_eios_eos"]["eos_ingested"] = True
+
+        if self.eios_kernel is not None:
+            if hasattr(self.eios_kernel, "register_research_hypothesis"):
+                self.eios_kernel.register_research_hypothesis(hyp)
+            if hasattr(self.eios_kernel, "sense_opportunity_anomalies"):
+                anomalies = self.eios_kernel.sense_opportunity_anomalies(domain=hyp.target_metric)
+                handoff_record["layer2_eios_eos"]["anomalies_sensed"] = len(anomalies)
+
+        # Layer 3: AEAN HiveMind Multi-Agent Coordination
+        if self.hive_mind is not None:
+            if hasattr(self.hive_mind, "register_research_insight"):
+                insight_record = {
+                    "insight_id": str(uuid4()),
+                    "title": hyp.title,
+                    "domain": hyp.target_metric,
+                    "description": hyp.description
+                }
+                self.hive_mind.register_research_insight(insight_record)
+                handoff_record["layer3_aean"]["insight_registered"] = True
+
+        # Layer 4: APODEX Platform Causal World Model & Beliefs
+        if self.world_model is not None:
+            if hasattr(self.world_model, "create_node"):
+                node = self.world_model.create_node(
+                    name=f"HypothesisNode_{hyp.title[:20]}",
+                    node_type="research_hypothesis",
+                    attributes={"domain": hyp.target_metric, "status": hyp.status}
+                )
+                handoff_record["layer4_apodex"]["node_id"] = str(node.node_id) if hasattr(node, "node_id") else str(node)
+
+            if hasattr(self.world_model, "update_belief"):
+                confidence = 0.95 if hyp.status in {"validated", "active"} else 0.5
+                belief = self.world_model.update_belief(
+                    subject=hyp.title,
+                    predicate="is_valid_research",
+                    confidence=confidence,
+                    evidence=[f"ResearchOS_experiment_{hypothesis_id}"]
+                )
+                handoff_record["layer4_apodex"]["belief_updated"] = True
+
+        return handoff_record

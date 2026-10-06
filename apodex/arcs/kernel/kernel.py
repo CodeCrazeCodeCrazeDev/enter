@@ -63,6 +63,28 @@ class EIOSKernel:
     def __init__(self) -> None:
         self.active_processes: Dict[str, ExecutionDAG] = {}
         self.metrics_history: List[Dict[str, Any]] = []
+        self.registered_hypotheses: List[Any] = []
+
+    def register_research_hypothesis(self, hypothesis: Any) -> None:
+        """Register research hypothesis from Layer 1 Research OS."""
+        self.registered_hypotheses.append(hypothesis)
+        logger.info(f"[EIOSKernel] Registered hypothesis: {getattr(hypothesis, 'title', str(hypothesis))}")
+
+    def sense_opportunity_anomalies(self, market_signals: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Sense market anomalies and compute Expected Free Energy (EFE) signals."""
+        anomalies = []
+        for signal in market_signals:
+            signal_variance = signal.get("variance", 0.0)
+            if signal_variance > 0.15:
+                anomaly = {
+                    "anomaly_id": f"anom_{uuid.uuid4().hex[:8]}",
+                    "signal_name": signal.get("name", "market_signal"),
+                    "efe_value": float(signal_variance * 2.5),
+                    "description": f"High variance detected in {signal.get('name')}"
+                }
+                anomalies.append(anomaly)
+        logger.info(f"[EIOSKernel] Sensed {len(anomalies)} opportunity anomalies.")
+        return anomalies
 
     async def execute_dag(self, dag: ExecutionDAG) -> bool:
         """Schedules and executes the compiled DAG with failure recovery."""

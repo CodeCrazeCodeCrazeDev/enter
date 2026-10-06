@@ -475,6 +475,46 @@ class EOSEngine:
         self.memory = EntrepreneurialMemory()
         self.evaluator = EvaluationFramework()
 
+    @property
+    def active_hypotheses(self) -> List[Any]:
+        """Returns active/validated hypotheses managed inside the HypothesisEngine."""
+        return [
+            hyp for hyp in self.hypothesis_engine.hypotheses.values()
+            if getattr(hyp, "status", None) in {"active", "validated"}
+        ]
+
+    def ingest_validated_research(self, hypothesis: Any) -> None:
+        """Ingests validated research hypothesis into EOS opportunity graph & hypothesis engine."""
+        hyp_id = getattr(hypothesis, "hypothesis_id", uuid4())
+        hyp_title = getattr(hypothesis, "title", "validated_research")
+
+        if hasattr(hypothesis, "status") and getattr(hypothesis, "status", None) not in {"active", "validated"}:
+            setattr(hypothesis, "status", "active")
+
+        # 1. Register with HypothesisEngine if not present
+        if isinstance(hypothesis, Hypothesis):
+            self.hypothesis_engine.add_hypothesis(hypothesis)
+        else:
+            # Create a model Hypothesis
+            new_hyp = Hypothesis(
+                hypothesis_id=hyp_id if isinstance(hyp_id, UUID) else uuid4(),
+                statement=getattr(hypothesis, "description", hyp_title),
+                domain=getattr(hypothesis, "target_metric", "general"),
+                status="active"
+            )
+            self.hypothesis_engine.add_hypothesis(new_hyp)
+
+        # 2. Register opportunity node
+        op_id = f"op_{str(hyp_id)[:8]}"
+        keywords = hyp_title.lower().split() + ["validated_research"]
+        self.opportunity_graph.add_opportunity(
+            op_id=op_id,
+            name=hyp_title,
+            value_cents=100000_00,
+            keywords=keywords
+        )
+        logger.info(f"[EOSEngine] Ingested validated research: '{hyp_title}' into Opportunity Graph [id={op_id}]")
+
     def run_continuous_sensing_cycle(self, cells: List[VentureCell], total_budget_cents: int) -> Dict[str, Any]:
         """Execute one complete hierarchical sensing, planning, allocation, and diagnostic loop."""
         # 1. World State sensing & transitions

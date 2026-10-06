@@ -423,3 +423,88 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. Cross-Layer Active Inference Research-to-System Bridge
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Orchestrates cross-layer active inference state handoffs across:
+    - Layer 1: Research OS hypothesis generation and validation
+    - Layer 2: EIOS Kernel DAG execution & EOS Engine capital allocation
+    - Layer 3: AEAN HiveMind task bidding and multi-agent coordination
+    - Layer 4: APODEX WorldModel causal graph nodes and Bayesian belief updating
+    """
+
+    def __init__(
+        self,
+        research_os: Any = None,
+        eios_kernel: Any = None,
+        eos_engine: Any = None,
+        hive_mind: Any = None,
+        world_model: Any = None
+    ) -> None:
+        self.research_os = research_os
+        self.eios_kernel = eios_kernel
+        self.eos_engine = eos_engine
+        self.hive_mind = hive_mind
+        self.world_model = world_model
+        self.handoff_history: List[Dict[str, Any]] = []
+
+    def execute_cross_layer_handoff(self, hypothesis: Any) -> Dict[str, Any]:
+        """
+        Executes a 4-layer active inference state handoff for a given validated hypothesis.
+        """
+        results: Dict[str, Any] = {
+            "hypothesis_id": str(getattr(hypothesis, "hypothesis_id", uuid4())),
+            "layer1_research_status": getattr(hypothesis, "status", "unknown"),
+            "layer2_eos_ingested": False,
+            "layer2_kernel_sensed": False,
+            "layer3_hive_mind_bid": False,
+            "layer4_world_model_updated": False,
+        }
+
+        # 1. Ingest into EOS Engine
+        if self.eos_engine and hasattr(self.eos_engine, "ingest_validated_research"):
+            self.eos_engine.ingest_validated_research(hypothesis)
+            results["layer2_eos_ingested"] = True
+
+        # 2. Register into EIOS Kernel
+        if self.eios_kernel and hasattr(self.eios_kernel, "register_research_hypothesis"):
+            self.eios_kernel.register_research_hypothesis(hypothesis)
+            results["layer2_kernel_sensed"] = True
+
+        # 3. Register into AEAN HiveMind
+        if self.hive_mind and hasattr(self.hive_mind, "register_research_insight"):
+            self.hive_mind.register_research_insight(
+                task_name=f"execute_{getattr(hypothesis, 'title', 'hypothesis')}",
+                priority=0.85,
+                expected_value=0.90,
+                token_cost=15
+            )
+            results["layer3_hive_mind_bid"] = True
+
+        # 4. Update APODEX WorldModel
+        if self.world_model:
+            hyp_title = getattr(hypothesis, "title", "validated_hypothesis")
+            hyp_id = str(getattr(hypothesis, "hypothesis_id", uuid4()))
+            if hasattr(self.world_model, "create_node"):
+                self.world_model.create_node(
+                    node_id=hyp_id,
+                    node_type="research_hypothesis",
+                    properties={"title": hyp_title, "status": getattr(hypothesis, "status", "validated")}
+                )
+            if hasattr(self.world_model, "update_belief"):
+                self.world_model.update_belief(
+                    belief_key=f"belief_{hyp_title}",
+                    prior_prob=0.50,
+                    posterior_prob=getattr(hypothesis, "posterior_confidence", 0.95),
+                    evidence_count=1
+                )
+            results["layer4_world_model_updated"] = True
+
+        self.handoff_history.append(results)
+        logger.info(f"[ResearchToSystemBridge] Cross-layer handoff completed for {results['hypothesis_id']}")
+        return results

@@ -1,6 +1,7 @@
 from __future__ import annotations
 import uuid
 import logging
+import math
 from enum import Enum
 from datetime import datetime, UTC
 from typing import Any, Dict, List, Optional, Tuple
@@ -57,12 +58,51 @@ class ExecutionDAG(BaseModel):
 class EIOSKernel:
     """The central core of the Entrepreneurial Intelligence Operating System.
 
-    Manages task scheduling, failure recovery (retries), and model routing.
+    Manages task scheduling, failure recovery (retries), active inference sensing, and model routing.
     """
 
     def __init__(self) -> None:
         self.active_processes: Dict[str, ExecutionDAG] = {}
         self.metrics_history: List[Dict[str, Any]] = []
+        self.registered_hypotheses: Dict[str, Dict[str, Any]] = {}
+
+    def register_research_hypothesis(self, title: str, description: str) -> None:
+        """Ingest a research hypothesis from Research OS into EIOS Kernel active memory."""
+        hyp_id = f"hyp_{uuid.uuid4().hex[:8]}"
+        self.registered_hypotheses[hyp_id] = {
+            "title": title,
+            "description": description,
+            "timestamp": datetime.now(UTC).isoformat()
+        }
+        logger.info(f"[Kernel] Registered research hypothesis '{title}' [id={hyp_id}].")
+
+    def sense_opportunity_anomalies(self, opportunities: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """
+        Senses opportunity anomalies using Active Inference Expected Free Energy (EFE).
+        Combines epistemic information gain and pragmatic utility to rank market opportunities.
+        """
+        scored_anomalies = []
+        for op in opportunities:
+            epistemic_surprise = float(op.get("uncertainty", 0.5))
+            pragmatic_reward = float(op.get("expected_yield", 0.5))
+            cost_penalty = float(op.get("complexity_cost", 0.1))
+
+            # Expected Free Energy: G = Complexity - Pragmatic - Epistemic
+            efe_score = epistemic_surprise + pragmatic_reward - cost_penalty
+            scored_anomalies.append({
+                "opportunity": op.get("title", op.get("name", "Unknown")),
+                "efe_score": float(efe_score),
+                "epistemic_surprise": epistemic_surprise,
+                "pragmatic_reward": pragmatic_reward
+            })
+
+        scored_anomalies.sort(key=lambda x: x["efe_score"], reverse=True)
+        logger.info(f"[Kernel] Sensed {len(scored_anomalies)} opportunity anomalies via EFE Active Inference.")
+        return {
+            "total_sensed": len(scored_anomalies),
+            "top_anomalies": scored_anomalies[:5],
+            "timestamp": datetime.now(UTC).isoformat()
+        }
 
     async def execute_dag(self, dag: ExecutionDAG) -> bool:
         """Schedules and executes the compiled DAG with failure recovery."""
@@ -75,12 +115,10 @@ class EIOSKernel:
         while loop_count < max_loops:
             executable = dag.get_executable_nodes()
             if not executable:
-                # Check if all nodes are completed
                 all_done = all(node.status == "COMPLETED" for node in dag.nodes.values())
                 if all_done:
                     logger.info(f"[Kernel] Execution DAG {dag.id} completed successfully.")
                     return True
-                # If some failed or circular reference
                 any_failed = any(node.status == "FAILED" for node in dag.nodes.values())
                 if any_failed:
                     logger.error(f"[Kernel] Execution DAG {dag.id} halted due to node failure.")
@@ -91,12 +129,10 @@ class EIOSKernel:
                 node.status = "RUNNING"
                 logger.info(f"[Kernel] Dispatching node: {node.name} ({node.action_type})")
 
-                # Simple simulated execution with auto-retry recovery logic
                 success = False
                 retries = 3
                 for attempt in range(1, retries + 1):
                     try:
-                        # Success simulations
                         success = True
                         break
                     except Exception as e:
@@ -121,11 +157,9 @@ class EntrepreneurialCompiler:
         logger.info(f"[Compiler] Compiling strategic goal: '{goal}'")
         dag = ExecutionDAG()
 
-        # Step 1: Research Node
         node_research = ExecutionNode(name="Conjoint Market Research", action_type="research_only", payload={"goal": goal})
         dag.add_node(node_research)
 
-        # Step 2: Feasibility Node (Depends on Research)
         node_feasibility = ExecutionNode(
             name="Feasibility Financial Model",
             action_type="research_only",
@@ -134,7 +168,6 @@ class EntrepreneurialCompiler:
         )
         dag.add_node(node_feasibility)
 
-        # Step 3: Brand & Positioning Node (Depends on Feasibility)
         node_brand = ExecutionNode(
             name="Brand Positioning and Trademark Check",
             action_type="publishing",
@@ -143,7 +176,6 @@ class EntrepreneurialCompiler:
         )
         dag.add_node(node_brand)
 
-        # Step 4: Execution Node (Depends on Brand)
         node_exec = ExecutionNode(
             name="Deploy GTM Ads Campaign",
             action_type="spending",
@@ -159,7 +191,6 @@ class HierarchicalActiveInference:
     """Cascading active inference tracking uncertainty reduction across organization layers (Layer 13)."""
 
     def __init__(self) -> None:
-        # Layer levels: Company -> Department -> Team -> Agent -> Action
         self.uncertainty_levels = {
             "company": 0.8,
             "department": 0.7,
@@ -171,10 +202,9 @@ class HierarchicalActiveInference:
     def calculate_layer_free_energy(self, layer: str, actual_outcome: float, expected_outcome: float) -> float:
         """Compute the Variational Free Energy for a specific layer."""
         error = actual_outcome - expected_outcome
-        complexity = 0.1 * len(layer)  # simple complexity heuristic
+        complexity = 0.1 * len(layer)
         free_energy = complexity + (error ** 2)
 
-        # Adjust estimated uncertainty based on prediction accuracy
         current_uncertainty = self.uncertainty_levels.get(layer, 0.5)
         self.uncertainty_levels[layer] = max(0.01, min(0.99, current_uncertainty + 0.1 * error))
 

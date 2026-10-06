@@ -39,3 +39,21 @@ class WorldModel(DirectedGraph[CausalNode, RelationEdge]):
     def register_pkc_trace(self, trace: PerceptionKnowledgeChain) -> None:
         """Register a search or reasoning trace with the World Model."""
         self.pkc_traces[str(trace.trace_id)] = trace
+
+    def create_node(self, node_id: str, node_type: str = "hypothesis", properties: Optional[Dict[str, Any]] = None) -> CausalNode:
+        """Creates and adds a CausalNode to the WorldModel multi-graph."""
+        node = CausalNode(node_id=node_id, node_type=node_type, properties=properties or {})
+        self.add_node(node)
+        return node
+
+    def update_belief(self, node_id: str, new_belief: float, evidence: str = "") -> Dict[str, Any]:
+        """Updates Bayesian posterior belief for a node in the WorldModel."""
+        belief_entry = {
+            "belief": float(new_belief),
+            "evidence": evidence,
+            "node_id": node_id
+        }
+        self.beliefs[node_id] = belief_entry
+        if node_id not in self.nodes:
+            self.create_node(node_id, node_type="hypothesis", properties=belief_entry)
+        return belief_entry

@@ -1,6 +1,6 @@
 from __future__ import annotations
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
@@ -61,7 +61,7 @@ class SkillExecutionLog(BaseModel):
     output_payload: Dict[str, Any] = Field(default_factory=dict)
     anchors_hit: List[str] = Field(default_factory=list)
     metrics_lift: Dict[str, float] = Field(default_factory=dict)
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class SkillScorecard(BaseModel):
@@ -113,7 +113,7 @@ class PlaybookUnit(BaseModel):
     win_rate: float = 0.0
     avg_revenue_lift: float = 0.0
     avg_cost_credits: float = 0.0
-    last_revalidated: datetime = Field(default_factory=datetime.utcnow)
+    last_revalidated: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class LearnFeedState(BaseModel):
@@ -137,4 +137,4 @@ class DecisionLog(BaseModel):
     cleared_by_compliance: bool = True
     cleared_by_human: bool = True
     channel: str = "default_channel"
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

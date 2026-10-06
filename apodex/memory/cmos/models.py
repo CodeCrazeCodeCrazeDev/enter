@@ -5,7 +5,7 @@ Defines the specialized nodes and edges constituting the active CMOS Memory Grap
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid4
@@ -44,7 +44,7 @@ class NodeState(str, Enum):
 class ProvenanceBlock(BaseModel):
     """Immutable metadata tracking the origin, creation, and authorization of memory entities."""
     origin: str = Field(..., description="Subsystem or component that generated this entity.")
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     creator_id: str = Field(..., description="Identifier of the executing agent or actor.")
     confidence: float = Field(0.5, ge=0.0, le=1.0)
     git_sha: str = Field("unknown", description="System code version fingerprint.")
@@ -62,7 +62,7 @@ class MemoryNode(BaseModel):
     provenance: ProvenanceBlock = Field(...)
     utility: float = Field(1.0, ge=0.0, description="Computed resource economics utility score.")
     retrieval_count: int = Field(0, ge=0)
-    last_retrieved_at: datetime = Field(default_factory=datetime.utcnow)
+    last_retrieved_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
 

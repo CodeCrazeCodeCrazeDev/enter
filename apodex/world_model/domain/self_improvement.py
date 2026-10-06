@@ -1,5 +1,5 @@
 from __future__ import annotations
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid4
 from pydantic import BaseModel, Field
@@ -14,7 +14,7 @@ class EngineeringFinding(BaseModel):
     line_number: Optional[int] = None
     description: str
     suggested_fix: str
-    detected_at: datetime = Field(default_factory=datetime.utcnow)
+    detected_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class BenchmarkReport(BaseModel):
@@ -40,7 +40,7 @@ class SelfImprovementProposal(BaseModel):
     status: str = "DRAFT"  # "DRAFT", "EVALUATED", "APPROVED", "REJECTED"
     associated_finding_id: Optional[UUID] = None
     benchmark_report: Optional[BenchmarkReport] = None
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     reviewed_at: Optional[datetime] = None
 
 

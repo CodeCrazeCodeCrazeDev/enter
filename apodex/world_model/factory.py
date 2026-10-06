@@ -1,5 +1,5 @@
 from __future__ import annotations
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import UUID, uuid4
 from typing import Any, Dict
 
@@ -19,8 +19,8 @@ class DomainModelFactory:
             name=name,
             entity_type=entity_type,
             properties=properties,
-            created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow()
+            created_at=datetime.now(timezone.utc),
+            updated_at=datetime.now(timezone.utc)
         )
 
     @staticmethod
@@ -41,5 +41,5 @@ class DomainModelFactory:
             belief_id=uuid4(),
             target_id=target_id,
             probability=probability,
-            last_validated=datetime.utcnow()
+            last_validated=datetime.now(timezone.utc)
         )

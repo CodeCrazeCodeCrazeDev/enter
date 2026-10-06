@@ -1,5 +1,5 @@
 from __future__ import annotations
-from datetime import datetime
+from datetime import datetime, timezone
 from hashlib import sha256
 from typing import Any, Dict, List
 from uuid import UUID, uuid4
@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 class AuditLedgerBlock(BaseModel):
     """An immutable, cryptographically chained record block inside the system audit log."""
     block_id: UUID = Field(default_factory=uuid4)
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     actor_id: str
     action: str
     payload_hash: str

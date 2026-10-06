@@ -1,5 +1,5 @@
 from __future__ import annotations
-from datetime import datetime
+from datetime import datetime, timezone
 import copy
 import hashlib
 import logging
@@ -116,7 +116,7 @@ class SelfImprovementFlywheelCoordinator:
                 "event": "budget_halt",
                 "cumulative_cost_usd": self.cumulative_cost_usd,
                 "offending_cost_usd": cost_usd,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "details": details
             })
             return False
@@ -136,7 +136,7 @@ class SelfImprovementFlywheelCoordinator:
                 "old_tier": old_tier,
                 "new_tier": "CHEAP",
                 "cumulative_cost_usd": self.cumulative_cost_usd,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "details": details
             })
 
@@ -237,7 +237,7 @@ class SelfImprovementFlywheelCoordinator:
             self.execution_log.append({
                 "status": "APPROVED",
                 "message": "No findings found during audit.",
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             })
             return proposals
 
@@ -259,7 +259,7 @@ class SelfImprovementFlywheelCoordinator:
                 self.execution_log.append({
                     "status": "CACHE_HIT",
                     "proposal_id": str(cached_proposal.proposal_id),
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(timezone.utc).isoformat()
                 })
             return proposals
 
@@ -273,7 +273,7 @@ class SelfImprovementFlywheelCoordinator:
                 self.execution_log.append({
                     "status": "INFRA_ERROR",
                     "error": f"Missing required skill: {step.skill_name}",
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(timezone.utc).isoformat()
                 })
                 return proposals
 
@@ -296,7 +296,7 @@ class SelfImprovementFlywheelCoordinator:
                     "old_tier": old_tier,
                     "new_tier": "CHEAP",
                     "steps_without_progress": steps_since_last_new_anchor,
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(timezone.utc).isoformat()
                 })
 
             if steps_since_last_new_anchor >= halt_limit:
@@ -305,7 +305,7 @@ class SelfImprovementFlywheelCoordinator:
                     "event": "budget_halt",
                     "status": "BUDGET_HALTED",
                     "reason": "Halted due to lack of anchor progress",
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(timezone.utc).isoformat()
                 })
                 return proposals
 
@@ -316,7 +316,7 @@ class SelfImprovementFlywheelCoordinator:
                 node_type="protocol_step",
                 anchors_hit=step.anchors_to_hit,
                 cost_usd=0.01 if self.current_tier != "CHEAP" else 0.001,
-                timestamp=datetime.utcnow().isoformat()
+                timestamp=datetime.now(timezone.utc).isoformat()
             )
             trace.add_hop(hop)
 
@@ -397,7 +397,7 @@ class SelfImprovementFlywheelCoordinator:
                     self.execution_log.append({
                         "status": "EVALUATOR_ERROR",
                         "error": "Failed during benchmark execution",
-                        "timestamp": datetime.utcnow().isoformat()
+                        "timestamp": datetime.now(timezone.utc).isoformat()
                     })
                     proposal.status = "REJECTED"
 

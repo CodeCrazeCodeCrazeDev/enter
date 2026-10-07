@@ -1,6 +1,7 @@
-"""Comprehensive unit, integration, and chaotic tests for the EOS Cognitive Engine.
+"""Comprehensive unit, integration, and first-principles tests for the EOS Cognitive Engine.
 
-Verifies all 14 systems and their interactions under standard and boundary scenarios.
+Verifies system state machine, decision tree, coupled business loops, risk classification,
+failure mode monitors, customer lifecycle stages, and company growth state transitions.
 """
 
 from __future__ import annotations
@@ -10,281 +11,232 @@ from uuid import uuid4
 
 from apodex.ai_eos.domain.models import VentureCell, Hypothesis, Evidence
 from apodex.ai_eos.intelligence.eos_engine import (
+    EOSState,
+    CompanyStage,
     EntrepreneurialWorldModel,
     OpportunityGraph,
+    EOSOpportunityDecisionTree,
     HypothesisEngine,
-    BusinessSimulator,
-    StrategicPlanner,
-    CapitalAllocationEngine,
-    PortfolioManager,
-    CompetitiveIntelligenceEngine,
-    MoatAnalyzer,
-    FailurePredictionEngine,
-    ReinventionEngine,
-    EntrepreneurialMemory,
-    EvaluationFramework,
+    ExternalBusinessLoopsEngine,
+    CustomerLifecycleEngine,
+    GTMSystemSimulator,
+    CompanyGrowthStateMachine,
+    StrategicMoatEngine,
+    FailureModeMonitor,
     EOSEngine,
 )
 
 
-def test_world_model_stochastic():
-    """Verify stochastic transitions and platform shifts in the World Model."""
+def test_world_model_and_anomaly_detection():
+    """Verify stochastic transitions and structural anomaly detection (§2.1)."""
     wm = EntrepreneurialWorldModel()
-    assert wm.state["competitor_count"] == 5
-    assert not wm.state["technology_platform_shift"]
+    signals = [
+        {"id": "sig_001", "name": "Normal Growth", "growth_rate": 0.06, "expected_growth_rate": 0.05},
+        {"id": "sig_002", "name": "CUDA/AI Compute Surge", "growth_rate": 0.85, "expected_growth_rate": 0.05, "is_structural_shift": True},
+    ]
 
-    # Run multiple transitions to ensure stability and potential shifts
-    for _ in range(50):
-        wm.transition_state()
-
-    assert wm.state["market_demand_index"] > 0.0
-    entropy = wm.calculate_state_entropy()
-    assert 0.0 <= entropy <= 1.0
-
-
-def test_opportunity_graph_similarity():
-    """Verify Directed Graph representation and Jaccard similarity searches."""
-    og = OpportunityGraph()
-    og.add_opportunity("op_001", "AI Code Assistant", 500000_00, ["ai", "developer", "automation"])
-    og.add_opportunity("op_002", "Developer Tools Platform", 200000_00, ["developer", "cli", "platform"])
-    og.add_opportunity("op_003", "BioTech Drug Discovery", 12000000_00, ["biotech", "ai", "pharma"])
-
-    og.add_dependency("op_001", "op_002")
-    assert "op_002" in og.nodes["op_001"].adjacent_ids
-
-    # Search similarity for "ai" and "developer"
-    matches = og.find_similar_opportunities(["ai", "developer"], threshold=0.1)
-    assert len(matches) >= 2
-    # op_001 has highest overlap
-    assert matches[0][0] == "op_001"
+    anomalies = wm.detect_anomalies(signals)
+    assert len(anomalies) == 1
+    assert anomalies[0]["signal_id"] == "sig_002"
+    assert anomalies[0]["is_structural"] is True
 
 
-def test_hypothesis_engine_lifecycle():
-    """Verify hypothesis promotion and Beta conjugate updates via statistical evidence."""
+def test_eos_opportunity_decision_tree():
+    """Verify §10.2 Decision Tree logic: 'Should We Pursue This Opportunity?'"""
+    dt = EOSOpportunityDecisionTree()
+
+    # Noise signal -> Discard at Q1
+    noise_op = {"is_structural_anomaly": False}
+    res_q1 = dt.evaluate(noise_op)
+    assert res_q1["pursue"] is False
+    assert "Q1" in res_q1["reason"]
+
+    # Irreversible, low multi-source confidence -> Discard at Q2a
+    irreversible_op = {
+        "is_structural_anomaly": True,
+        "is_reversible": False,  # Type I
+        "multi_source_confidence": 0.4
+    }
+    res_q2a = dt.evaluate(irreversible_op)
+    assert res_q2a["pursue"] is False
+    assert "Q2a" in res_q2a["reason"]
+
+    # Cheap test failed -> Discard at Q4
+    failed_test_op = {
+        "is_structural_anomaly": True,
+        "is_reversible": True,
+        "cheap_test_available": True,
+        "test_result_score": 0.2,
+        "kill_threshold": 0.5
+    }
+    res_q4 = dt.evaluate(failed_test_op)
+    assert res_q4["pursue"] is False
+    assert "Q4" in res_q4["reason"]
+
+    # Valid opportunity -> Commit resources
+    valid_op = {
+        "is_structural_anomaly": True,
+        "is_reversible": True,
+        "cheap_test_available": True,
+        "test_result_score": 0.8,
+        "kill_threshold": 0.5,
+        "has_structural_advantage": True
+    }
+    res_valid = dt.evaluate(valid_op)
+    assert res_valid["pursue"] is True
+
+
+def test_hypothesis_risk_type_classification():
+    """Verify Type I (irreversible) vs Type II (reversible) risk classification (§2.1)."""
     engine = HypothesisEngine()
-    hyp = Hypothesis(
-        hypothesis_id=uuid4(),
-        statement="Top banner increases signups by 10%.",
-        prior_confidence=0.50,
-        posterior_confidence=0.50,
-        confidence_distribution={"type": "beta", "params": {"alpha": 10.0, "beta": 10.0}},
-        status="proposed"
-    )
-    engine.add_hypothesis(hyp)
-
-    # 1. Add supporting evidence (low p-value, positive effect size)
-    ev_sup = Evidence(
-        evidence_id="ev_001",
-        source="A/B Test Run 1",
-        source_type="experiment",
-        method="experiment",
-        reliability_weight=0.9,
-        strength={"p_value": 0.01, "effect_size": 0.15},
-        linked_hypotheses=[str(hyp.hypothesis_id)]
-    )
-    engine.update_with_evidence(hyp.hypothesis_id, ev_sup)
-    assert hyp.confidence_distribution["params"]["alpha"] == 11.0
-    assert hyp.posterior_confidence > 0.50
-
-    # 2. Add contradicting evidence (high p-value or non-positive effect size)
-    ev_con = Evidence(
-        evidence_id="ev_002",
-        source="A/B Test Run 2",
-        source_type="experiment",
-        method="experiment",
-        reliability_weight=0.8,
-        strength={"p_value": 0.45, "effect_size": -0.05},
-        linked_hypotheses=[str(hyp.hypothesis_id)]
-    )
-    engine.update_with_evidence(hyp.hypothesis_id, ev_con)
-    assert hyp.confidence_distribution["params"]["beta"] == 11.0
-
-    # 3. Add multiple supporting items to trigger promotion (need enough to exceed 0.80)
-    # alpha starts at 10, ev_sup adds 1, ev_con adds 1 to beta.
-    # To exceed 0.80, we need alpha / (alpha + beta) >= 0.80 -> alpha >= 4 * beta.
-    # Current beta = 11, so we need alpha >= 44. Since alpha is currently 11, we need to add >= 33 items.
-    for i in range(40):
-        ev = Evidence(
-            evidence_id=f"ev_sup_{i}",
-            source="A/B Multi Test",
-            source_type="experiment",
-            strength={"p_value": 0.001, "effect_size": 0.2},
-            linked_hypotheses=[str(hyp.hypothesis_id)]
-        )
-        engine.update_with_evidence(hyp.hypothesis_id, ev)
-
-    promoted = engine.evaluate_promotions()
-    assert hyp.hypothesis_id in promoted
-    assert hyp.status == "active"
+    assert "Type II" in engine.classify_risk_type(is_reversible=True)
+    assert "Type I" in engine.classify_risk_type(is_reversible=False)
 
 
-def test_business_simulator_cohorts():
-    """Verify customer GTM cohort conversion and unit economics math."""
-    sim = BusinessSimulator()
-    res_healthy = sim.simulate_gtm_cohort(
-        traffic=10000,
-        conversion_rate=0.03,
-        arpu_cents=50_00,       # $50
-        cac_cents=100_00,       # $100
-        churn_rate=0.02        # 2% monthly
-    )
-    assert res_healthy["customers_acquired"] == 300
-    assert res_healthy["monthly_recurring_revenue_cents"] == 15000_00
-    assert res_healthy["ltv_cents"] == 2500_00  # $50 / 0.02 = $2500
-    assert res_healthy["ltv_to_cac_ratio"] == 25.0
-    assert res_healthy["cac_payback_months"] == 2.0
-    assert res_healthy["unit_economics_healthy"] is True
+def test_external_business_loops_13_coupled_systems():
+    """Verify standard execution across all 13 external business loops (§3)."""
+    ebl = ExternalBusinessLoopsEngine()
 
-    res_unhealthy = sim.simulate_gtm_cohort(
-        traffic=5000,
-        conversion_rate=0.01,
-        arpu_cents=10_00,       # $10
-        cac_cents=200_00,       # $200
-        churn_rate=0.10        # 10% monthly
-    )
-    assert res_unhealthy["unit_economics_healthy"] is False
+    prod = ebl.execute_product_loop(user_feedback_score=0.8, dev_velocity=1.0)
+    assert prod["retention_delta"] > 0
 
+    mkt = ebl.execute_marketing_loop(spend_cents=10000_00, positioning_clarity=0.8)
+    assert mkt["acquired_leads"] > 0
 
-def test_strategic_planner_efe():
-    """Verify that the Strategic Planner selects policy sequences minimizing EFE."""
-    planner = StrategicPlanner()
+    sales = ebl.execute_sales_loop(qualified_leads=mkt["acquired_leads"], sales_efficiency=0.9)
+    assert sales["closed_deals"] > 0
 
-    # Policy A: high utility, low uncertainty, low risk
-    policy_a = {"name": "Test Segment A", "expected_utility": 10.0, "predictive_entropy": 0.2, "risk_factor": 0.1}
-    # Policy B: low utility, high uncertainty, high risk
-    policy_b = {"name": "Explore Segment B", "expected_utility": 2.0, "predictive_entropy": 0.9, "risk_factor": 0.8}
+    cs = ebl.execute_customer_success_loop(active_customers=sales["closed_deals"], onboarding_quality=0.85)
+    assert cs["nrr"] > 1.0
 
-    best = planner.select_optimal_policy([policy_a, policy_b])
-    assert best["name"] == "Test Segment A"
-    assert best["computed_efe"] < 2.0
+    brand = ebl.execute_brand_loop(product_experience_score=0.9, marketing_reach=1000)
+    assert brand["pricing_power_multiplier"] > 1.0
 
+    pricing = ebl.execute_pricing_loop(value_delivered_cents=100_00, cost_basis_cents=10_00)
+    assert pricing["gross_margin"] == 0.50
 
-def test_capital_allocation_engine_ceilings():
-    """Verify multi-objective allocation logic with capacity/risk ceilings."""
-    allocator = CapitalAllocationEngine()
+    ref = ebl.execute_referral_loop(satisfied_customers=100, viral_incentive_score=0.5)
+    assert ref["new_referrals"] > 0
 
-    cell_safe = VentureCell(
-        name="Venture Alpha",
-        namespace="alpha",
-        allocated_capital_cents=0,
-        expected_free_energy=5.0,
-        risk=0.1
-    )
-    cell_risky = VentureCell(
-        name="Venture Beta",
-        namespace="beta",
-        allocated_capital_cents=0,
-        expected_free_energy=10.0,
-        risk=0.8  # Exceeds risk limit -> capped at 25% of total budget
-    )
+    data = ebl.execute_data_loop(total_interactions=500)
+    assert data["latency_reduction"] > 0
 
-    allocations = allocator.allocate([cell_safe, cell_risky], total_budget_cents=100000_00)
+    fin = ebl.execute_financial_loop(revenue_cents=20000_00, costs_cents=10000_00)
+    assert fin["cash_balance_cents"] > 100_000_00
 
-    # Cents allocated to risky should be capped
-    risky_allocation = allocations[cell_risky.cell_id]
-    assert risky_allocation <= 25000_00
+    hiring = ebl.execute_hiring_loop(open_roles=4, employer_brand_score=1.0)
+    assert hiring["filled_roles"] == 4
+
+    culture = ebl.execute_culture_loop(values_alignment_score=0.9)
+    assert culture["enps"] == 90
+
+    innov = ebl.execute_innovation_loop(rd_spend_cents=5000_00, experiments_count=10)
+    assert innov["shipped_bets"] >= 1
+
+    comp = ebl.execute_competitive_intel_loop(competitor_moves=["price_cut"], feature_parity_gap=0.85)
+    assert comp["repositioning_required"] is False
 
 
-def test_portfolio_manager_adaptation():
-    """Verify budget shifts based on systemic market uncertainty."""
-    pm = PortfolioManager()
+def test_customer_lifecycle_stages():
+    """Verify customer journey 15-stage conversion evaluation (§4)."""
+    cle = CustomerLifecycleEngine()
+    cohort_data = {"Activation": 0.45, "Retention": 0.12}
 
-    # Case 1: Low uncertainty
-    pm.adjust_proportions(total_capital_cents=100000_00, market_uncertainty=0.2)
-    assert pm.research_budget_cents == 15000_00
-    assert pm.venture_budget_cents == 85000_00
+    act_eval = cle.evaluate_stage_conversion("Activation", cohort_data)
+    assert act_eval["health"] == "healthy"
 
-    # Case 2: High uncertainty (explores options value)
-    pm.adjust_proportions(total_capital_cents=100000_00, market_uncertainty=0.8)
-    assert pm.research_budget_cents == 40000_00
-    assert pm.venture_budget_cents == 60000_00
+    ret_eval = cle.evaluate_stage_conversion("Retention", cohort_data)
+    assert ret_eval["health"] == "bottleneck"
 
 
-def test_competitor_intel_and_moats():
-    """Verify feature parity and moat score computations."""
-    cie = CompetitiveIntelligenceEngine()
-    cie.register_competitor("Competitor X", 0.40, ["sso", "analytics", "realtime"])
-    cie.register_competitor("Competitor Y", 0.20, ["sso", "billing"])
+def test_gtm_system_simulator():
+    """Verify GTM channel fit, pricing, and compounding motions (§5)."""
+    simulator = GTMSystemSimulator()
 
-    parity = cie.compute_feature_parity(["sso", "analytics"])
-    # Repicated: sso, analytics (2 out of 3 total competitor features: sso, analytics, realtime, billing)
-    # Total unique competitor features = sso, analytics, realtime, billing (4)
-    # Our features = sso, analytics
-    # Replicated = sso, analytics (2) -> parity = 2/4 = 0.5
-    assert parity == 0.5
+    # Mismatched motion: High complexity with self-serve PLG
+    mismatch = simulator.simulate_gtm_system(positioning_score=0.9, price_cents=50000_00, complexity="high", motion="PLG")
+    assert mismatch["channel_fit"] is False
 
-    ma = MoatAnalyzer()
-    score = ma.score_moat(
-        network_density=0.8,
-        avg_switching_cost_cents=5000_00,  # $5,000
-        brand_trust_score=0.9,
-        cost_advantage_percent=0.15
-    )
-    assert 0.0 <= score <= 1.0
+    # Aligned SLG enterprise motion
+    aligned = simulator.simulate_gtm_system(positioning_score=0.85, price_cents=50000_00, complexity="high", motion="SLG")
+    assert aligned["channel_fit"] is True
+    assert aligned["compounding_motion_enabled"] is True
 
 
-def test_failure_predictor_and_reinvention():
-    """Verify insolvency hazard modeling, bottleneck analysis, and pivot triggers."""
-    fpe = FailurePredictionEngine()
-    prob_high = fpe.predict_insolvency_probability(burn_multiple=3.0, runway_months=3.0, ltv_to_cac=1.5)
-    assert prob_high > 0.60
+def test_company_growth_state_machine():
+    """Verify company growth transitions across stages and constraint checks (§6)."""
+    sm = CompanyGrowthStateMachine(CompanyStage.IDEA)
 
-    prob_low = fpe.predict_insolvency_probability(burn_multiple=1.1, runway_months=18.0, ltv_to_cac=4.5)
-    assert prob_low < 0.15
+    # Validated learnings < 5 -> stay at Idea
+    stage, msg = sm.transition_stage({"validated_learnings": 2})
+    assert stage == CompanyStage.IDEA
+    assert "Founder time" in msg
 
-    # Bottleneck latency
-    latencies = [0.5, 4.2, 0.2, 8.5]
-    bottlenecks = fpe.detect_bottlenecks(latencies, sla_threshold=3.0)
-    assert len(bottlenecks) == 2
-    assert "process_step_3" in bottlenecks[1]
+    # Validated learnings >= 5 -> promote to Validation
+    stage, msg = sm.transition_stage({"validated_learnings": 6})
+    assert stage == CompanyStage.VALIDATION
 
-    # Reinvention
-    re = ReinventionEngine()
-    assert re.check_reinvention_trigger(monthly_revenue_decay=0.20, customer_attrition_rate=0.25) is True
-    assert re.check_reinvention_trigger(monthly_revenue_decay=0.01, customer_attrition_rate=0.02) is False
+    # Paying customers >= 3 -> promote to Startup
+    stage, msg = sm.transition_stage({"paying_customers": 4})
+    assert stage == CompanyStage.STARTUP
 
 
-def test_memory_trajectories():
-    """Verify trajectory history recording and value-based selective matching."""
-    mem = EntrepreneurialMemory()
-    cell_id = uuid4()
+def test_strategic_moats_and_capital_ranking():
+    """Verify composite moat score and opportunity-cost initiative ranking (§7)."""
+    sme = StrategicMoatEngine()
 
-    mem.record_step(cell_id, "GTM Launch", {"cac": 120, "mrr": 5000})
-    mem.record_step(cell_id, "Scale GTM", {"cac": 180, "mrr": 12000})
+    moat_scores = {
+        "network_effects": 0.8,
+        "switching_costs": 0.7,
+        "economies_of_scale": 0.9,
+        "brand": 0.6,
+        "regulatory_ip": 0.5,
+        "counter_positioning": 0.8,
+    }
+    composite = sme.score_composite_moat(moat_scores)
+    assert 0.70 <= composite <= 0.80
 
-    matches = mem.retrieve_matching_trajectories("mrr", 8000)
-    assert len(matches) == 1
-    assert matches[0]["step"] == "Scale GTM"
+    initiatives = [
+        {"name": "Init A", "expected_return_cents": 1000, "capital_required_cents": 100},  # ROI = 10
+        {"name": "Init B", "expected_return_cents": 5000, "capital_required_cents": 100},  # ROI = 50
+    ]
+    ranked = sme.rank_opportunity_cost_initiatives(initiatives)
+    assert ranked[0]["name"] == "Init B"
 
 
-def test_evaluation_framework_grc():
-    """Verify GRC and risk score filters."""
-    ef = EvaluationFramework()
-    assert ef.audit_ethical_alignment("Launch high-risk unaligned campaign", 0.95) is False
-    assert ef.audit_ethical_alignment("Deploy standard refactoring", 0.10) is True
+def test_failure_mode_monitor():
+    """Verify detection of failure modes (building before validating, bottlenecks, premature scaling) (§8)."""
+    fmm = FailureModeMonitor()
+
+    metrics = {
+        "high_build_velocity": True,
+        "demand_signal": 0.05,  # low
+        "decision_latency_seconds": 100000,  # > 1 day
+        "cac_trend": 3.0,
+        "ltv_trend": 1.0  # cac rising 3x ltv
+    }
+
+    warnings = fmm.audit_operating_metrics(metrics)
+    assert len(warnings) == 3
+    failure_types = {w["failure_mode"] for w in warnings}
+    assert "building_before_validating" in failure_types
+    assert "organizational_bottlenecks" in failure_types
+    assert "scaling_prematurely" in failure_types
 
 
-def test_eos_engine_e2e_sensing_loop():
-    """Verify end-to-end sensing, allocation, and tracking loop in the unified EOSEngine."""
+def test_eos_engine_system_state_machine():
+    """Verify full state machine transitions across Section 10.1 System State Machine."""
     engine = EOSEngine()
+    assert engine.current_state == EOSState.SENSING
 
-    # Register some opportunities
-    engine.opportunity_graph.add_opportunity("op_001", "Developer OS", 800000_00, ["developer", "os", "productivity"])
-
-    # Register competitors
-    engine.competitor_intel.register_competitor("Competitor A", 0.15, ["developer"])
-
-    cell_1 = VentureCell(name="Venture A", namespace="v_a", expected_free_energy=3.0, risk=0.1)
-    cell_2 = VentureCell(name="Venture B", namespace="v_b", expected_free_energy=1.5, risk=0.2)
-
-    # Run continuous sensing cycle
-    res = engine.run_continuous_sensing_cycle([cell_1, cell_2], total_budget_cents=50000_00)
-
-    assert "world_state" in res
-    assert res["market_uncertainty"] >= 0.0
-    assert cell_1.allocated_capital_cents > 0
-    assert cell_2.allocated_capital_cents > 0
-
-    # Confirm trajectory is saved in memory
-    matching_records = engine.memory.retrieve_matching_trajectories("allocated_capital", 100)
-    assert len(matching_records) >= 1
+    assert engine.transition_system_state("anomaly_detected", {}) == EOSState.HYPOTHESIS
+    assert engine.transition_system_state("hypothesis_formed", {}) == EOSState.CHEAP_TEST
+    assert engine.transition_system_state("strengthened", {}) == EOSState.VALIDATION
+    assert engine.transition_system_state("economic_viability_confirmed", {}) == EOSState.BUILD_GATE
+    assert engine.transition_system_state("resourced", {}) == EOSState.MVP
+    assert engine.transition_system_state("shipped", {}) == EOSState.GTM_TEST
+    assert engine.transition_system_state("signal_collected", {}) == EOSState.KILL_OR_SCALE
+    assert engine.transition_system_state("above_threshold", {}) == EOSState.SCALE
+    assert engine.transition_system_state("repeatable_loop_confirmed", {}) == EOSState.OPERATE
+    assert engine.transition_system_state("market_maturity", {}) == EOSState.REINVENT
+    assert engine.transition_system_state("loop_reset", {}) == EOSState.SENSING

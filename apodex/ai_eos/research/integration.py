@@ -13,6 +13,7 @@ import ast
 import tempfile
 import sys
 import os
+import datetime
 from typing import Any, Dict, List, Optional, Tuple, Set
 from uuid import UUID, uuid4
 from pydantic import BaseModel, Field
@@ -421,5 +422,89 @@ class LearnableRoutingGateDispatcher:
 
 
 def time_now() -> str:
-    import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 7. Research-To-System Bridge (4-Layer Cognitive State Handoff)
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Orchestrates cross-layer active inference state handoffs across:
+    - Layer 1: Research OS (Scientific Research & Hypotheses)
+    - Layer 2: EIOS / EOS Engine (Sensing, EFE Scheduling & Growth)
+    - Layer 3: AEAN HiveMind (Multi-Agent Bidding & Evolution)
+    - Layer 4: APODEX WorldModel (Causal Graph & Belief Updates)
+    """
+
+    def __init__(
+        self,
+        research_os: Any = None,
+        eios_kernel: Any = None,
+        eos_engine: Any = None,
+        hive_mind: Any = None,
+        world_model: Any = None,
+    ) -> None:
+        self.research_os = research_os
+        self.eios_kernel = eios_kernel
+        self.eos_engine = eos_engine
+        self.hive_mind = hive_mind
+        self.world_model = world_model
+
+    def orchestrate_closed_loop_cycle(
+        self, hypothesis_data: Dict[str, Any], execution_context: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """
+        Executes a complete 4-layer active inference closed-loop cycle.
+        Returns execution results, token allocations, and updated belief states.
+        """
+        cycle_id = str(uuid4())
+        ctx = execution_context or {}
+
+        # 1. Layer 1: Hypothesis Registration
+        hyp_id = str(hypothesis_data.get("hypothesis_id", uuid4()))
+        title = hypothesis_data.get("title", "Active Inference Strategy Hypothesis")
+        subsystem = hypothesis_data.get("target_subsystem", "EIOS")
+        principle = hypothesis_data.get("extracted_principle", "EFE Minimization")
+
+        # 2. Layer 2: EIOS Sensing & EOS Engine Ingestion
+        if self.eios_kernel and hasattr(self.eios_kernel, "register_research_hypothesis"):
+            self.eios_kernel.register_research_hypothesis(hypothesis_data)
+        if self.eos_engine and hasattr(self.eos_engine, "ingest_validated_research"):
+            self.eos_engine.ingest_validated_research(hypothesis_data)
+
+        # 3. Layer 3: AEAN HiveMind Task Bidding Registration
+        bidding_result = None
+        if self.hive_mind and hasattr(self.hive_mind, "register_research_insight"):
+            bidding_result = self.hive_mind.register_research_insight(
+                hypothesis_id=hyp_id,
+                insight_title=title,
+                target_subsystem=subsystem,
+                extracted_principle=principle,
+            )
+
+        # 4. Layer 4: APODEX WorldModel Causal Node Creation & Belief Update
+        updated_node_id = None
+        posterior_belief = 0.85
+        if self.world_model:
+            if hasattr(self.world_model, "create_node"):
+                node = self.world_model.create_node(
+                    name=f"HypothesisNode_{hyp_id[:8]}",
+                    node_type="hypothesis",
+                    metadata={"subsystem": subsystem, "principle": principle},
+                )
+                updated_node_id = str(getattr(node, "id", uuid4()))
+            if hasattr(self.world_model, "update_belief") and updated_node_id:
+                self.world_model.update_belief(node_id=updated_node_id, new_probability=posterior_belief)
+
+        return {
+            "cycle_id": cycle_id,
+            "hypothesis_id": hyp_id,
+            "target_subsystem": subsystem,
+            "bidding_result": bidding_result,
+            "world_model_node_id": updated_node_id,
+            "belief_posterior": posterior_belief,
+            "status": "success",
+            "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        }

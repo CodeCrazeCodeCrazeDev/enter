@@ -40,19 +40,26 @@ class Grant:
 @dataclass
 class HiveMind:
     token_budget: int = 100
+    token_burn_deflator: float = 1.0
     granted_history: List[Grant] = field(default_factory=list)
+    research_insights: List[Dict[str, Any]] = field(default_factory=list)
+
+    def register_research_insight(self, insight: Dict[str, Any]) -> None:
+        """Register a research insight from Research OS for token-weighted task bidding."""
+        self.research_insights.append(insight)
 
     def arbitrate(self, bids: List[TaskBid]) -> List[Grant]:
-        """Allocate tokens to the highest-scoring bids within budget."""
+        """Allocate tokens to the highest-scoring bids within budget using token burn deflator."""
         ordered = sorted(bids, key=lambda b: b.score, reverse=True)
-        remaining = self.token_budget
+        remaining = float(self.token_budget)
         grants: List[Grant] = []
         for i, bid in enumerate(ordered):
-            # Second-price-style signal: clearing score is the next-best bid.
+            # Apply token burn deflator to token cost
+            effective_cost = max(1, int(bid.token_cost * self.token_burn_deflator))
             clearing = ordered[i + 1].score if i + 1 < len(ordered) else 0.0
-            if bid.token_cost <= remaining:
-                remaining -= bid.token_cost
-                grants.append(Grant(bid.task, True, bid.token_cost, clearing))
+            if effective_cost <= remaining:
+                remaining -= effective_cost
+                grants.append(Grant(bid.task, True, effective_cost, clearing))
             else:
                 grants.append(Grant(bid.task, False, 0, clearing))
         self.granted_history.extend(grants)

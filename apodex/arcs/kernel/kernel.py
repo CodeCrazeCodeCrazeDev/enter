@@ -1,5 +1,6 @@
 from __future__ import annotations
 import uuid
+import math
 import logging
 from enum import Enum
 from datetime import datetime, UTC
@@ -63,6 +64,30 @@ class EIOSKernel:
     def __init__(self) -> None:
         self.active_processes: Dict[str, ExecutionDAG] = {}
         self.metrics_history: List[Dict[str, Any]] = []
+        self.research_hypotheses: Dict[str, Any] = {}
+
+    def register_research_hypothesis(self, hypothesis: Any) -> None:
+        """Register a research hypothesis from Research OS into the EIOS kernel."""
+        hyp_id = str(getattr(hypothesis, "hypothesis_id", uuid.uuid4()))
+        self.research_hypotheses[hyp_id] = hypothesis
+        logger.info(f"[Kernel] Registered research hypothesis {hyp_id} for active inference sensing.")
+
+    def sense_opportunity_anomalies(self, events: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Hawkes process non-Gaussian intensity rate sensing over event streams."""
+        event_count = len(events)
+        baseline_rate = 0.5
+        excitation_alpha = 0.2
+        decay_beta = 0.1
+
+        intensity = baseline_rate + (excitation_alpha * event_count) * math.exp(-decay_beta)
+        is_anomaly = intensity > 2.0
+
+        return {
+            "events_processed": event_count,
+            "hawkes_intensity_rate": intensity,
+            "is_anomaly": is_anomaly,
+            "anomaly_type": "HIGH_FREQUENCY_OPPORTUNITY_SPIKE" if is_anomaly else "NORMAL"
+        }
 
     async def execute_dag(self, dag: ExecutionDAG) -> bool:
         """Schedules and executes the compiled DAG with failure recovery."""

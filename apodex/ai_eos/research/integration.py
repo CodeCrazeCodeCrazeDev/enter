@@ -423,3 +423,151 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. Cross-Layer Active Inference Research-to-System Bridge
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Cross-layer active inference state handoff bridge.
+    Connects Layer 1 (Research OS), Layer 2 (EIOS Kernel & EOS Engine),
+    Layer 3 (AEAN HiveMind), and Layer 4 (APODEX WorldModel).
+    """
+
+    def __init__(
+        self,
+        research_os: Optional[Any] = None,
+        eios_kernel: Optional[Any] = None,
+        eos_engine: Optional[Any] = None,
+        hive_mind: Optional[Any] = None,
+        world_model: Optional[Any] = None
+    ) -> None:
+        from .research_os import ResearchOS
+        from apodex.arcs.kernel.kernel import EIOSKernel
+        from apodex.ai_eos.intelligence.eos_engine import EOSEngine
+        from apodex.aean.coordination.hive_mind import HiveMind
+        from apodex.world_model.world_model import WorldModel
+
+        self.research_os = research_os or ResearchOS()
+        self.eios_kernel = eios_kernel or EIOSKernel()
+        self.eos_engine = eos_engine or EOSEngine()
+        self.hive_mind = hive_mind or HiveMind()
+        self.world_model = world_model or WorldModel()
+
+    def hand_off_research_to_eios(self, hypothesis_id: UUID) -> Dict[str, Any]:
+        """Hand off hypothesis from Research OS to EIOS Kernel for DAG compilation & active inference EFE sensing."""
+        hyp = self.research_os.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis '{hypothesis_id}' not found in Research OS ledger.")
+
+        dag = self.eios_kernel.register_research_hypothesis(hyp)
+        anomalies = self.eios_kernel.sense_opportunity_anomalies([hyp])
+
+        return {
+            "hypothesis_id": str(hypothesis_id),
+            "dag_id": dag.id,
+            "anomalies_sensed": anomalies,
+            "status": "handed_off_to_eios"
+        }
+
+    def hand_off_research_to_eos(self, hypothesis_id: UUID) -> Dict[str, Any]:
+        """Hand off hypothesis to EOS Engine for market opportunity & business model evaluation."""
+        hyp = self.research_os.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis '{hypothesis_id}' not found in Research OS ledger.")
+
+        self.eos_engine.ingest_validated_research(hyp)
+        return {
+            "hypothesis_id": str(hypothesis_id),
+            "active_hypotheses_count": len(self.eos_engine.active_hypotheses),
+            "status": "ingested_into_eos"
+        }
+
+    def hand_off_research_to_aean(self, hypothesis_id: UUID, initial_tokens: int = 25) -> Dict[str, Any]:
+        """Hand off hypothesis insight to AEAN HiveMind for multi-agent strategy bidding."""
+        hyp = self.research_os.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis '{hypothesis_id}' not found in Research OS ledger.")
+
+        insight = {
+            "hypothesis_id": str(hypothesis_id),
+            "title": getattr(hyp, "title", "Untitled"),
+            "priority": 0.9,
+            "expected_value": 2.0,
+            "token_cost": initial_tokens
+        }
+        bid = self.hive_mind.register_research_insight(insight)
+        grants = self.hive_mind.arbitrate([bid])
+
+        return {
+            "hypothesis_id": str(hypothesis_id),
+            "bid_task": bid.task,
+            "grant_status": grants[0].granted if grants else False,
+            "status": "handed_off_to_aean"
+        }
+
+    def hand_off_research_to_world_model(self, hypothesis_id: UUID) -> Dict[str, Any]:
+        """Create causal graph nodes and update Bayesian beliefs in APODEX WorldModel."""
+        hyp = self.research_os.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis '{hypothesis_id}' not found in Research OS ledger.")
+
+        hyp_str_id = str(hypothesis_id)
+        node = self.world_model.create_node(
+            node_id=hyp_str_id,
+            node_type="research_hypothesis",
+            properties={"title": getattr(hyp, "title", ""), "status": getattr(hyp, "status", "registered")}
+        )
+        belief = self.world_model.update_belief(
+            node_id=hyp_str_id,
+            posterior_probability=0.95 if getattr(hyp, "status", None) == "validated" else 0.50,
+            evidence_keys=["statistical_walk_forward_simulation"]
+        )
+
+        return {
+            "hypothesis_id": hyp_str_id,
+            "node_id": node.node_id,
+            "belief": belief,
+            "status": "world_model_updated"
+        }
+
+    def execute_full_5layer_pipeline(
+        self,
+        title: str,
+        description: str,
+        null_hypothesis: str,
+        target_metric: str,
+        ground_truth_yield: float = 2.5
+    ) -> Dict[str, Any]:
+        """Run complete 5-layer active inference pipeline across Research OS, EIOS, EOS, AEAN, and WorldModel."""
+        # Layer 1: Research OS
+        hyp = self.research_os.register_hypothesis(
+            title=title,
+            description=description,
+            null_hypothesis=null_hypothesis,
+            target_metric=target_metric
+        )
+        exp = self.research_os.create_experiment(hyp.hypothesis_id)
+        completed_exp = self.research_os.execute_experiment_simulation(exp.experiment_id, ground_truth_yield=ground_truth_yield)
+
+        # Layer 2: EIOS Kernel & EOS Engine
+        eios_handoff = self.hand_off_research_to_eios(hyp.hypothesis_id)
+        eos_handoff = self.hand_off_research_to_eos(hyp.hypothesis_id)
+
+        # Layer 3: AEAN HiveMind
+        aean_handoff = self.hand_off_research_to_aean(hyp.hypothesis_id)
+
+        # Layer 4: APODEX WorldModel
+        wm_handoff = self.hand_off_research_to_world_model(hyp.hypothesis_id)
+
+        return {
+            "pipeline_status": "success",
+            "hypothesis_id": str(hyp.hypothesis_id),
+            "hypothesis_validated": completed_exp.is_statistically_significant,
+            "eios": eios_handoff,
+            "eos": eos_handoff,
+            "aean": aean_handoff,
+            "world_model": wm_handoff
+        }

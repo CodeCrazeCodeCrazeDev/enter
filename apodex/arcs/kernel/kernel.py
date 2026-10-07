@@ -64,6 +64,50 @@ class EIOSKernel:
         self.active_processes: Dict[str, ExecutionDAG] = {}
         self.metrics_history: List[Dict[str, Any]] = []
 
+    def register_research_hypothesis(self, hypothesis: Any) -> ExecutionDAG:
+        """Register a research hypothesis from Research OS into EIOS Kernel as an execution DAG."""
+        title = getattr(hypothesis, "title", "Untitled Research Hypothesis")
+        statement = getattr(hypothesis, "statement", getattr(hypothesis, "description", ""))
+        hyp_id = str(getattr(hypothesis, "hypothesis_id", uuid.uuid4()))
+
+        dag = ExecutionDAG(id=f"dag_research_{hyp_id[:8]}")
+        node_sense = ExecutionNode(
+            name=f"Sense Anomaly: {title}",
+            action_type="research_sensing",
+            payload={"hypothesis_id": hyp_id, "title": title, "statement": statement}
+        )
+        node_eval = ExecutionNode(
+            name=f"Active Inference EFE Evaluation: {title}",
+            action_type="efe_evaluation",
+            payload={"hypothesis_id": hyp_id},
+            depends_on=[node_sense.node_id]
+        )
+        dag.add_node(node_sense)
+        dag.add_node(node_eval)
+
+        self.active_processes[dag.id] = dag
+        logger.info(f"[Kernel] Registered research hypothesis into DAG {dag.id}: {title}")
+        return dag
+
+    def sense_opportunity_anomalies(self, hypotheses: List[Any]) -> List[Dict[str, Any]]:
+        """Active Inference sensing over research hypotheses to isolate high Expected Free Energy (EFE) opportunities."""
+        anomalies = []
+        for hyp in hypotheses:
+            title = getattr(hyp, "title", "Untitled")
+            p_val = getattr(hyp, "p_value", 0.01)
+            effect_size = getattr(hyp, "effect_size", 1.5)
+            # Higher effect size and lower p-value reduce pragmatic uncertainty -> strong signal anomaly
+            efe_score = max(0.1, float(effect_size) * (1.0 - min(1.0, float(p_val))))
+            anomaly = {
+                "hypothesis_title": title,
+                "efe_score": efe_score,
+                "anomaly_type": "epistemic_opportunity",
+                "detected_at": datetime.now(UTC).isoformat()
+            }
+            anomalies.append(anomaly)
+            logger.info(f"[Kernel] Sensed opportunity anomaly '{title}' with EFE score {efe_score:.4f}")
+        return anomalies
+
     async def execute_dag(self, dag: ExecutionDAG) -> bool:
         """Schedules and executes the compiled DAG with failure recovery."""
         logger.info(f"[Kernel] Initiating execution DAG: {dag.id}")

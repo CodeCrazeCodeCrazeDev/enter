@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import Any, Dict, List, Optional
+from datetime import datetime, timezone
 from pydantic import BaseModel, Field
 
 from apodex.common.graph import DirectedGraph, GraphNodeProtocol, GraphEdgeProtocol
@@ -39,3 +40,44 @@ class WorldModel(DirectedGraph[CausalNode, RelationEdge]):
     def register_pkc_trace(self, trace: PerceptionKnowledgeChain) -> None:
         """Register a search or reasoning trace with the World Model."""
         self.pkc_traces[str(trace.trace_id)] = trace
+
+    def create_node(self, node_id: str, node_type: str, properties: Optional[Dict[str, Any]] = None) -> CausalNode:
+        """Create and add a new CausalNode to the World Model graph."""
+        node = CausalNode(node_id=node_id, node_type=node_type, properties=properties or {})
+        self.add_node(node)
+        return node
+
+    def add_edge(
+        self,
+        source_id: str,
+        target_id: str,
+        relation_type: str,
+        weight: float = 1.0,
+        properties: Optional[Dict[str, Any]] = None
+    ) -> RelationEdge:
+        """Create and add a new RelationEdge to the World Model graph."""
+        edge = RelationEdge(
+            source_id=source_id,
+            target_id=target_id,
+            relation_type=relation_type,
+            weight=weight,
+            properties=properties or {}
+        )
+        self.add_relation(edge)
+        return edge
+
+    def update_belief(
+        self,
+        node_id: str,
+        posterior_probability: float,
+        evidence_keys: Optional[List[str]] = None
+    ) -> Dict[str, Any]:
+        """Perform a Bayesian belief update for a graph node."""
+        belief = {
+            "node_id": node_id,
+            "posterior_probability": posterior_probability,
+            "evidence_keys": evidence_keys or [],
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }
+        self.beliefs[node_id] = belief
+        return belief

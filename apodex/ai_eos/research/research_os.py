@@ -223,3 +223,13 @@ class ResearchOS(IResearchOS):
 
         self.hypotheses.save(hyp.hypothesis_id, hyp)
         return exp
+
+    def export_validated_hypotheses(self) -> List[Hypothesis]:
+        """Export all hypotheses currently in 'validated' or 'active' statuses for system handoff."""
+        all_hypotheses = self.hypotheses.list_all()
+        validated = [
+            h for h in all_hypotheses
+            if getattr(h, "status", None) in ("validated", "active")
+        ]
+        logger.info(f"Exported {len(validated)} validated hypotheses from Research OS.")
+        return validated

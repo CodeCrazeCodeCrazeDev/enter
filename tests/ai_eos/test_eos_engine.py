@@ -1,6 +1,6 @@
 """Comprehensive unit, integration, and chaotic tests for the EOS Cognitive Engine.
 
-Verifies all 14 systems and their interactions under standard and boundary scenarios.
+Verifies all systems and their interactions under standard and boundary scenarios.
 """
 
 from __future__ import annotations
@@ -23,6 +23,11 @@ from apodex.ai_eos.intelligence.eos_engine import (
     ReinventionEngine,
     EntrepreneurialMemory,
     EvaluationFramework,
+    EOSOpportunityDecisionTree,
+    CompanyGrowthStateMachine,
+    CompanyStage,
+    ExternalBusinessLoopsEngine,
+    CustomerLifecycleEngine,
     EOSEngine,
 )
 
@@ -100,9 +105,6 @@ def test_hypothesis_engine_lifecycle():
     assert hyp.confidence_distribution["params"]["beta"] == 11.0
 
     # 3. Add multiple supporting items to trigger promotion (need enough to exceed 0.80)
-    # alpha starts at 10, ev_sup adds 1, ev_con adds 1 to beta.
-    # To exceed 0.80, we need alpha / (alpha + beta) >= 0.80 -> alpha >= 4 * beta.
-    # Current beta = 11, so we need alpha >= 44. Since alpha is currently 11, we need to add >= 33 items.
     for i in range(40):
         ev = Evidence(
             evidence_id=f"ev_sup_{i}",
@@ -207,10 +209,6 @@ def test_competitor_intel_and_moats():
     cie.register_competitor("Competitor Y", 0.20, ["sso", "billing"])
 
     parity = cie.compute_feature_parity(["sso", "analytics"])
-    # Repicated: sso, analytics (2 out of 3 total competitor features: sso, analytics, realtime, billing)
-    # Total unique competitor features = sso, analytics, realtime, billing (4)
-    # Our features = sso, analytics
-    # Replicated = sso, analytics (2) -> parity = 2/4 = 0.5
     assert parity == 0.5
 
     ma = MoatAnalyzer()
@@ -264,6 +262,64 @@ def test_evaluation_framework_grc():
     assert ef.audit_ethical_alignment("Deploy standard refactoring", 0.10) is True
 
 
+def test_eos_decision_tree():
+    """Verify Section 10.2 decision tree logic."""
+    tree = EOSOpportunityDecisionTree()
+
+    # Noise signal -> Discard
+    res_noise = tree.evaluate(is_structural_anomaly=False, is_reversible=True)
+    assert res_noise["pursue"] is False
+    assert "Noise" in res_noise["reason"]
+
+    # Irreversible without high confidence -> Discard
+    res_type1 = tree.evaluate(is_structural_anomaly=True, is_reversible=False, multi_source_confidence=0.5)
+    assert res_type1["pursue"] is False
+
+    # Valid opportunity -> Pursue
+    res_valid = tree.evaluate(
+        is_structural_anomaly=True,
+        is_reversible=True,
+        cheap_test_available=True,
+        test_result_score=0.8,
+        kill_threshold=0.6,
+        has_structural_advantage=True
+    )
+    assert res_valid["pursue"] is True
+
+
+def test_growth_state_machine():
+    """Verify stage classification across Section 6 growth stages."""
+    sm = CompanyGrowthStateMachine()
+
+    assert sm.classify_stage(0, False, 0.0, 0, 0.0) == CompanyStage.IDEA
+    assert sm.classify_stage(5, False, 0.0, 0, 0.0) == CompanyStage.VALIDATION
+    assert sm.classify_stage(20, False, 0.1, 0, 0.0) == CompanyStage.STARTUP
+    assert sm.classify_stage(100, True, 0.1, 0, 0.0) == CompanyStage.PMF
+    assert sm.classify_stage(500, True, 0.3, 0, 0.0) == CompanyStage.GROWTH
+    assert sm.classify_stage(2000, True, 0.6, 0, 0.0) == CompanyStage.SCALE
+    assert sm.classify_stage(5000, True, 0.6, 15, 0.0) == CompanyStage.PLATFORM
+    assert sm.classify_stage(10000, True, 0.6, 60, 0.0) == CompanyStage.ECOSYSTEM
+    assert sm.classify_stage(50000, True, 0.6, 100, 0.45) == CompanyStage.MARKET_LEADERSHIP
+
+
+def test_external_business_loops_and_lifecycle():
+    """Verify 13 external loops and 15 lifecycle stages tracking."""
+    loops = ExternalBusinessLoopsEngine()
+    assert len(loops.loop_health) == 13
+    assert loops.compute_systemic_health() == 1.0
+
+    loops.update_loop_health("pricing", 0.5)
+    assert loops.compute_systemic_health() < 1.0
+
+    lifecycle = CustomerLifecycleEngine()
+    assert len(lifecycle.stage_counts) == 15
+    lifecycle.record_transition("awareness", 100)
+    lifecycle.record_transition("activation", 25)
+    funnel = lifecycle.get_conversion_funnel()
+    assert funnel["awareness"] == 100
+    assert funnel["activation"] == 25
+
+
 def test_eos_engine_e2e_sensing_loop():
     """Verify end-to-end sensing, allocation, and tracking loop in the unified EOSEngine."""
     engine = EOSEngine()
@@ -284,6 +340,7 @@ def test_eos_engine_e2e_sensing_loop():
     assert res["market_uncertainty"] >= 0.0
     assert cell_1.allocated_capital_cents > 0
     assert cell_2.allocated_capital_cents > 0
+    assert "systemic_loop_health" in res
 
     # Confirm trajectory is saved in memory
     matching_records = engine.memory.retrieve_matching_trajectories("allocated_capital", 100)

@@ -1,21 +1,35 @@
 """Entrepreneurial Operating System (EOS) Cognitive Engine implementation.
 
-Features 14 production-grade systems fully integrated behind a unified orchestrator
+Features production-grade systems fully integrated behind a unified orchestrator
 for continuous sensing, anomaly detection, business simulation, capital allocation,
-moat analysis, failure prediction, and strategic reinvention.
+moat analysis, failure prediction, growth stage classification, customer lifecycle tracking,
+decision tree opportunity evaluation, and strategic reinvention.
 """
 
 from __future__ import annotations
 import math
 import logging
 import random
+from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple, Set
 from uuid import UUID, uuid4
-from datetime import datetime
+from datetime import datetime, timezone
 
 from ...ai_eos.domain.models import VentureCell, Hypothesis, Evidence, Theory
 
 logger = logging.getLogger("sero.eos_engine")
+
+
+class CompanyStage(str, Enum):
+    IDEA = "idea"
+    VALIDATION = "validation"
+    STARTUP = "startup"
+    PMF = "product_market_fit"
+    GROWTH = "growth"
+    SCALE = "scale"
+    PLATFORM = "platform"
+    ECOSYSTEM = "ecosystem"
+    MARKET_LEADERSHIP = "market_leadership"
 
 
 # =====================================================================
@@ -145,7 +159,7 @@ class HypothesisEngine:
         a = hyp.confidence_distribution["params"]["alpha"]
         b = hyp.confidence_distribution["params"]["beta"]
         hyp.posterior_confidence = float(a / (a + b))
-        hyp.last_updated = datetime.utcnow()
+        hyp.last_updated = datetime.now(timezone.utc)
 
     def evaluate_promotions(self) -> List[UUID]:
         """Promote high-confidence hypotheses (posterior > 0.8) to active or theory-ready."""
@@ -424,7 +438,7 @@ class EntrepreneurialMemory:
             "cell_id": cell_id,
             "step": step_name,
             "metrics": metrics,
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(timezone.utc)
         })
 
     def retrieve_matching_trajectories(self, key_metric: str, threshold_val: float) -> List[Dict[str, Any]]:
@@ -455,10 +469,128 @@ class EvaluationFramework:
 
 
 # =====================================================================
-# 14. Coordinating EOSEngine (Orchestrator)
+# 14. EOS Decision Tree Engine (Section 10.2)
+# =====================================================================
+class EOSOpportunityDecisionTree:
+    """Evaluates opportunity pursuit according to Section 10.2 decision logic."""
+
+    def evaluate(
+        self,
+        is_structural_anomaly: bool,
+        is_reversible: bool,
+        multi_source_confidence: float = 0.5,
+        cheap_test_available: bool = True,
+        test_result_score: float = 0.5,
+        kill_threshold: float = 0.6,
+        expected_value_positive: bool = True,
+        has_structural_advantage: bool = True,
+    ) -> Dict[str, Any]:
+        """Evaluates whether to pursue an opportunity based on Section 10.2 flowchart."""
+        if not is_structural_anomaly:
+            return {"pursue": False, "reason": "Noise signal, not a structural anomaly"}
+
+        if not is_reversible:
+            if multi_source_confidence < 0.70:
+                return {"pursue": False, "reason": "Type I irreversible decision without high-confidence multi-source signal"}
+
+        if cheap_test_available:
+            if test_result_score < kill_threshold:
+                return {"pursue": False, "reason": "Cheap test result fell below kill threshold"}
+        else:
+            if not expected_value_positive:
+                return {"pursue": False, "reason": "No cheap test available and expected value is not clearly positive"}
+
+        if not has_structural_advantage:
+            return {"pursue": False, "reason": "Lacks defendable structural advantage"}
+
+        return {"pursue": True, "reason": "All decision criteria satisfied. Commit resources."}
+
+
+# =====================================================================
+# 15. Company Growth State Machine (Section 6)
+# =====================================================================
+class CompanyGrowthStateMachine:
+    """Scores venture maturity against the Idea -> Market Leadership stage model."""
+
+    def classify_stage(
+        self,
+        paying_customers: int,
+        retention_curve_flattened: bool,
+        growth_rate: float,
+        third_party_activity: int,
+        category_share: float
+    ) -> CompanyStage:
+        if category_share >= 0.40:
+            return CompanyStage.MARKET_LEADERSHIP
+        elif third_party_activity > 50:
+            return CompanyStage.ECOSYSTEM
+        elif third_party_activity > 10:
+            return CompanyStage.PLATFORM
+        elif growth_rate > 0.50 and retention_curve_flattened:
+            return CompanyStage.SCALE
+        elif growth_rate > 0.20 and retention_curve_flattened:
+            return CompanyStage.GROWTH
+        elif retention_curve_flattened:
+            return CompanyStage.PMF
+        elif paying_customers >= 10:
+            return CompanyStage.STARTUP
+        elif paying_customers > 0:
+            return CompanyStage.VALIDATION
+        else:
+            return CompanyStage.IDEA
+
+
+# =====================================================================
+# 16. External Business Loops Engine (Section 3)
+# =====================================================================
+class ExternalBusinessLoopsEngine:
+    """Tracks and evaluates the 13 coupled business loops."""
+
+    LOOPS = [
+        "product", "marketing", "sales", "customer_success", "brand",
+        "pricing", "referral", "data", "financial", "hiring",
+        "culture", "innovation", "competitive_intelligence"
+    ]
+
+    def __init__(self) -> None:
+        self.loop_health: Dict[str, float] = {loop: 1.0 for loop in self.LOOPS}
+
+    def update_loop_health(self, loop_name: str, health_score: float) -> None:
+        if loop_name in self.loop_health:
+            self.loop_health[loop_name] = max(0.0, min(1.0, health_score))
+
+    def compute_systemic_health(self) -> float:
+        return float(sum(self.loop_health.values()) / len(self.loop_health))
+
+
+# =====================================================================
+# 17. Customer Lifecycle Engine (Section 4)
+# =====================================================================
+class CustomerLifecycleEngine:
+    """Tracks customer cohorts across the 15 lifecycle stages."""
+
+    STAGES = [
+        "awareness", "interest", "consideration", "evaluation", "purchase",
+        "onboarding", "activation", "engagement", "habit_formation", "retention",
+        "loyalty", "advocacy", "referral", "expansion", "repurchase"
+    ]
+
+    def __init__(self) -> None:
+        self.stage_counts: Dict[str, int] = {stage: 0 for stage in self.STAGES}
+
+    def record_transition(self, stage: str, count: int = 1) -> None:
+        if stage in self.stage_counts:
+            self.stage_counts[stage] += count
+
+    def get_conversion_funnel(self) -> Dict[str, int]:
+        return dict(self.stage_counts)
+
+
+# =====================================================================
+# 18. Coordinating EOSEngine (Orchestrator)
 # =====================================================================
 class EOSEngine:
-    """The continuous entrepreneurial operating orchestrator coupling all 13 subsystems."""
+    """The continuous entrepreneurial operating orchestrator coupling all subsystems."""
 
     def __init__(self) -> None:
         self.world_model = EntrepreneurialWorldModel()
@@ -474,6 +606,10 @@ class EOSEngine:
         self.reinvention_engine = ReinventionEngine()
         self.memory = EntrepreneurialMemory()
         self.evaluator = EvaluationFramework()
+        self.decision_tree = EOSOpportunityDecisionTree()
+        self.growth_state_machine = CompanyGrowthStateMachine()
+        self.business_loops = ExternalBusinessLoopsEngine()
+        self.customer_lifecycle = CustomerLifecycleEngine()
 
     def run_continuous_sensing_cycle(self, cells: List[VentureCell], total_budget_cents: int) -> Dict[str, Any]:
         """Execute one complete hierarchical sensing, planning, allocation, and diagnostic loop."""
@@ -503,5 +639,6 @@ class EOSEngine:
             "market_uncertainty": market_uncertainty,
             "allocated_budgets": allocations,
             "research_portfolio_cents": self.portfolio_manager.research_budget_cents,
-            "venture_portfolio_cents": self.portfolio_manager.venture_budget_cents
+            "venture_portfolio_cents": self.portfolio_manager.venture_budget_cents,
+            "systemic_loop_health": self.business_loops.compute_systemic_health(),
         }

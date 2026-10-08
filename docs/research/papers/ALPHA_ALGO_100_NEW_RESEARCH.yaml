@@ -6140,8 +6140,8 @@ duplicate_detection_matrix:
 - new_id: 213
   new_title: Optimal Execution of Portfolio Transactions
   doi: 10.21314/JOR.2000.024
-  similarity: 0.1
-  closest_match: a survey of process reward models
+  similarity: 0.16666666666666666
+  closest_match: empirical principles of rsi execution in high-fidelity systems v2
   status: Approved
 - new_id: 214
   new_title: An Empirical Analysis of High-Frequency Trading on the London Stock Exchange
@@ -6215,8 +6215,9 @@ duplicate_detection_matrix:
 - new_id: 225
   new_title: Active Inference and Epistemic Curiosity
   doi: 10.1007/s10339-013-0579-y
-  similarity: 0.09090909090909091
-  closest_match: judging llm-as-a-judge with mt-bench and chatbot arena
+  similarity: 0.15384615384615385
+  closest_match: empirical principles of active inference planning in high-fidelity
+    systems v4
   status: Approved
 - new_id: 226
   new_title: 'Sophisticated Inference: Planning and Curiosity'
@@ -6235,9 +6236,9 @@ duplicate_detection_matrix:
 - new_id: 228
   new_title: 'The Graphical Brain: Belief Propagation as Active Inference'
   doi: 10.3389/fnins.2017.00049
-  similarity: 0.09523809523809523
-  closest_match: coordination as an architectural layer for llm-based multi-agent
-    systems / lumimas / the six sigma agent
+  similarity: 0.125
+  closest_match: empirical principles of active inference planning in high-fidelity
+    systems v4
   status: Approved
 - new_id: 229
   new_title: Variational Free Energy as a Cognitive Objective
@@ -6254,8 +6255,9 @@ duplicate_detection_matrix:
 - new_id: 231
   new_title: Active Inference and Adaptive Control
   doi: 10.1162/neco_a_01198
-  similarity: 0.09090909090909091
-  closest_match: judging llm-as-a-judge with mt-bench and chatbot arena
+  similarity: 0.15384615384615385
+  closest_match: empirical principles of active inference planning in high-fidelity
+    systems v4
   status: Approved
 - new_id: 232
   new_title: Information-Theoretic Explorations of Expected Free Energy
@@ -6272,47 +6274,51 @@ duplicate_detection_matrix:
 - new_id: 234
   new_title: Active Inference under Epistemic Risk
   doi: 10.1162/neco_a_01284
-  similarity: 0.05555555555555555
-  closest_match: 'jr. ai scientist and its risk report: autonomous scientific exploration
-    from a baseline paper'
+  similarity: 0.15384615384615385
+  closest_match: empirical principles of active inference planning in high-fidelity
+    systems v4
   status: Approved
 - new_id: 235
   new_title: Planning as Inference in Distributed Agent Networks
   doi: 10.1162/089976603762552943
-  similarity: 0.15384615384615385
-  closest_match: 'ultrahorizon: benchmarking agent capabilities in ultra long-horizon
-    scenarios'
+  similarity: 0.21428571428571427
+  closest_match: empirical principles of active inference planning in high-fidelity
+    systems v4
   status: Approved
 - new_id: 236
   new_title: Active Inference and Direct Policy Optimization
   doi: arXiv:2006.04157
-  similarity: 0.13333333333333333
-  closest_match: 'codeevolve: an open-source evolutionary coding agent for algorithm
-    discovery and optimization'
+  similarity: 0.14285714285714285
+  closest_match: empirical principles of active inference planning in high-fidelity
+    systems v4
   status: Approved
 - new_id: 237
   new_title: Hierarchical Active Inference and Multi-Timescale Control
   doi: 10.1162/neco_a_00742
-  similarity: 0.08333333333333333
-  closest_match: judging llm-as-a-judge with mt-bench and chatbot arena
+  similarity: 0.14285714285714285
+  closest_match: empirical principles of active inference planning in high-fidelity
+    systems v4
   status: Approved
 - new_id: 238
   new_title: Somatic Markers and Active Inference
   doi: 10.1080/17588928.2013.801556
-  similarity: 0.09090909090909091
-  closest_match: judging llm-as-a-judge with mt-bench and chatbot arena
+  similarity: 0.15384615384615385
+  closest_match: empirical principles of active inference planning in high-fidelity
+    systems v4
   status: Approved
 - new_id: 239
   new_title: Variational Principles for Active Sensing
   doi: 10.1162/neco_a_00238
-  similarity: 0.1111111111111111
-  closest_match: defining scalable oversight for llms
+  similarity: 0.15384615384615385
+  closest_match: empirical principles of active inference planning in high-fidelity
+    systems v4
   status: Approved
 - new_id: 240
   new_title: A Path-Integral Formulation of Active Inference
   doi: 10.1162/neco_a_01402
-  similarity: 0.2
-  closest_match: a survey of process reward models
+  similarity: 0.23076923076923078
+  closest_match: empirical principles of active inference planning in high-fidelity
+    systems v4
   status: Approved
 - new_id: 241
   new_title: Advantage-Left Policy Gradients for Financial Portfolios
@@ -6472,9 +6478,9 @@ duplicate_detection_matrix:
 - new_id: 265
   new_title: An Architecture for Multi-Agent Systems in Portfolio Management
   doi: 10.1023/A:1010070500123
-  similarity: 0.21052631578947367
-  closest_match: coordination as an architectural layer for llm-based multi-agent
-    systems / lumimas / the six sigma agent
+  similarity: 0.21428571428571427
+  closest_match: empirical principles of multi-agent planning in high-fidelity systems
+    v2
   status: Approved
 - new_id: 266
   new_title: Nash Equilibrium and Multi-Agent Convergence
@@ -6524,8 +6530,8 @@ duplicate_detection_matrix:
 - new_id: 273
   new_title: Dynamic Role Allocation in High-Frequency Execution Teams
   doi: 10.1109/MIS.2016.12
-  similarity: 0.09090909090909091
-  closest_match: 'weaver: weak-to-strong generalization in verification'
+  similarity: 0.14285714285714285
+  closest_match: empirical principles of rsi execution in high-fidelity systems v2
   status: Approved
 - new_id: 274
   new_title: Communication Complexity Bounds in Agent Societies
@@ -6570,8 +6576,9 @@ duplicate_detection_matrix:
 - new_id: 280
   new_title: Empirical Game-Theoretic Analysis of Fragmented Liquidity
   doi: 10.1145/3463676.3463701
-  similarity: 0.09090909090909091
-  closest_match: a survey of process reward models
+  similarity: 0.16666666666666666
+  closest_match: empirical principles of self-correction in high-fidelity systems
+    v4
   status: Approved
 - new_id: 281
   new_title: An Artificial Intelligence Co-Scientist for Volatility
@@ -6657,9 +6664,9 @@ duplicate_detection_matrix:
 - new_id: 294
   new_title: Robust Policy Search via Evolutionary Strategy Iteration
   doi: 10.1109/TEVC.2023.12
-  similarity: 0.125
-  closest_match: 'the ai scientist-v2: workshop-level automated scientific discovery
-    via agentic tree search'
+  similarity: 0.14285714285714285
+  closest_match: empirical principles of evolutionary search in high-fidelity systems
+    v4
   status: Approved
 - new_id: 295
   new_title: Self-Tuned Prompt Mutations in Large-Scale Swarms
@@ -6690,8 +6697,8 @@ duplicate_detection_matrix:
 - new_id: 299
   new_title: Bandit-Controlled Mutation Operators in Program Synthesis
   doi: 10.1145/3663789.3663845
-  similarity: 0.1
-  closest_match: 'weaver: weak-to-strong generalization in verification'
+  similarity: 0.15384615384615385
+  closest_match: empirical principles of program search in high-fidelity systems v3
   status: Approved
 - new_id: 300
   new_title: Evolutionary Meta-Rewriter for Institutional Policy Rules

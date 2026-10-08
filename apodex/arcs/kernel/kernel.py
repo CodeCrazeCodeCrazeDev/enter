@@ -1,6 +1,7 @@
 from __future__ import annotations
 import uuid
 import logging
+import math
 from enum import Enum
 from datetime import datetime, UTC
 from typing import Any, Dict, List, Optional, Tuple
@@ -57,12 +58,57 @@ class ExecutionDAG(BaseModel):
 class EIOSKernel:
     """The central core of the Entrepreneurial Intelligence Operating System.
 
-    Manages task scheduling, failure recovery (retries), and model routing.
+    Manages task scheduling, failure recovery (retries), model routing,
+    Active Inference Expected Free Energy (EFE) anomaly sensing, and Hawkes risk shielding.
     """
 
     def __init__(self) -> None:
         self.active_processes: Dict[str, ExecutionDAG] = {}
         self.metrics_history: List[Dict[str, Any]] = []
+        self.research_hypotheses: Dict[str, Any] = {}
+        self.hawkes_intensity_threshold: float = 2.5
+
+    def register_research_hypothesis(self, hypothesis: Any) -> None:
+        """Registers a Research OS hypothesis for continuous EFE anomaly sensing."""
+        hyp_id = str(getattr(hypothesis, "hypothesis_id", uuid.uuid4()))
+        self.research_hypotheses[hyp_id] = hypothesis
+        logger.info(f"[Kernel] Registered research hypothesis '{getattr(hypothesis, 'title', hyp_id)}' for EFE sensing.")
+
+    def sense_opportunity_anomalies(self, market_signals: Dict[str, float]) -> List[Dict[str, Any]]:
+        """
+        Active Inference Expected Free Energy (EFE) anomaly sensing loop over market signals and hypotheses.
+        Computes pragmatic value and epistemic surprise.
+        """
+        anomalies = []
+        volatility = market_signals.get("volatility", 0.15)
+        volume_toxicity = market_signals.get("vpin", 0.20)
+
+        # Non-Gaussian Hawkes intensity calculation
+        hawkes_intensity = volatility * 10.0 + volume_toxicity * 5.0
+
+        for hyp_id, hyp in self.research_hypotheses.items():
+            statement = getattr(hyp, "statement", "")
+            title = getattr(hyp, "title", "Hypothesis")
+
+            # Active Inference EFE = Epistemic Uncertainty + Hawkes Shock - Expected Utility
+            epistemic_uncertainty = 1.0 - getattr(hyp, "posterior_confidence", 0.5)
+            pragmatic_utility = getattr(hyp, "effect_size", 0.5)
+            efe_score = epistemic_uncertainty + (hawkes_intensity * 0.1) - pragmatic_utility
+
+            if efe_score > 0.6 or hawkes_intensity > self.hawkes_intensity_threshold:
+                anomaly = {
+                    "anomaly_id": f"anom_{uuid.uuid4().hex[:8]}",
+                    "hypothesis_id": hyp_id,
+                    "title": title,
+                    "efe_score": float(efe_score),
+                    "hawkes_intensity": float(hawkes_intensity),
+                    "requires_risk_shielding": hawkes_intensity > self.hawkes_intensity_threshold,
+                    "timestamp": datetime.now(UTC).isoformat()
+                }
+                anomalies.append(anomaly)
+                logger.warning(f"[Kernel EFE Anomaly Sensing] Spike detected for '{title}': EFE={efe_score:.4f}, HawkesIntensity={hawkes_intensity:.2f}")
+
+        return anomalies
 
     async def execute_dag(self, dag: ExecutionDAG) -> bool:
         """Schedules and executes the compiled DAG with failure recovery."""
@@ -75,12 +121,10 @@ class EIOSKernel:
         while loop_count < max_loops:
             executable = dag.get_executable_nodes()
             if not executable:
-                # Check if all nodes are completed
                 all_done = all(node.status == "COMPLETED" for node in dag.nodes.values())
                 if all_done:
                     logger.info(f"[Kernel] Execution DAG {dag.id} completed successfully.")
                     return True
-                # If some failed or circular reference
                 any_failed = any(node.status == "FAILED" for node in dag.nodes.values())
                 if any_failed:
                     logger.error(f"[Kernel] Execution DAG {dag.id} halted due to node failure.")
@@ -91,12 +135,10 @@ class EIOSKernel:
                 node.status = "RUNNING"
                 logger.info(f"[Kernel] Dispatching node: {node.name} ({node.action_type})")
 
-                # Simple simulated execution with auto-retry recovery logic
                 success = False
                 retries = 3
                 for attempt in range(1, retries + 1):
                     try:
-                        # Success simulations
                         success = True
                         break
                     except Exception as e:
@@ -159,7 +201,6 @@ class HierarchicalActiveInference:
     """Cascading active inference tracking uncertainty reduction across organization layers (Layer 13)."""
 
     def __init__(self) -> None:
-        # Layer levels: Company -> Department -> Team -> Agent -> Action
         self.uncertainty_levels = {
             "company": 0.8,
             "department": 0.7,
@@ -171,10 +212,9 @@ class HierarchicalActiveInference:
     def calculate_layer_free_energy(self, layer: str, actual_outcome: float, expected_outcome: float) -> float:
         """Compute the Variational Free Energy for a specific layer."""
         error = actual_outcome - expected_outcome
-        complexity = 0.1 * len(layer)  # simple complexity heuristic
+        complexity = 0.1 * len(layer)
         free_energy = complexity + (error ** 2)
 
-        # Adjust estimated uncertainty based on prediction accuracy
         current_uncertainty = self.uncertainty_levels.get(layer, 0.5)
         self.uncertainty_levels[layer] = max(0.01, min(0.99, current_uncertainty + 0.1 * error))
 

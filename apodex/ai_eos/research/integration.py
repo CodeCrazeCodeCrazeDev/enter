@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 integration.py: Multi-paradigm scientific research-to-code integration layer.
-Incorporates transferable engineering principles extracted from the 200-paper corpus,
+Incorporates transferable engineering principles extracted from the 600-paper corpus,
 directly resolving high-priority research debt in AI-EOS, AEAN, and Research OS.
 """
 
@@ -13,6 +13,7 @@ import ast
 import tempfile
 import sys
 import os
+import datetime
 from typing import Any, Dict, List, Optional, Tuple, Set
 from uuid import UUID, uuid4
 from pydantic import BaseModel, Field
@@ -187,13 +188,13 @@ class GeneticWorkflowOptimizer:
     def _mutate_parameters(self, params: Dict[str, Any]) -> Dict[str, Any]:
         mutated = params.copy()
         for k, v in mutated.items():
-            if isinstance(v, (int, float)):
+            if isinstance(v, bool):
+                if random.random() < self.mutation_rate:
+                    mutated[k] = not v
+            elif isinstance(v, (int, float)):
                 # Apply Gaussian mutation
                 noise = random.gauss(0.0, 0.1 * abs(v) if v != 0 else 0.1)
                 mutated[k] = type(v)(v + noise)
-            elif isinstance(v, bool):
-                if random.random() < self.mutation_rate:
-                    mutated[k] = not v
         return mutated
 
     def _mutate_prompt(self, template: str) -> str:
@@ -420,6 +421,78 @@ class LearnableRoutingGateDispatcher:
         logger.info(f"Updated routing metrics for agent '{agent_id}': SuccessRate={agent.historical_success_rate:.4f}, Curiosity={agent.epistemic_curiosity:.4f}")
 
 
+# =====================================================================
+# 5. Cross-Layer State Handoff Bridge (ResearchOS -> EOS -> AEAN -> APODEX)
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Unified cross-layer state handoff orchestrator connecting Layer 1 (Research OS),
+    Layer 2 (EIOS/EOS Engine), Layer 3 (AEAN HiveMind), and Layer 4 (APODEX WorldModel).
+    """
+
+    def __init__(
+        self,
+        research_os: Any = None,
+        eos_engine: Any = None,
+        hive_mind: Any = None,
+        world_model: Any = None
+    ) -> None:
+        self.research_os = research_os
+        self.eos_engine = eos_engine
+        self.hive_mind = hive_mind
+        self.world_model = world_model
+        self.active_handoff_records: List[Dict[str, Any]] = []
+
+    def propagate_validated_hypotheses(self) -> int:
+        """
+        Extracts validated hypotheses from Research OS (Layer 1) and propagates them into:
+        1. EOS Engine (Layer 2) as active decision hypotheses.
+        2. AEAN HiveMind (Layer 3) as token-bidding task opportunities.
+        3. APODEX WorldModel (Layer 4) as initial Bayesian belief nodes.
+        """
+        if not self.research_os:
+            logger.warning("ResearchOS instance not attached to bridge.")
+            return 0
+
+        hypotheses = self.research_os.export_validated_hypotheses()
+        propagated_count = 0
+
+        for hyp in hypotheses:
+            record = {
+                "hypothesis_id": getattr(hyp, "hypothesis_id", str(uuid4())),
+                "title": getattr(hyp, "title", "Hypothesis"),
+                "subsystem": getattr(hyp, "target_subsystem", "general"),
+                "confidence": getattr(hyp, "confidence_score", 0.95),
+                "propagated_at": time_now()
+            }
+
+            # 1. Ingest into EOS Engine
+            if self.eos_engine and hasattr(self.eos_engine, "ingest_validated_research"):
+                self.eos_engine.ingest_validated_research([hyp])
+
+            # 2. Register into AEAN HiveMind
+            if self.hive_mind and hasattr(self.hive_mind, "register_research_insight"):
+                self.hive_mind.register_research_insight(
+                    insight_id=record["hypothesis_id"],
+                    topic=record["title"],
+                    priority=record["confidence"]
+                )
+
+            # 3. Create Causal Node in APODEX WorldModel
+            if self.world_model and hasattr(self.world_model, "create_node"):
+                self.world_model.create_node(
+                    node_id=record["hypothesis_id"],
+                    node_type="hypothesis",
+                    metadata={"title": record["title"], "confidence": record["confidence"]}
+                )
+
+            self.active_handoff_records.append(record)
+            propagated_count += 1
+
+        logger.info(f"Propagated {propagated_count} research hypotheses across Layers 1-4.")
+        return propagated_count
+
+
 def time_now() -> str:
-    import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()

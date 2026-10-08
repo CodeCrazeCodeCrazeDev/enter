@@ -6,7 +6,7 @@ drift, matching the convention used elsewhere in the ``apodex`` codebase.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
@@ -18,7 +18,7 @@ def _uuid() -> str:
 
 
 def _now() -> datetime:
-    return datetime.utcnow()
+    return datetime.now(timezone.utc)
 
 
 class MicroCellStatus(str, Enum):

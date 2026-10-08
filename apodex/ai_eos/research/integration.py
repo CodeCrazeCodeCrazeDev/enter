@@ -17,6 +17,15 @@ from typing import Any, Dict, List, Optional, Tuple, Set
 from uuid import UUID, uuid4
 from pydantic import BaseModel, Field
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .research_os import ResearchOS
+    from ..intelligence.eos_engine import EOSEngine
+    from ...arcs.kernel.kernel import EIOSKernel
+    from ...aean.coordination.hive_mind import HiveMind
+    from ...world_model.world_model import WorldModel
+
 logger = logging.getLogger("sero.research.integration")
 
 # =====================================================================
@@ -423,3 +432,179 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. Cross-Layer Active Inference State Bridge (ResearchToSystemBridge)
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Unified active inference state handoff bridge connecting all four cognitive OS layers:
+    - Layer 1: Research OS (hypothesis registration, statistical experiment simulation, literature synthesis)
+    - Layer 2: EIOS Kernel & EOS Engine (DAG execution, continuous sensing, capital allocation)
+    - Layer 3: AEAN HiveMind (multi-agent token bidding & second-price resource arbitration)
+    - Layer 4: APODEX WorldModel (E-K-C-T-U multi-graph nodes, relation edges, and Bayesian belief updating)
+    """
+
+    def __init__(
+        self,
+        research_os: Optional[ResearchOS] = None,
+        eos_engine: Optional[EOSEngine] = None,
+        eios_kernel: Optional[EIOSKernel] = None,
+        hive_mind: Optional[HiveMind] = None,
+        world_model: Optional[WorldModel] = None,
+    ) -> None:
+        from .research_os import ResearchOS
+        from ..intelligence.eos_engine import EOSEngine
+        from ...arcs.kernel.kernel import EIOSKernel
+        from ...aean.coordination.hive_mind import HiveMind
+        from ...world_model.world_model import WorldModel
+
+        self.research_os = research_os or ResearchOS()
+        self.eos_engine = eos_engine or EOSEngine()
+        self.eios_kernel = eios_kernel or EIOSKernel()
+        self.hive_mind = hive_mind or HiveMind()
+        self.world_model = world_model or WorldModel()
+
+    def handoff_validated_hypothesis(self, hypothesis_id: UUID) -> Dict[str, Any]:
+        """
+        Executes a complete cross-layer active inference handoff for a research hypothesis:
+        1. Layer 1: Retrieves validated/registered hypothesis from Research OS.
+        2. Layer 2: Ingests into EOS Engine's Hypothesis Engine and compiles an execution DAG in EIOS Kernel.
+        3. Layer 3: Bids for multi-agent execution tokens in AEAN HiveMind.
+        4. Layer 4: Inserts CausalNodes and RelationEdges into APODEX WorldModel and updates Bayesian beliefs.
+        """
+        hyp = self.research_os.hypotheses.get(hypothesis_id)
+        if not hyp:
+            raise ValueError(f"Hypothesis {hypothesis_id} not found in Research OS.")
+
+        is_validated = hyp.status in ("validated", "active")
+
+        from ...arcs.kernel.kernel import ExecutionDAG, ExecutionNode
+        from ...aean.coordination.hive_mind import TaskBid
+        from ...world_model.world_model import CausalNode, RelationEdge
+        from ...ai_eos.domain.models import Hypothesis as EOSHypothesis
+
+        # --- Layer 2: EOS Engine Ingestion & EIOS Kernel DAG Compilation ---
+        eos_hyp = EOSHypothesis(
+            statement=hyp.description or hyp.statement,
+            domain=hyp.target_metric,
+            posterior_confidence=0.85 if is_validated else 0.50,
+            status="active" if is_validated else "proposed"
+        )
+        self.eos_engine.hypothesis_engine.add_hypothesis(eos_hyp)
+
+        dag = ExecutionDAG()
+        ingest_node = ExecutionNode(
+            name=f"Ingest Hypothesis: {hyp.title}",
+            action_type="research_ingestion",
+            payload={"hypothesis_id": str(hypothesis_id), "target_metric": hyp.target_metric}
+        )
+        exec_node = ExecutionNode(
+            name=f"Deploy Strategic Action for {hyp.title}",
+            action_type="spending",
+            payload={"spend_cents": 5000_00},
+            depends_on=[ingest_node.node_id]
+        )
+        dag.add_node(ingest_node)
+        dag.add_node(exec_node)
+        self.eios_kernel.active_processes[dag.id] = dag
+
+        # --- Layer 3: AEAN HiveMind Task Bidding ---
+        bids = [
+            TaskBid(
+                task=f"execute_research_action_{hyp.hypothesis_id}",
+                priority=0.90 if is_validated else 0.50,
+                expected_value=1.5,
+                token_cost=10
+            )
+        ]
+        grants = self.hive_mind.arbitrate(bids)
+
+        # --- Layer 4: APODEX WorldModel Graph & Belief Updating ---
+        hyp_node = CausalNode(
+            node_id=f"hyp_{hyp.hypothesis_id}",
+            node_type="hypothesis",
+            properties={
+                "title": hyp.title,
+                "status": hyp.status,
+                "target_metric": hyp.target_metric
+            }
+        )
+        metric_node = CausalNode(
+            node_id=f"metric_{hyp.target_metric}",
+            node_type="target_metric",
+            properties={"name": hyp.target_metric}
+        )
+        edge = RelationEdge(
+            source_id=hyp_node.node_id,
+            target_id=metric_node.node_id,
+            relation_type="influences",
+            weight=0.85 if is_validated else 0.50
+        )
+        self.world_model.add_node(hyp_node)
+        self.world_model.add_node(metric_node)
+        self.world_model.add_relation(edge)
+
+        belief_record = {
+            "hypothesis_id": str(hyp.hypothesis_id),
+            "prior_confidence": 0.50,
+            "posterior_confidence": 0.85 if is_validated else 0.50,
+            "validated": is_validated,
+            "last_updated": time_now()
+        }
+        self.world_model.beliefs[hyp_node.node_id] = belief_record
+
+        logger.info(f"Cross-layer active inference handoff completed for hypothesis '{hyp.title}' [id={hypothesis_id}].")
+
+        return {
+            "hypothesis_id": str(hypothesis_id),
+            "layer_1_research_status": hyp.status,
+            "layer_2_eos_hypothesis_id": str(eos_hyp.hypothesis_id),
+            "layer_2_eios_dag_id": dag.id,
+            "layer_3_grants_count": len(grants),
+            "layer_4_world_model_nodes": len(self.world_model.nodes),
+            "layer_4_world_model_edges": len(self.world_model.edges),
+            "layer_4_belief": belief_record
+        }
+
+    def execute_closed_loop_active_inference(
+        self,
+        title: str,
+        description: str,
+        null_hypothesis: str,
+        target_metric: str,
+        ground_truth_yield: float = 2.0
+    ) -> Dict[str, Any]:
+        """
+        Executes a complete closed-loop cycle from Layer 1 hypothesis registration & experiment
+        simulation to Layer 2-4 cross-system state propagation and EOS sensing.
+        """
+        # Step 1: Layer 1 Research OS
+        hyp = self.research_os.register_hypothesis(
+            title=title,
+            description=description,
+            null_hypothesis=null_hypothesis,
+            target_metric=target_metric
+        )
+        exp = self.research_os.create_experiment(hyp.hypothesis_id, seed=42)
+        exp_result = self.research_os.execute_experiment_simulation(exp.experiment_id, ground_truth_yield)
+
+        # Step 2: Handoff across Layers 1-4
+        handoff_report = self.handoff_validated_hypothesis(hyp.hypothesis_id)
+
+        # Step 3: Run EOS Engine continuous sensing cycle
+        sensing_report = self.eos_engine.run_continuous_sensing_cycle(cells=[], total_budget_cents=100000_00)
+
+        return {
+            "hypothesis": {
+                "id": str(hyp.hypothesis_id),
+                "title": hyp.title,
+                "status": hyp.status,
+                "p_value": exp_result.p_value,
+                "is_statistically_significant": exp_result.is_statistically_significant
+            },
+            "cross_layer_handoff": handoff_report,
+            "eos_sensing": sensing_report
+        }

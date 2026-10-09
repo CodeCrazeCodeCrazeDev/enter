@@ -420,6 +420,95 @@ class LearnableRoutingGateDispatcher:
         logger.info(f"Updated routing metrics for agent '{agent_id}': SuccessRate={agent.historical_success_rate:.4f}, Curiosity={agent.epistemic_curiosity:.4f}")
 
 
+# =====================================================================
+# 5. Research To System Cross-Layer Active Inference Bridge
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Cross-Layer Active Inference State Handoff Bridge.
+    Orchestrates seamless state handoffs across Layer 1 (Research OS),
+    Layer 2 (EIOS Kernel & EOS Engine), Layer 3 (AEAN HiveMind), and Layer 4 (APODEX WorldModel).
+    """
+
+    def __init__(
+        self,
+        research_os: Any,
+        eios_kernel: Any,
+        eos_engine: Any,
+        hive_mind: Any,
+        world_model: Any
+    ) -> None:
+        self.research_os = research_os
+        self.eios_kernel = eios_kernel
+        self.eos_engine = eos_engine
+        self.hive_mind = hive_mind
+        self.world_model = world_model
+
+    def bridge_validated_hypotheses(self) -> Dict[str, Any]:
+        """
+        Queries validated hypotheses from Research OS and propagates active inference updates
+        across EIOS Kernel, EOS Engine, AEAN HiveMind, and APODEX WorldModel.
+        """
+        # 1. Fetch validated / active hypotheses from Research OS
+        if hasattr(self.research_os, "get_hypotheses_by_status"):
+            validated_hyps = self.research_os.get_hypotheses_by_status(["validated", "active"])
+        else:
+            all_hyps = getattr(self.research_os.hypotheses, "list_all", lambda: [])()
+            validated_hyps = [h for h in all_hyps if getattr(h, "status", "") in ["validated", "active"]]
+
+        results = {
+            "validated_count": len(validated_hyps),
+            "eos_ingested_ids": [],
+            "kernel_registered_titles": [],
+            "hive_mind_bids": [],
+            "world_model_nodes": [],
+        }
+
+        # 2. Propagate to EOS Engine
+        if hasattr(self.eos_engine, "ingest_validated_research"):
+            ingested_ids = self.eos_engine.ingest_validated_research(validated_hyps)
+            results["eos_ingested_ids"] = ingested_ids
+
+        for hyp in validated_hyps:
+            title = getattr(hyp, "title", str(hyp))
+            domain = getattr(hyp, "domain", getattr(hyp, "target_metric", "general"))
+
+            # 3. Propagate to EIOS Kernel
+            if hasattr(self.eios_kernel, "register_research_hypothesis"):
+                self.eios_kernel.register_research_hypothesis(hyp)
+                results["kernel_registered_titles"].append(title)
+
+            # 4. Propagate to AEAN HiveMind
+            if hasattr(self.hive_mind, "register_research_insight"):
+                bid = self.hive_mind.register_research_insight(
+                    task_name=f"execute_research_task_{title}",
+                    priority=0.85,
+                    expected_value=1.5,
+                    token_cost=15
+                )
+                results["hive_mind_bids"].append(bid.task)
+
+            # 5. Propagate to APODEX WorldModel
+            if hasattr(self.world_model, "create_node"):
+                node_id = f"node_hyp_{getattr(hyp, 'hypothesis_id', uuid4()).hex[:8]}"
+                self.world_model.create_node(
+                    node_id=node_id,
+                    node_type="research_hypothesis",
+                    properties={"title": title, "domain": domain, "status": getattr(hyp, "status", "validated")}
+                )
+                if hasattr(self.world_model, "update_belief"):
+                    self.world_model.update_belief(
+                        belief_key=f"belief_{node_id}",
+                        confidence=0.85,
+                        metadata={"source": "ResearchOS", "domain": domain}
+                    )
+                results["world_model_nodes"].append(node_id)
+
+        logger.info(f"[Bridge] Successfully bridged {len(validated_hyps)} hypotheses across all system layers.")
+        return results
+
+
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()

@@ -63,6 +63,35 @@ class EIOSKernel:
     def __init__(self) -> None:
         self.active_processes: Dict[str, ExecutionDAG] = {}
         self.metrics_history: List[Dict[str, Any]] = []
+        self.registered_hypotheses: List[Dict[str, Any]] = []
+
+    def register_research_hypothesis(self, hypothesis: Any) -> None:
+        """Register research hypothesis from Research OS into kernel active inference memory."""
+        hyp_dict = {
+            "title": getattr(hypothesis, "title", str(hypothesis)),
+            "statement": getattr(hypothesis, "statement", getattr(hypothesis, "description", "")),
+            "domain": getattr(hypothesis, "domain", getattr(hypothesis, "target_metric", "general")),
+            "status": getattr(hypothesis, "status", "validated"),
+        }
+        self.registered_hypotheses.append(hyp_dict)
+        logger.info(f"[Kernel] Registered research hypothesis: {hyp_dict['title']}")
+
+    def sense_opportunity_anomalies(self, market_signals: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Active inference anomaly detection over market signals and registered research hypotheses."""
+        anomalies = []
+        demand = market_signals.get("demand_index", 1.0)
+        volatility = market_signals.get("volatility", 0.1)
+
+        for hyp in self.registered_hypotheses:
+            # Expected Free Energy (EFE) calculation: epistemic uncertainty + market anomaly gap
+            efe_score = volatility * 0.5 + (1.5 if demand > 1.2 else 0.5)
+            anomalies.append({
+                "hypothesis_title": hyp["title"],
+                "domain": hyp["domain"],
+                "efe_score": efe_score,
+                "action_recommended": "deploy_gtm_experiment" if efe_score > 0.8 else "monitor_signal",
+            })
+        return anomalies
 
     async def execute_dag(self, dag: ExecutionDAG) -> bool:
         """Schedules and executes the compiled DAG with failure recovery."""

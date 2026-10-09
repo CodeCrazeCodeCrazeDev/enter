@@ -1,4 +1,57 @@
-"""Entrepreneurial Intelligence System (EIS) context."""
+"""Entrepreneurial Operating System (EOS) and Intelligence re-exports."""
 
 from .decision_engine import EntrepreneurialIntelligenceSystem
 from .collective import CollectiveIntelligenceEngine
+from .eos_engine import (
+    EOSEngine,
+    EntrepreneurialWorldModel,
+    OpportunityGraph,
+    OpportunityNode,
+    HypothesisEngine,
+    BusinessSimulator,
+    GTMSystemSimulator,
+    StrategicPlanner,
+    CapitalAllocationEngine,
+    PortfolioManager,
+    CompetitiveIntelligenceEngine,
+    MoatAnalyzer,
+    StrategicMoatEngine,
+    FailurePredictionEngine,
+    FailureModeMonitor,
+    ReinventionEngine,
+    ExternalBusinessLoopsEngine,
+    CustomerLifecycleEngine,
+    CompanyGrowthStateMachine,
+    CompanyStage,
+    ExternalLoopType,
+    EntrepreneurialMemory,
+    EvaluationFramework,
+)
+
+__all__ = [
+    "EntrepreneurialIntelligenceSystem",
+    "CollectiveIntelligenceEngine",
+    "EOSEngine",
+    "EntrepreneurialWorldModel",
+    "OpportunityGraph",
+    "OpportunityNode",
+    "HypothesisEngine",
+    "BusinessSimulator",
+    "GTMSystemSimulator",
+    "StrategicPlanner",
+    "CapitalAllocationEngine",
+    "PortfolioManager",
+    "CompetitiveIntelligenceEngine",
+    "MoatAnalyzer",
+    "StrategicMoatEngine",
+    "FailurePredictionEngine",
+    "FailureModeMonitor",
+    "ReinventionEngine",
+    "ExternalBusinessLoopsEngine",
+    "CustomerLifecycleEngine",
+    "CompanyGrowthStateMachine",
+    "CompanyStage",
+    "ExternalLoopType",
+    "EntrepreneurialMemory",
+    "EvaluationFramework",
+]

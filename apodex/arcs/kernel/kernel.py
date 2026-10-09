@@ -63,6 +63,33 @@ class EIOSKernel:
     def __init__(self) -> None:
         self.active_processes: Dict[str, ExecutionDAG] = {}
         self.metrics_history: List[Dict[str, Any]] = []
+        self.active_hypotheses: List[Any] = []
+
+    def register_research_hypothesis(self, hypothesis: Any) -> None:
+        """Registers research hypothesis for kernel-level EFE execution tracking."""
+        self.active_hypotheses.append(hypothesis)
+        logger.info(f"[Kernel] Registered active research hypothesis: {getattr(hypothesis, 'title', hypothesis)}")
+
+    def sense_opportunity_anomalies(self, sensor_signals: List[float]) -> List[Dict[str, Any]]:
+        """Senses environmental z-score anomalies and generates Active Inference signals."""
+        anomalies = []
+        if not sensor_signals:
+            return anomalies
+        mean_sig = sum(sensor_signals) / len(sensor_signals)
+        var_sig = sum((s - mean_sig) ** 2 for s in sensor_signals) / max(1, len(sensor_signals) - 1)
+        std_sig = var_sig ** 0.5 if var_sig > 0 else 1.0
+
+        for i, val in enumerate(sensor_signals):
+            z_score = abs(val - mean_sig) / std_sig
+            if z_score > 2.0:
+                anomalies.append({
+                    "signal_index": i,
+                    "value": val,
+                    "z_score": z_score,
+                    "active_inference_target": True
+                })
+        logger.info(f"[Kernel] Continuous sensing detected {len(anomalies)} anomalies out of {len(sensor_signals)} signals.")
+        return anomalies
 
     async def execute_dag(self, dag: ExecutionDAG) -> bool:
         """Schedules and executes the compiled DAG with failure recovery."""

@@ -42,6 +42,14 @@ class HiveMind:
     token_budget: int = 100
     granted_history: List[Grant] = field(default_factory=list)
 
+    def register_research_insight(self, task: str, priority: float = 0.8, expected_value: float = 1.0, token_cost: int = 10) -> Grant:
+        """Submits and arbitrates a research insight task bid directly into HiveMind token registry."""
+        bid = TaskBid(task=task, priority=priority, expected_value=expected_value, token_cost=token_cost)
+        grants = self.arbitrate([bid])
+        grant = grants[0]
+        logger.info(f"HiveMind arbitrated research insight '{task}': Granted={grant.granted}, Tokens={grant.tokens}, ClearingScore={grant.clearing_score:.4f}")
+        return grant
+
     def arbitrate(self, bids: List[TaskBid]) -> List[Grant]:
         """Allocate tokens to the highest-scoring bids within budget."""
         ordered = sorted(bids, key=lambda b: b.score, reverse=True)

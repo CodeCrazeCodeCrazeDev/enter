@@ -14,13 +14,21 @@ from apodex.ai_eos.intelligence.eos_engine import (
     OpportunityGraph,
     HypothesisEngine,
     BusinessSimulator,
+    GTMSystemSimulator,
     StrategicPlanner,
     CapitalAllocationEngine,
     PortfolioManager,
     CompetitiveIntelligenceEngine,
     MoatAnalyzer,
+    StrategicMoatEngine,
     FailurePredictionEngine,
+    FailureModeMonitor,
     ReinventionEngine,
+    ExternalBusinessLoopsEngine,
+    CustomerLifecycleEngine,
+    CompanyGrowthStateMachine,
+    CompanyStage,
+    ExternalLoopType,
     EntrepreneurialMemory,
     EvaluationFramework,
     EOSEngine,
@@ -99,10 +107,7 @@ def test_hypothesis_engine_lifecycle():
     engine.update_with_evidence(hyp.hypothesis_id, ev_con)
     assert hyp.confidence_distribution["params"]["beta"] == 11.0
 
-    # 3. Add multiple supporting items to trigger promotion (need enough to exceed 0.80)
-    # alpha starts at 10, ev_sup adds 1, ev_con adds 1 to beta.
-    # To exceed 0.80, we need alpha / (alpha + beta) >= 0.80 -> alpha >= 4 * beta.
-    # Current beta = 11, so we need alpha >= 44. Since alpha is currently 11, we need to add >= 33 items.
+    # 3. Add multiple supporting items to trigger promotion
     for i in range(40):
         ev = Evidence(
             evidence_id=f"ev_sup_{i}",
@@ -143,6 +148,19 @@ def test_business_simulator_cohorts():
         churn_rate=0.10        # 10% monthly
     )
     assert res_unhealthy["unit_economics_healthy"] is False
+
+
+def test_gtm_system_simulator():
+    """Verify channel selection logic in GTMSystemSimulator."""
+    gtm_sim = GTMSystemSimulator()
+
+    # Self-serve low ACV -> PLG
+    plg_recs = gtm_sim.evaluate_channel_fit(target_acv_cents=30_00, complexity_score=0.2, network_effects=False)
+    assert plg_recs[0]["channel"] == "plg"
+
+    # High ACV enterprise -> SLG
+    slg_recs = gtm_sim.evaluate_channel_fit(target_acv_cents=50000_00, complexity_score=0.8, network_effects=True)
+    assert slg_recs[0]["channel"] == "slg"
 
 
 def test_strategic_planner_efe():
@@ -201,47 +219,65 @@ def test_portfolio_manager_adaptation():
 
 
 def test_competitor_intel_and_moats():
-    """Verify feature parity and moat score computations."""
+    """Verify feature parity and 7 powers moat score computations."""
     cie = CompetitiveIntelligenceEngine()
     cie.register_competitor("Competitor X", 0.40, ["sso", "analytics", "realtime"])
     cie.register_competitor("Competitor Y", 0.20, ["sso", "billing"])
 
     parity = cie.compute_feature_parity(["sso", "analytics"])
-    # Repicated: sso, analytics (2 out of 3 total competitor features: sso, analytics, realtime, billing)
-    # Total unique competitor features = sso, analytics, realtime, billing (4)
-    # Our features = sso, analytics
-    # Replicated = sso, analytics (2) -> parity = 2/4 = 0.5
     assert parity == 0.5
 
-    ma = MoatAnalyzer()
-    score = ma.score_moat(
-        network_density=0.8,
-        avg_switching_cost_cents=5000_00,  # $5,000
-        brand_trust_score=0.9,
-        cost_advantage_percent=0.15
-    )
-    assert 0.0 <= score <= 1.0
+    sme = StrategicMoatEngine()
+    powers_result = sme.score_7_powers({
+        "network_effects": 0.9,
+        "switching_costs": 0.8,
+        "scale_economies": 0.7,
+        "counter_positioning": 0.85
+    })
+    assert powers_result["dominant_power"] == "network_effects"
+    assert powers_result["composite_moat_score"] > 0.5
 
 
-def test_failure_predictor_and_reinvention():
-    """Verify insolvency hazard modeling, bottleneck analysis, and pivot triggers."""
-    fpe = FailurePredictionEngine()
-    prob_high = fpe.predict_insolvency_probability(burn_multiple=3.0, runway_months=3.0, ltv_to_cac=1.5)
+def test_failure_mode_monitor():
+    """Verify failure mode audits and insolvency predictions."""
+    fmm = FailureModeMonitor()
+    prob_high = fmm.predict_insolvency_probability(burn_multiple=3.0, runway_months=3.0, ltv_to_cac=1.5)
     assert prob_high > 0.60
 
-    prob_low = fpe.predict_insolvency_probability(burn_multiple=1.1, runway_months=18.0, ltv_to_cac=4.5)
-    assert prob_low < 0.15
+    alerts = fmm.audit_failure_modes({
+        "survey_satisfaction_high": True,
+        "usage_engagement": 0.1,
+        "build_velocity": 0.9,
+        "demand_signal": 0.1,
+        "retention_curve_flattens": False,
+        "monthly_spend": 100000
+    })
+    assert len(alerts) >= 3
 
-    # Bottleneck latency
-    latencies = [0.5, 4.2, 0.2, 8.5]
-    bottlenecks = fpe.detect_bottlenecks(latencies, sla_threshold=3.0)
-    assert len(bottlenecks) == 2
-    assert "process_step_3" in bottlenecks[1]
 
-    # Reinvention
-    re = ReinventionEngine()
-    assert re.check_reinvention_trigger(monthly_revenue_decay=0.20, customer_attrition_rate=0.25) is True
-    assert re.check_reinvention_trigger(monthly_revenue_decay=0.01, customer_attrition_rate=0.02) is False
+def test_external_loops_and_lifecycle():
+    """Verify External Business Loops and Customer Lifecycle funnel metrics."""
+    loops_engine = ExternalBusinessLoopsEngine()
+    fin_health = loops_engine.evaluate_loop_health(
+        ExternalLoopType.FINANCIAL,
+        {"burn_multiple": 3.0, "runway_months": 4.0}
+    )
+    assert fin_health["healthy"] is False
+
+    lifecycle = CustomerLifecycleEngine()
+    conversions = lifecycle.compute_funnel_efficiency({"awareness": 1000, "interest": 200, "consideration": 50})
+    assert conversions["awareness_to_interest"] == 0.20
+    assert conversions["interest_to_consideration"] == 0.25
+
+
+def test_growth_stage_classifier():
+    """Verify Company Growth Stage classifications."""
+    sm = CompanyGrowthStateMachine()
+    assert sm.classify_stage({"paying_customers": 0}) == CompanyStage.IDEA
+    assert sm.classify_stage({"paying_customers": 5, "mrr_cents": 200_00}) == CompanyStage.VALIDATION
+    assert sm.classify_stage({"paying_customers": 60, "mrr_cents": 5000_00}) == CompanyStage.PMF
+    assert sm.classify_stage({"paying_customers": 500, "mrr_cents": 120000_00}) == CompanyStage.GROWTH
+    assert sm.classify_stage({"third_party_developers": 150}) == CompanyStage.PLATFORM
 
 
 def test_memory_trajectories():

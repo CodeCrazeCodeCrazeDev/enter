@@ -32,6 +32,13 @@ class ResearchOS(IResearchOS):
         self.models = InMemoryLedger[Dict[str, Any]]()
         self.artifacts = InMemoryLedger[Dict[str, Any]]()
 
+    def get_hypotheses_by_status(self, statuses: Optional[List[str]] = None) -> List[Hypothesis]:
+        """Query and export hypotheses filtered by status (defaults to ['validated', 'active'])."""
+        if statuses is None:
+            statuses = ["validated", "active"]
+        all_hyps = self.hypotheses.list_all()
+        return [h for h in all_hyps if h.status in statuses]
+
     def register_hypothesis(
         self,
         title: str,

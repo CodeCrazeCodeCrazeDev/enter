@@ -475,6 +475,41 @@ class EOSEngine:
         self.memory = EntrepreneurialMemory()
         self.evaluator = EvaluationFramework()
 
+    @property
+    def active_hypotheses(self) -> List[Hypothesis]:
+        """Return list of active hypotheses in hypothesis engine."""
+        return [h for h in self.hypothesis_engine.hypotheses.values() if h.status == "active"]
+
+    def ingest_validated_research(self, validated_hypotheses: List[Any]) -> List[UUID]:
+        """Ingest research hypotheses validated in Research OS into the EOS Hypothesis Engine and Opportunity Graph."""
+        ingested_ids = []
+        for v_hyp in validated_hypotheses:
+            title = getattr(v_hyp, "title", str(v_hyp))
+            statement = getattr(v_hyp, "statement", getattr(v_hyp, "description", title))
+            domain = getattr(v_hyp, "domain", getattr(v_hyp, "target_metric", "general"))
+
+            hyp = Hypothesis(
+                hypothesis_id=uuid4(),
+                statement=statement,
+                domain=domain,
+                posterior_confidence=0.85,
+                status="active"
+            )
+            self.hypothesis_engine.add_hypothesis(hyp)
+
+            # Add corresponding node in Opportunity Graph
+            op_id = f"op_{hyp.hypothesis_id.hex[:8]}"
+            self.opportunity_graph.add_opportunity(
+                op_id=op_id,
+                name=title,
+                value_cents=50000_00,
+                keywords=[domain, "research_validated"]
+            )
+            ingested_ids.append(hyp.hypothesis_id)
+            logger.info(f"[EOSEngine] Ingested validated research hypothesis: {title} -> {hyp.hypothesis_id}")
+
+        return ingested_ids
+
     def run_continuous_sensing_cycle(self, cells: List[VentureCell], total_budget_cents: int) -> Dict[str, Any]:
         """Execute one complete hierarchical sensing, planning, allocation, and diagnostic loop."""
         # 1. World State sensing & transitions

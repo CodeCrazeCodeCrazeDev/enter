@@ -111,16 +111,38 @@ class ResearchOS(IResearchOS):
         return float(priority)
 
     # ------------------------------------------------------------------
+    # Hypothesis Export & Principle Querying
+    # ------------------------------------------------------------------
+    def export_validated_hypotheses(self) -> List[Hypothesis]:
+        """Export all hypotheses with status 'validated' or 'active' for system integration."""
+        all_hypotheses = self.hypotheses.list_all()
+        validated = [h for h in all_hypotheses if h.status in ("validated", "active")]
+        logger.info(f"Exported {len(validated)} validated hypotheses from Research OS ledger.")
+        return validated
+
+    def query_corpus_principles(self, query: str) -> List[Dict[str, Any]]:
+        """Query extracted research principles matching the keyword query."""
+        from .integration import ALPHAALGO_300_PRINCIPLES
+        q_lower = query.lower()
+        matched = [
+            p for p in ALPHAALGO_300_PRINCIPLES
+            if q_lower in p["title"].lower() or q_lower in p["extracted_principle"].lower() or q_lower in p["target_subsystem"].lower()
+        ]
+        return matched
+
+    # ------------------------------------------------------------------
     # Autonomous Science Engine
     # ------------------------------------------------------------------
     def conduct_literature_review(self, domain: str) -> Dict[str, Any]:
         """Automated literature synthesis and citation mapping over active scientific namespaces."""
         logger.info(f"Autonomous Science Engine conducting literature synthesis for domain: {domain}")
+        principles = self.query_corpus_principles(domain)
         return {
             "domain": domain,
-            "reviewed_citations_count": 14,
+            "reviewed_citations_count": 14 + len(principles),
             "synthesized_trends": ["Deep Reinforcement learning with GRPO", "Active Inference with Expected Free Energy approximation"],
-            "whitespace_found": "Expected Free Energy implementation under lightweight micro-VM environments."
+            "whitespace_found": "Expected Free Energy implementation under lightweight micro-VM environments.",
+            "relevant_corpus_principles": principles
         }
 
     def design_experiment(self, hypothesis_id: UUID) -> Dict[str, Any]:

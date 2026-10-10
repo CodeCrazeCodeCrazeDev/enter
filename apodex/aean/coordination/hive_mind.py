@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import Dict, List
+from typing import Dict, List, Any
 
 logger = logging.getLogger("aean.hive_mind")
 
@@ -41,6 +41,30 @@ class Grant:
 class HiveMind:
     token_budget: int = 100
     granted_history: List[Grant] = field(default_factory=list)
+    research_insights_registry: List[Dict[str, Any]] = field(default_factory=list)
+
+    def register_research_insight(
+        self,
+        topic: str,
+        insight_summary: str,
+        confidence: float = 0.9
+    ) -> TaskBid:
+        """Registers a research insight from Research OS and converts it into an agent task bid."""
+        record = {
+            "topic": topic,
+            "summary": insight_summary,
+            "confidence": confidence
+        }
+        self.research_insights_registry.append(record)
+
+        bid = TaskBid(
+            task=f"ResearchTask:{topic[:20]}",
+            priority=min(1.0, confidence),
+            expected_value=confidence * 1.5,
+            token_cost=10
+        )
+        logger.info(f"[HiveMind] Registered research insight for '{topic}' as TaskBid with score {bid.score:.4f}.")
+        return bid
 
     def arbitrate(self, bids: List[TaskBid]) -> List[Grant]:
         """Allocate tokens to the highest-scoring bids within budget."""
@@ -48,7 +72,6 @@ class HiveMind:
         remaining = self.token_budget
         grants: List[Grant] = []
         for i, bid in enumerate(ordered):
-            # Second-price-style signal: clearing score is the next-best bid.
             clearing = ordered[i + 1].score if i + 1 < len(ordered) else 0.0
             if bid.token_cost <= remaining:
                 remaining -= bid.token_cost

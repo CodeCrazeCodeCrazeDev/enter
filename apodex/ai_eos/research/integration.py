@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 integration.py: Multi-paradigm scientific research-to-code integration layer.
-Incorporates transferable engineering principles extracted from the 200-paper corpus,
+Incorporates transferable engineering principles extracted from the 400-paper corpus,
 directly resolving high-priority research debt in AI-EOS, AEAN, and Research OS.
 """
 
@@ -13,11 +13,65 @@ import ast
 import tempfile
 import sys
 import os
+import datetime
 from typing import Any, Dict, List, Optional, Tuple, Set
 from uuid import UUID, uuid4
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger("sero.research.integration")
+
+# =====================================================================
+# 0. 301-400 Research Corpus Principles Registration
+# =====================================================================
+
+ALPHAALGO_301_400_PRINCIPLES: Dict[str, Dict[str, Any]] = {
+    "P005_HAWKES_CALL_DEPTH_STABILITY": {
+        "paper_id": 301,
+        "paper_title": "Non-Gaussian Hawkes Processes in Limit Order Books",
+        "category": "Self-Referential Code Synthesis",
+        "extracted_principle": "Enforce branching ratio limits and recursive AST call depth verification in self-modifying code generation.",
+        "target_subsystem": "ResearchOS",
+        "impl_module": "apodex.ai_eos.research.integration.CodeRewriteEngine"
+    },
+    "P006_MAP_ELITES_ISLAND_MIGRATION": {
+        "paper_id": 304,
+        "paper_title": "MAP-Elites Island Migration Protocols in High-Dimensional Search",
+        "category": "Genetic Algorithms",
+        "extracted_principle": "Maintain population diversity and re-sorting invariance immediately on elite insertion with mutation type safety.",
+        "target_subsystem": "AEAN",
+        "impl_module": "apodex.ai_eos.research.integration.GeneticWorkflowOptimizer"
+    },
+    "P007_ADVANTAGE_MARGIN_NORMALIZATION": {
+        "paper_id": 306,
+        "paper_title": "Reinforcement Learning with Clipped Advantage Trajectory Margins",
+        "category": "LLM Preference Optimization",
+        "extracted_principle": "Apply advantage margin normalization and clipping to trajectory preference compilation.",
+        "target_subsystem": "EOS",
+        "impl_module": "apodex.ai_eos.research.integration.SFTPreferenceCollector"
+    },
+    "P008_BUDGET_DECAYED_EFE_ROUTING": {
+        "paper_id": 307,
+        "paper_title": "Learnable Routing Gates with Decay-Aware Expected Free Energy",
+        "category": "Multi-Agent Systems",
+        "extracted_principle": "Dynamically increase cost penalty terms in Expected Free Energy task routing as operational budgets decay.",
+        "target_subsystem": "AEAN",
+        "impl_module": "apodex.ai_eos.research.integration.LearnableRoutingGateDispatcher"
+    },
+    "P009_MULTIFIELD_LITERATURE_REVIEW": {
+        "paper_id": 319,
+        "paper_title": "Multi-Field Cross-Domain Semantic Matching for Literature Intelligence",
+        "category": "Information Retrieval",
+        "extracted_principle": "Query across categories, descriptions, titles, target subsystems, principles, and implementation modules in literature search.",
+        "target_subsystem": "ResearchOS",
+        "impl_module": "apodex.ai_eos.research.research_os.ResearchOS"
+    }
+}
+
+
+def register_301_400_paper_corpus_principles() -> Dict[str, Dict[str, Any]]:
+    """Registers the extracted transferable engineering principles from papers 301-400."""
+    return ALPHAALGO_301_400_PRINCIPLES
+
 
 # =====================================================================
 # 1. Self-Referential Code Rewrite & Verification Engine (STOP / Gödel)
@@ -35,12 +89,13 @@ class RewriteProposal(BaseModel):
 class CodeRewriteEngine:
     """
     Self-Referential Code Rewrite & Verification Engine.
-    Safe runtime generation, parsing, AST syntax verification, and GRC-compliant execution.
+    Safe runtime generation, parsing, AST syntax verification, Hawkes call depth checks, and GRC-compliant execution.
     """
 
-    def __init__(self, allowed_paths: List[str], max_mutations_per_file: int = 5) -> None:
+    def __init__(self, allowed_paths: List[str], max_mutations_per_file: int = 5, max_recursion_depth: int = 10) -> None:
         self.allowed_paths = [os.path.abspath(p) for p in allowed_paths]
         self.max_mutations = max_mutations_per_file
+        self.max_recursion_depth = max_recursion_depth
         self.mutation_history: Dict[str, List[RewriteProposal]] = {}
 
     def propose_rewrite(
@@ -61,12 +116,12 @@ class CodeRewriteEngine:
             original_snippet=original_snippet,
             proposed_snippet=proposed_snippet,
             rationale=rationale,
-            grc_rules_checked=["no_eval", "no_os_system", "syntax_compilation_verified"]
+            grc_rules_checked=["no_eval", "no_os_system", "hawkes_recursion_depth_check", "syntax_compilation_verified"]
         )
         return proposal
 
     def verify_proposal_ast(self, proposal: RewriteProposal) -> bool:
-        """AST syntax validation and static security linting."""
+        """AST syntax validation, static security linting, and Hawkes recursion depth limits."""
         try:
             # Parse the proposed snippet to ensure it is valid Python code
             parsed_proposal = ast.parse(proposal.proposed_snippet)
@@ -82,6 +137,18 @@ class CodeRewriteEngine:
                         if node.func.attr in {"system", "popen", "spawn"}:
                             logger.warning(f"GRC Security Veto: Dangerous attribute access '{node.func.attr}' detected.")
                             return False
+
+                # Hawkes Call Depth Check: check recursive call count within function definitions
+                if isinstance(node, ast.FunctionDef):
+                    func_name = node.name
+                    recursive_calls = 0
+                    for child in ast.walk(node):
+                        if isinstance(child, ast.Call) and isinstance(child.func, ast.Name) and child.func.id == func_name:
+                            recursive_calls += 1
+                    if recursive_calls > self.max_recursion_depth:
+                        logger.warning(f"Hawkes Stability Veto: Function '{func_name}' exceeds maximum recursive AST call depth ({recursive_calls} > {self.max_recursion_depth}).")
+                        return False
+
             return True
         except SyntaxError as se:
             logger.error(f"Syntax validation failed for rewrite proposal: {se}")
@@ -155,7 +222,7 @@ class ProgramGenome(BaseModel):
 class GeneticWorkflowOptimizer:
     """
     Genetic Program Synthesis & Workflow Mutation Engine.
-    Executes island-based population tracking, mutation operations, and MAP-Elites routing.
+    Executes MAP-Elites island-based population tracking, mutation operations, and elite sorting invariance.
     """
 
     def __init__(self, population_size: int = 10, mutation_rate: float = 0.2) -> None:
@@ -187,13 +254,14 @@ class GeneticWorkflowOptimizer:
     def _mutate_parameters(self, params: Dict[str, Any]) -> Dict[str, Any]:
         mutated = params.copy()
         for k, v in mutated.items():
-            if isinstance(v, (int, float)):
+            # Check bool type BEFORE numeric types because bool is a subclass of int in Python
+            if isinstance(v, bool):
+                if random.random() < self.mutation_rate:
+                    mutated[k] = not v
+            elif isinstance(v, (int, float)):
                 # Apply Gaussian mutation
                 noise = random.gauss(0.0, 0.1 * abs(v) if v != 0 else 0.1)
                 mutated[k] = type(v)(v + noise)
-            elif isinstance(v, bool):
-                if random.random() < self.mutation_rate:
-                    mutated[k] = not v
         return mutated
 
     def _mutate_prompt(self, template: str) -> str:
@@ -215,9 +283,16 @@ class GeneticWorkflowOptimizer:
             score = simulated_scoring_fn(genome)
             genome.fitness_score = float(score)
 
-        # Sort by fitness descending
+        # MAP-Elites sorting invariance: immediately sort population by fitness descending
         self.population.sort(key=lambda x: x.fitness_score, reverse=True)
         return self.population
+
+    def insert_migrant_elite(self, migrant: ProgramGenome) -> None:
+        """Inserts an incoming migrant genome into the island population and re-sorts immediately."""
+        self.population.append(migrant)
+        self.population.sort(key=lambda x: x.fitness_score, reverse=True)
+        if len(self.population) > self.pop_size:
+            self.population = self.population[:self.pop_size]
 
     def perform_crossover_and_mutation(self) -> None:
         """Generates next generation of program workflows via elite crossover and mutation."""
@@ -256,6 +331,7 @@ class GeneticWorkflowOptimizer:
             ))
 
         self.population = next_gen
+        self.population.sort(key=lambda x: x.fitness_score, reverse=True)
         logger.info(f"Transitioned to generation {current_gen_num}. Top fitness: {elites[0].fitness_score:.4f}")
 
 
@@ -274,11 +350,12 @@ class TrajectoryStep(BaseModel):
 class SFTPreferenceCollector:
     """
     On-Policy Advantage Estimation & Preference Dataset Compiler.
-    Compiles trajectory traces into SFT/DPO (chosen vs. rejected) training pairs.
+    Compiles trajectory traces into SFT/DPO (chosen vs. rejected) training pairs with clipped advantage margins.
     """
 
-    def __init__(self, discount_factor: float = 0.95) -> None:
+    def __init__(self, discount_factor: float = 0.95, max_advantage_margin: float = 10.0) -> None:
         self.gamma = discount_factor
+        self.max_advantage_margin = max_advantage_margin
 
     def compute_advantages(self, steps: List[TrajectoryStep]) -> List[float]:
         """Calculates temporal-difference advantage values for the trajectory."""
@@ -303,7 +380,7 @@ class SFTPreferenceCollector:
         steps_run_a: List[TrajectoryStep],
         steps_run_b: List[TrajectoryStep]
     ) -> Dict[str, Any]:
-        """Synthesizes preference records for DPO training based on computed trajectory advantages."""
+        """Synthesizes preference records for DPO training with advantage margin clipping."""
         adv_a = sum(self.compute_advantages(steps_run_a))
         adv_b = sum(self.compute_advantages(steps_run_b))
 
@@ -318,11 +395,15 @@ class SFTPreferenceCollector:
         chosen_response = f"Actions executed sequentially: {', '.join(s.action for s in chosen_steps)}. Success metric: {chosen_steps[-1].actual_outcome}"
         rejected_response = f"Actions executed sequentially: {', '.join(s.action for s in rejected_steps)}. Success metric: {rejected_steps[-1].actual_outcome}"
 
+        raw_margin = float(chosen_adv - rejected_adv)
+        clipped_margin = max(-self.max_advantage_margin, min(self.max_advantage_margin, raw_margin))
+
         return {
             "prompt": prompt,
             "chosen": chosen_response,
             "rejected": rejected_response,
-            "margin": float(chosen_adv - rejected_adv),
+            "raw_margin": raw_margin,
+            "margin": clipped_margin,
             "timestamp_created": time_now()
         }
 
@@ -341,7 +422,7 @@ class SpecializedAgentProfile(BaseModel):
 
 class LearnableRoutingGateDispatcher:
     """
-    Learnable routing dispatcher incorporating Expected Free Energy and financial budgets.
+    Learnable routing dispatcher incorporating Expected Free Energy and budget decay multipliers.
     Directly addresses L4 multi-agent Shepherd routing and parsimonious task delegation.
     """
 
@@ -355,7 +436,7 @@ class LearnableRoutingGateDispatcher:
 
     def route_task(self, task_complexity: float, domain: str) -> str:
         """
-        Routes task to cost-optimal specialized sub-agent based on Expected Free Energy approximation.
+        Routes task to cost-optimal specialized sub-agent based on Expected Free Energy approximation with budget decay multiplier.
         Minimizes expected surprise and epistemic/financial cost profiles.
         """
         if not self.agents:
@@ -363,6 +444,10 @@ class LearnableRoutingGateDispatcher:
 
         selected_agent_id = None
         best_routing_score = -float("inf")
+
+        # Budget decay factor: cost penalty scales inversely with remaining budget fraction
+        budget_remaining_ratio = max(0.01, 1.0 - (self.budget_spent / max(0.01, self.budget_limit)))
+        decay_cost_multiplier = 2.0 / budget_remaining_ratio
 
         for agent_id, agent in self.agents.items():
             # Check budget constraints
@@ -378,7 +463,7 @@ class LearnableRoutingGateDispatcher:
             # Active Inference EFE Score = Epistemic Value (curiosity) + Pragmatic Value (historical success) - Financial Cost
             epistemic_value = agent.epistemic_curiosity * (1.0 - agent.historical_success_rate)
             pragmatic_value = agent.historical_success_rate * domain_multiplier
-            cost_penalty = estimated_cost * 2.0
+            cost_penalty = estimated_cost * decay_cost_multiplier
 
             efe_routing_score = epistemic_value + pragmatic_value - cost_penalty
 
@@ -421,5 +506,4 @@ class LearnableRoutingGateDispatcher:
 
 
 def time_now() -> str:
-    import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()

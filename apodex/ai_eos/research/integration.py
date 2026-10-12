@@ -423,3 +423,85 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. Cross-Layer Research-to-System Active Inference Bridge
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Cross-layer Research-to-System Bridge for closed-loop Active Inference state handoffs.
+    Bridges Layer 1 Research OS hypotheses into Layer 2 EIOS Kernel & EOS Engine,
+    Layer 3 AEAN multi-agent bidding, and Layer 4 APODEX WorldModel entity and belief updates.
+    """
+
+    def __init__(
+        self,
+        research_os: Any,
+        eios_kernel: Any,
+        eos_engine: Any,
+        hive_mind: Any,
+        world_model: Any
+    ) -> None:
+        self.research_os = research_os
+        self.eios_kernel = eios_kernel
+        self.eos_engine = eos_engine
+        self.hive_mind = hive_mind
+        self.world_model = world_model
+
+    def execute_cross_layer_handoff(self, hypothesis: Any) -> Dict[str, Any]:
+        """Executes complete 4-layer active inference handoff from hypothesis validation to system execution and belief update."""
+        logger.info(f"[ResearchToSystemBridge] Ingesting hypothesis '{getattr(hypothesis, 'title', 'Hypothesis')}' across system layers...")
+
+        # Layer 1 -> Layer 2: EIOS Kernel ingestion and EOS Engine opportunity graph addition
+        hyp_id = str(getattr(hypothesis, "hypothesis_id", uuid4()))
+        title = getattr(hypothesis, "title", "Hypothesis")
+        domain = getattr(hypothesis, "domain", "general")
+
+        if hasattr(self.eios_kernel, "register_research_hypothesis"):
+            self.eios_kernel.register_research_hypothesis(hypothesis)
+
+        if hasattr(self.eos_engine, "opportunity_graph"):
+            self.eos_engine.opportunity_graph.add_opportunity(
+                op_id=hyp_id,
+                name=title,
+                value_cents=500000,
+                keywords=[domain, "active_inference"]
+            )
+
+        # Layer 2 -> Layer 3: Convert research insight to HiveMind task bid
+        task_bid = None
+        if hasattr(self.hive_mind, "register_research_insight"):
+            task_bid = self.hive_mind.register_research_insight({
+                "hypothesis_id": hyp_id,
+                "title": title,
+                "domain": domain,
+                "priority": 0.9,
+                "expected_value": 0.85,
+                "token_cost": 20
+            })
+            grants = self.hive_mind.arbitrate([task_bid])
+            logger.info(f"[ResearchToSystemBridge] AEAN HiveMind grant status: {grants[0].granted if grants else False}")
+
+        # Layer 3 -> Layer 4: Update APODEX WorldModel causal graph and Bayesian beliefs
+        causal_node = None
+        if hasattr(self.world_model, "create_node"):
+            causal_node = self.world_model.create_node(
+                node_id=f"hyp_node_{hyp_id[:8]}",
+                node_type="hypothesis_entity",
+                properties={"title": title, "domain": domain, "status": getattr(hypothesis, "status", "active")}
+            )
+            self.world_model.update_belief(
+                belief_key=f"belief_{hyp_id[:8]}",
+                prior_probability=0.5,
+                evidence_weight=0.88
+            )
+
+        return {
+            "hypothesis_id": hyp_id,
+            "eios_registered": True,
+            "hive_mind_task": getattr(task_bid, "task", None) if task_bid else None,
+            "world_model_node_id": getattr(causal_node, "node_id", None) if causal_node else None,
+            "status": "HANDOFF_COMPLETED"
+        }

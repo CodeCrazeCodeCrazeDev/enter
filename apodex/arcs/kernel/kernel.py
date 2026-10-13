@@ -57,12 +57,61 @@ class ExecutionDAG(BaseModel):
 class EIOSKernel:
     """The central core of the Entrepreneurial Intelligence Operating System.
 
-    Manages task scheduling, failure recovery (retries), and model routing.
+    Manages task scheduling, failure recovery (retries), research hypothesis ingestion,
+    and Active Inference Expected Free Energy (EFE) anomaly sensing.
     """
 
     def __init__(self) -> None:
         self.active_processes: Dict[str, ExecutionDAG] = {}
         self.metrics_history: List[Dict[str, Any]] = []
+        self.registered_hypotheses: Dict[str, Dict[str, Any]] = {}
+
+    def register_research_hypothesis(
+        self,
+        hypothesis_id: str,
+        title: str,
+        domain: str,
+        priority: float = 1.0
+    ) -> Dict[str, Any]:
+        """Registers a research hypothesis exported from Research OS for Active Inference sensing."""
+        record = {
+            "hypothesis_id": hypothesis_id,
+            "title": title,
+            "domain": domain,
+            "priority": priority,
+            "registered_at": datetime.now(UTC).isoformat()
+        }
+        self.registered_hypotheses[hypothesis_id] = record
+        logger.info(f"[Kernel] Registered research hypothesis: {title} [id={hypothesis_id}]")
+        return record
+
+    def sense_opportunity_anomalies(self, world_state: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+        """Senses opportunities and anomalies via Expected Free Energy approximation."""
+        world_state = world_state or {}
+        anomalies = []
+
+        # Sense market demand shifts
+        demand_index = world_state.get("market_demand_index", 1.0)
+        if demand_index < 0.85 or demand_index > 1.15:
+            anomalies.append({
+                "anomaly_type": "market_demand_shift",
+                "demand_index": demand_index,
+                "efe_score": float(abs(1.0 - demand_index) * 2.5),
+                "actionable": True
+            })
+
+        # Sense registered research hypotheses requiring system execution
+        for hyp_id, hyp in self.registered_hypotheses.items():
+            anomalies.append({
+                "anomaly_type": "hypothesis_opportunity",
+                "hypothesis_id": hyp_id,
+                "title": hyp["title"],
+                "efe_score": float(hyp["priority"] * 1.5),
+                "actionable": True
+            })
+
+        logger.info(f"[Kernel] Sensed {len(anomalies)} opportunity/anomaly signals.")
+        return anomalies
 
     async def execute_dag(self, dag: ExecutionDAG) -> bool:
         """Schedules and executes the compiled DAG with failure recovery."""

@@ -423,3 +423,75 @@ class LearnableRoutingGateDispatcher:
 def time_now() -> str:
     import datetime
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# =====================================================================
+# 5. Research To System Bridge (Cross-Layer Active Inference)
+# =====================================================================
+
+class ResearchToSystemBridge:
+    """
+    Orchestrates cross-layer active inference state handoffs connecting Layer 1 Research OS,
+    Layer 2 EIOS Kernel & EOS Engine, Layer 3 AEAN HiveMind, and Layer 4 APODEX WorldModel.
+    """
+
+    def __init__(
+        self,
+        research_os: Any,
+        eios_kernel: Any,
+        eos_engine: Any,
+        hive_mind: Any,
+        world_model: Any
+    ) -> None:
+        self.ros = research_os
+        self.eios = eios_kernel
+        self.eos = eos_engine
+        self.hive_mind = hive_mind
+        self.world_model = world_model
+
+    def bridge_hypothesis_to_eios(self, hypothesis: Any) -> Dict[str, Any]:
+        """Handoff Layer 1 hypothesis to Layer 2 EIOS Kernel for Active Inference sensing."""
+        hyp_id = str(getattr(hypothesis, "hypothesis_id", uuid4()))
+        title = getattr(hypothesis, "title", "Hypothesis")
+        domain = getattr(hypothesis, "domain", getattr(hypothesis, "target_metric", "general"))
+
+        eios_record = self.eios.register_research_hypothesis(hyp_id, title, domain, priority=1.2)
+        anomalies = self.eios.sense_opportunity_anomalies()
+        logger.info(f"[Bridge] Bridged hypothesis '{title}' [id={hyp_id}] to EIOS Kernel.")
+        return {"eios_record": eios_record, "anomalies_sensed": anomalies}
+
+    def bridge_opportunity_to_eos(
+        self,
+        opportunity_id: str,
+        name: str,
+        value_cents: int,
+        keywords: List[str]
+    ) -> Dict[str, Any]:
+        """Handoff sensed opportunity to Layer 2 EOS Engine for capital and business valuation."""
+        self.eos.opportunity_graph.add_opportunity(opportunity_id, name, value_cents, keywords)
+        world_sensing = self.eos.run_continuous_sensing_cycle(cells=[], total_budget_cents=value_cents)
+        logger.info(f"[Bridge] Bridged opportunity '{name}' [id={opportunity_id}] to EOS Engine.")
+        return {"opportunity_id": opportunity_id, "world_sensing": world_sensing}
+
+    def bridge_insight_to_aean(self, insight_id: str, domain: str, expected_value: float) -> Dict[str, Any]:
+        """Handoff insight to Layer 3 AEAN HiveMind for multi-agent task bidding and arbitration."""
+        bid = self.hive_mind.register_research_insight(insight_id, domain, expected_value)
+        grants = self.hive_mind.arbitrate([bid])
+        logger.info(f"[Bridge] Bridged insight '{insight_id}' to AEAN HiveMind arbitration.")
+        return {"bid": bid, "grants": grants}
+
+    def bridge_execution_to_world_model(
+        self,
+        node_id: str,
+        node_type: str,
+        relation_type: str,
+        target_id: str,
+        belief_key: str,
+        belief_val: Any
+    ) -> Dict[str, Any]:
+        """Handoff execution outcome to Layer 4 APODEX WorldModel for causal graph and Bayesian updates."""
+        node = self.world_model.create_node(node_id, node_type)
+        edge = self.world_model.add_edge(node_id, target_id, relation_type)
+        belief = self.world_model.update_belief(belief_key, belief_val)
+        logger.info(f"[Bridge] Bridged execution to APODEX WorldModel node='{node_id}', belief='{belief_key}'.")
+        return {"node": node, "edge": edge, "belief": belief}

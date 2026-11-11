@@ -1,5 +1,5 @@
 from __future__ import annotations
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List
 from uuid import UUID
 
@@ -22,7 +22,7 @@ class WmcOrchestrationCoordinator:
         sim_engine = self.container.resolve(IWorldSimulationEngine)
 
         # 1. Create a branch timeline
-        branch_time = datetime.utcnow()
+        branch_time = datetime.now(timezone.utc)
         timeline = await sim_engine.create_branch(parent_timeline_id, scenario_name, branch_time)
 
         # 2. Run simulation stepping
